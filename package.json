@@ -1,0 +1,14 @@
+{
+    "name": "InterviewEasy-Web",
+    "version": "1.0.0",
+    "scripts": {
+        "build:c": "pnpm --prefix packages/client run build",
+        "build:s": "pnpm --prefix packages/server run build",
+        "dev:c": "pnpm --prefix packages/client run dev",
+        "dev:s": "pnpm --prefix packages/server run start:dev"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.31.0"
+}
