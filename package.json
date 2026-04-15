@@ -2,10 +2,11 @@
     "name": "InterviewEasy-Web",
     "version": "1.0.0",
     "scripts": {
-        "build:c": "pnpm --prefix packages/client run build",
-        "build:s": "pnpm --prefix packages/server run build",
-        "dev:c": "pnpm --prefix packages/client run dev",
-        "dev:s": "pnpm --prefix packages/server run start:dev"
+        "dev": "pnpm --prefix package/server run dev",
+        "build:c": "pnpm --prefix package/client run build",
+        "build:s": "pnpm --prefix package/server run build",
+        "dev:c": "pnpm --prefix package/client run dev",
+        "dev:s": "pnpm --prefix package/server run dev"
     },
     "keywords": [],
     "author": "",
