@@ -5,7 +5,7 @@ import { Checkbox, Flex, Float } from "@chakra-ui/react";
 const LoginTemplate: React.FC = () => {
     return (
         <Flex align="center" gap="4">
-            <div>이미지 넣을 예정</div>
+            <img>이미지 넣을 예정</img>
             <div>
                 <img src="/public/Logo.png"></img>
                 <div>로그인</div>
