@@ -1,5 +1,5 @@
-import type { Route } from "./+types/login";
-import LoginTemplate from "~/components/templates/LoginTemplate";
+import type { Route } from "./+types/login"
+import LoginTemplate from "~/components/templates/LoginTemplate"
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -21,9 +21,9 @@ export function meta({}: Route.MetaArgs) {
             name: "twitter:description",
             content: "description",
         },
-    ];
+    ]
 }
 
 export default function Main() {
-    return <LoginTemplate />;
+    return <LoginTemplate />
 }

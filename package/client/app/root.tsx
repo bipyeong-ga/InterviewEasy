@@ -6,12 +6,12 @@ import {
     Scripts,
     ScrollRestoration,
     useRouteError,
-} from "react-router";
+} from "react-router"
 
-import ErrorTemplate from "./components/templates/ErrorTemplate";
-import type { Route } from "./+types/root";
-import { Provider } from "./components/ui/provider";
-import { Toaster } from "./components/ui/toaster";
+import ErrorTemplate from "./components/templates/ErrorTemplate"
+import type { Route } from "./+types/root"
+import { Provider } from "./components/ui/provider"
+import { Toaster } from "./components/ui/toaster"
 
 export const links: Route.LinksFunction = () => [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -24,7 +24,7 @@ export const links: Route.LinksFunction = () => [
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
     },
-];
+]
 
 export function Layout({ children }: { children: React.ReactNode }) {
     return (
@@ -45,7 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Scripts />
             </body>
         </html>
-    );
+    )
 }
 
 export default function App() {
@@ -54,23 +54,23 @@ export default function App() {
             <Outlet />
             <Toaster />
         </>
-    );
+    )
 }
 export function ErrorBoundary() {
-    const error = useRouteError() as unknown;
+    const error = useRouteError() as unknown
 
-    const isDev = import.meta.env.DEV;
+    const isDev = import.meta.env.DEV
 
-    let message = "Oops!";
-    let details = "An unexpected error occurred.";
-    let stack: string | undefined;
+    let message = "Oops!"
+    let details = "An unexpected error occurred."
+    let stack: string | undefined
 
     const statusCode =
         error instanceof Error
             ? parseInt(error.message.match(/\d+/)?.[0] || "") || null
             : isRouteErrorResponse(error)
-            ? error.status
-            : null;
+              ? error.status
+              : null
 
     if (!isDev) {
         return (
@@ -80,37 +80,37 @@ export function ErrorBoundary() {
                     details="An unexpected error occurred."
                 />
             </Provider>
-        );
+        )
     }
 
     switch (statusCode) {
         case 400:
-            message = "Bad Request";
-            details = "Server received a bad request.";
-            break;
+            message = "Bad Request"
+            details = "Server received a bad request."
+            break
         case 401:
-            message = "Unauthorized";
-            details = "Authentication is required.";
-            break;
+            message = "Unauthorized"
+            details = "Authentication is required."
+            break
         case 403:
-            message = "Forbidden";
-            details = "Access to this page is not allowed.";
-            break;
+            message = "Forbidden"
+            details = "Access to this page is not allowed."
+            break
         case 404:
-            message = "Not Found";
-            details = "The page you are looking for does not exist.";
-            break;
+            message = "Not Found"
+            details = "The page you are looking for does not exist."
+            break
         case 500:
-            message = "Server Error";
-            details = "An error occurred on the server.";
-            break;
+            message = "Server Error"
+            details = "An error occurred on the server."
+            break
         default:
             if (isRouteErrorResponse(error)) {
-                message = error.statusText;
-                details = error.data?.message || error.statusText;
+                message = error.statusText
+                details = error.data?.message || error.statusText
             } else if (error instanceof Error) {
-                details = error.message;
-                stack = error.stack;
+                details = error.message
+                stack = error.stack
             }
     }
 
@@ -118,5 +118,5 @@ export function ErrorBoundary() {
         <Provider>
             <ErrorTemplate title={message} details={details} />
         </Provider>
-    );
+    )
 }
