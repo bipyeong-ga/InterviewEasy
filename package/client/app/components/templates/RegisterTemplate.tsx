@@ -146,7 +146,7 @@ const RegisterTemplate: React.FC = () => {
                                 <Text fontSize="36px" fontWeight="bold">
                                     회원가입
                                 </Text>
-                                <Text color="gray.600">
+                                <Text color="gray.600" fontWeight="bold">
                                     취업 준비의 첫 걸음을 함께해요
                                 </Text>
                             </Box>
