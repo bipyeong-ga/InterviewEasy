@@ -9,6 +9,9 @@ import {
     Input,
     Image,
     Checkbox,
+    Dialog,
+    Portal,
+    CloseButton,
 } from "@chakra-ui/react"
 
 import "../../fonts.css"
@@ -23,6 +26,24 @@ type FormValues = {
 
 type FormErrors = Partial<Record<keyof FormValues, string>>
 
+type ModalType = "terms1" | "terms2" | "terms3" | null
+
+// 약관 데이터 분리
+const AGREEMENTS = {
+    terms1: {
+        title: "이용약관",
+        content: "여기에 이용약관 내용 들어감",
+    },
+    terms2: {
+        title: "개인정보 처리방침",
+        content: "여기에 개인정보 처리방침 내용 들어감",
+    },
+    terms3: {
+        title: "마케팅 수신 동의",
+        content: "여기에 마케팅 수신 동의 내용 들어감",
+    },
+} as const
+
 const RegisterTemplate: React.FC = () => {
     const [values, setValues] = useState<FormValues>({
         name: "",
@@ -31,8 +52,17 @@ const RegisterTemplate: React.FC = () => {
         password: "",
         confirmPassword: "",
     })
+
     const [errors, setErrors] = useState<FormErrors>({})
     const [submitted, setSubmitted] = useState(false)
+
+    const [isAgreementOpen, setAgreementOpen] = useState(false)
+    const [modalType, setModalType] = useState<ModalType>(null)
+
+    const openModal = (type: ModalType) => {
+        setModalType(type)
+        setAgreementOpen(true)
+    }
 
     const validate = (nextValues: FormValues): FormErrors => {
         const nextErrors: FormErrors = {}
@@ -83,198 +113,231 @@ const RegisterTemplate: React.FC = () => {
         }
     }
 
+    const current = modalType ? AGREEMENTS[modalType] : null
+
     return (
         <Flex
             w="100%"
             minH="100vh"
             bg="#f7f8fa"
             direction={{ base: "column", lg: "row" }}
-            pt={{ base: 6, lg: 0 }}
         >
             <Flex
                 display={{ base: "none", lg: "flex" }}
                 flex={1}
-                minH="100vh"
-                minW={0}
-                overflow="hidden"
                 position="relative"
             >
                 <Image
                     src="/images/register.png"
-                    alt="logo"
+                    alt="bg"
                     position="absolute"
                     inset={0}
-                    width="100%"
-                    height="100%"
+                    w="100%"
+                    h="100%"
                     objectFit="cover"
                 />
             </Flex>
 
-            <Flex
-                flex={{ base: 1, lg: "0 0 560px" }}
-                justify={{ base: "flex-start", lg: "center" }}
-                align={{ base: "stretch", lg: "center" }}
-                p={{ base: 4, md: 6, lg: 12 }}
-                pt={{ base: 6, md: 6, lg: 12 }}
-            >
-                <Box w="100%" maxW="560px">
+            <Flex flex={{ base: 1, lg: "0 0 560px" }} align="center" p="12">
+                <Box w="100%">
                     <form onSubmit={handleSubmit}>
-                        <VStack align="stretch" gap={{ base: 4, md: 5 }}>
+                        <VStack align="stretch" gap="5">
                             <Box>
-                                <Text
-                                    fontSize={{ base: "28px", md: "36px" }}
-                                    fontWeight="extrabold"
-                                >
+                                <Text fontSize="36px" fontWeight="bold">
                                     회원가입
                                 </Text>
-                                <Text
-                                    color="gray.600"
-                                    fontSize={{ base: "14px", md: "15px" }}
-                                    fontWeight="bold"
-                                >
+                                <Text color="gray.600">
                                     취업 준비의 첫 걸음을 함께해요
                                 </Text>
                             </Box>
 
-                            <HStack
-                                gap={{ base: 3, md: 4 }}
-                                direction={{ base: "column", md: "row" }}
-                            >
+                            <HStack>
                                 <Box flex={1}>
-                                    <Text mb="5px" fontWeight="medium">
-                                        이름
-                                    </Text>
+                                    <Text>이름</Text>
                                     <Input
                                         placeholder="홍길동"
-                                        size="lg"
                                         value={values.name}
                                         onChange={handleChange("name")}
                                     />
-                                    {submitted && errors.name ? (
-                                        <Text
-                                            mt="4px"
-                                            fontSize="13px"
-                                            color="red.400"
-                                        >
+                                    {submitted && errors.name && (
+                                        <Text color="red.400">
                                             {errors.name}
                                         </Text>
-                                    ) : null}
+                                    )}
                                 </Box>
 
                                 <Box flex={1}>
-                                    <Text mb="5px" fontWeight="medium">
-                                        닉네임
-                                    </Text>
+                                    <Text>닉네임</Text>
                                     <Input
                                         placeholder="박수받는 박쥐"
-                                        size="lg"
                                         value={values.nickname}
                                         onChange={handleChange("nickname")}
                                     />
-                                    {submitted && errors.nickname ? (
-                                        <Text
-                                            mt="4px"
-                                            fontSize="13px"
-                                            color="red.400"
-                                        >
+                                    {submitted && errors.nickname && (
+                                        <Text color="red.400">
                                             {errors.nickname}
                                         </Text>
-                                    ) : null}
+                                    )}
                                 </Box>
                             </HStack>
 
                             <Box>
-                                <Text mb="5px" fontWeight="medium">
-                                    이메일
-                                </Text>
+                                <Text>이메일</Text>
                                 <Input
                                     placeholder="interviewEasy@gmail.com"
-                                    size="lg"
                                     value={values.email}
                                     onChange={handleChange("email")}
                                 />
-                                {submitted && errors.email ? (
-                                    <Text
-                                        mt="4px"
-                                        fontSize="13px"
-                                        color="red.400"
-                                    >
-                                        {errors.email}
-                                    </Text>
-                                ) : null}
+                                {submitted && errors.email && (
+                                    <Text color="red.400">{errors.email}</Text>
+                                )}
                             </Box>
 
                             <Box>
-                                <Text mb="5px" fontWeight="medium">
-                                    비밀번호
-                                </Text>
+                                <Text>비밀번호</Text>
                                 <Input
                                     type="password"
-                                    size="lg"
                                     value={values.password}
                                     onChange={handleChange("password")}
                                 />
-                                {submitted && errors.password ? (
-                                    <Text
-                                        mt="4px"
-                                        fontSize="13px"
-                                        color="red.400"
-                                    >
+                                {submitted && errors.password && (
+                                    <Text color="red.400">
                                         {errors.password}
                                     </Text>
-                                ) : null}
+                                )}
                             </Box>
 
                             <Box>
-                                <Text mb="5px" fontWeight="medium">
-                                    비밀번호 확인
-                                </Text>
+                                <Text>비밀번호 확인</Text>
                                 <Input
                                     type="password"
-                                    size="lg"
                                     value={values.confirmPassword}
                                     onChange={handleChange("confirmPassword")}
                                 />
-                                {submitted && errors.confirmPassword ? (
-                                    <Text
-                                        mt="4px"
-                                        fontSize="13px"
-                                        color="red.400"
-                                    >
+                                {submitted && errors.confirmPassword && (
+                                    <Text color="red.400">
                                         {errors.confirmPassword}
                                     </Text>
-                                ) : null}
+                                )}
                             </Box>
-                            <Checkbox.Root>
-                                <Checkbox.HiddenInput />
-                                <Checkbox.Control
-                                    _checked={{
-                                        bg: "#2563EB",
-                                        borderColor: "#2563EB",
-                                    }}
-                                >
-                                    <Checkbox.Indicator />
-                                </Checkbox.Control>
-                                <Checkbox.Label>
-                                    이용약관에 동의합니다.
-                                </Checkbox.Label>
-                            </Checkbox.Root>
-                            <Button
-                                type="submit"
-                                mt="2"
-                                h="54px"
-                                bg="#2563EB"
-                                color="white"
-                                _hover={{ bg: "#1D4ED8" }}
-                                borderRadius="14px"
-                                fontSize="16px"
-                            >
+
+                            <VStack align="stretch">
+                                <HStack gap={1} align="center">
+                                    <Checkbox.Root>
+                                        <Checkbox.HiddenInput />
+                                        <Checkbox.Control
+                                            _checked={{
+                                                bg: "#2F6FED",
+                                                borderColor: "#2F6FED",
+                                                color: "white",
+                                            }}
+                                        >
+                                            <Checkbox.Indicator />
+                                        </Checkbox.Control>
+                                    </Checkbox.Root>
+                                    <Text
+                                        fontSize="14px"
+                                        textDecoration={"underline"}
+                                        color={"#64748B"}
+                                        cursor="pointer"
+                                        onClick={() => openModal("terms1")}
+                                    >
+                                        서비스 이용약관
+                                    </Text>
+                                    <Text fontSize="13px" color={"#64748B"}>
+                                        (필수)
+                                    </Text>
+                                </HStack>{" "}
+                                <HStack gap={1} align="center">
+                                    <Checkbox.Root>
+                                        <Checkbox.HiddenInput />
+                                        <Checkbox.Control
+                                            _checked={{
+                                                bg: "#2F6FED",
+                                                borderColor: "#2F6FED",
+                                                color: "white",
+                                            }}
+                                        >
+                                            <Checkbox.Indicator />
+                                        </Checkbox.Control>
+                                    </Checkbox.Root>
+                                    <Text
+                                        fontSize="14px"
+                                        textDecoration={"underline"}
+                                        color={"#64748B"}
+                                        cursor="pointer"
+                                        onClick={() => openModal("terms2")}
+                                    >
+                                        개인정보 수집 및 이용동의
+                                    </Text>
+                                    <Text fontSize="13px" color={"#64748B"}>
+                                        (필수)
+                                    </Text>
+                                </HStack>
+                                <HStack gap={1} align="center">
+                                    <Checkbox.Root>
+                                        <Checkbox.HiddenInput />
+                                        <Checkbox.Control
+                                            _checked={{
+                                                bg: "#2F6FED",
+                                                borderColor: "#2F6FED",
+                                                color: "white",
+                                            }}
+                                        >
+                                            <Checkbox.Indicator />
+                                        </Checkbox.Control>
+                                    </Checkbox.Root>
+                                    <Text
+                                        fontSize="14px"
+                                        textDecoration={"underline"}
+                                        color={"#64748B"}
+                                        cursor="pointer"
+                                        onClick={() => openModal("terms3")}
+                                    >
+                                        멤버십 이용약관
+                                    </Text>
+                                    <Text fontSize="13px" color={"#64748B"}>
+                                        (선택)
+                                    </Text>
+                                </HStack>
+                            </VStack>
+
+                            <Button type="submit" bg="blue.500" color="white">
                                 회원가입
                             </Button>
                         </VStack>
                     </form>
                 </Box>
             </Flex>
+
+            <Dialog.Root
+                size="cover"
+                placement="center"
+                motionPreset="slide-in-bottom"
+                open={isAgreementOpen}
+                onOpenChange={(e) => setAgreementOpen(e.open)}
+            >
+                <Portal>
+                    <Dialog.Backdrop />
+                    <Dialog.Positioner>
+                        <Dialog.Content>
+                            <Dialog.Header>
+                                <Dialog.Title>{current?.title}</Dialog.Title>
+                                <Dialog.CloseTrigger asChild>
+                                    <CloseButton
+                                        size="2xl"
+                                        onClick={() => setAgreementOpen(false)}
+                                    />
+                                </Dialog.CloseTrigger>
+                            </Dialog.Header>
+
+                            <Dialog.Body maxH="400px" overflowY="auto">
+                                <Text>{current?.content}</Text>
+                            </Dialog.Body>
+                        </Dialog.Content>
+                    </Dialog.Positioner>
+                </Portal>
+            </Dialog.Root>
         </Flex>
     )
 }
