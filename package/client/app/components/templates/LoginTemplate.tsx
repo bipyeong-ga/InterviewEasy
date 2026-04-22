@@ -12,6 +12,8 @@ import {
     Center,
 } from "@chakra-ui/react"
 
+import BlockLink from "../atoms/BlockLink"
+
 import "../../fonts.css"
 
 type FormValues = {
@@ -67,7 +69,7 @@ const LoginTemplate: React.FC = () => {
         setSubmitted(true)
 
         if (Object.keys(nextErrors).length === 0) {
-            console.log("회원가입 성공", values)
+            console.log("로그인 성공", values)
         }
     }
 
@@ -179,7 +181,9 @@ const LoginTemplate: React.FC = () => {
                                 </Box>
                                 <Box textAlign="right">
                                     <Text color="#94A3B8" fontSize="14px">
-                                        비밀번호 찾기
+                                        <BlockLink to="/register">
+                                            회원가입
+                                        </BlockLink>
                                     </Text>
                                 </Box>
                             </HStack>
