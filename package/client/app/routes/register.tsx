@@ -1,5 +1,5 @@
+import RegisterTemplate from "~/components/templates/RegisterTemplate"
 import type { Route } from "./+types/main"
-import Register from "~/components/templates/Register"
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -24,6 +24,6 @@ export function meta({}: Route.MetaArgs) {
     ]
 }
 
-export default function test() {
-    return <Register />
+export default function Main() {
+    return <RegisterTemplate />
 }
