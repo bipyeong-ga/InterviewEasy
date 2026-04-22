@@ -181,8 +181,8 @@ const LoginTemplate: React.FC = () => {
                                 </Box>
                                 <Box textAlign="right">
                                     <Text color="#94A3B8" fontSize="14px">
-                                        <BlockLink to="/register">
-                                            회원가입
+                                        <BlockLink to="/">
+                                            비밀번호 찾기
                                         </BlockLink>
                                     </Text>
                                 </Box>
