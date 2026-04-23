@@ -31,16 +31,16 @@ type ModalType = "terms1" | "terms2" | "terms3" | null
 // 약관 데이터 분리
 const AGREEMENTS = {
     terms1: {
-        title: "이용약관",
-        content: "여기에 이용약관 내용 들어감",
+        title: "서비스 이용약관",
+        content: `여러줄 엔터로 가능`,
     },
     terms2: {
-        title: "개인정보 처리방침",
-        content: "여기에 개인정보 처리방침 내용 들어감",
+        title: "개인정보 처리방침 및 이용동의",
+        content: `여러줄 엔터로 가능`,
     },
     terms3: {
-        title: "마케팅 수신 동의",
-        content: "여기에 마케팅 수신 동의 내용 들어감",
+        title: "멤버쉽 이용약관",
+        content: `여러줄 엔터로 가능`,
     },
 } as const
 
@@ -332,7 +332,9 @@ const RegisterTemplate: React.FC = () => {
                             </Dialog.Header>
 
                             <Dialog.Body maxH="400px" overflowY="auto">
-                                <Text>{current?.content}</Text>
+                                <Text whiteSpace="pre-line" lineHeight="1.8">
+                                    {current?.content}
+                                </Text>
                             </Dialog.Body>
                         </Dialog.Content>
                     </Dialog.Positioner>
