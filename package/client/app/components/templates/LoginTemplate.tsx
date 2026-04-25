@@ -11,6 +11,7 @@ import {
     Checkbox,
     Center,
 } from "@chakra-ui/react"
+import { useNavigate } from "react-router"
 
 import BlockLink from "../atoms/BlockLink"
 
@@ -27,6 +28,7 @@ type FormValues = {
 type FormErrors = Partial<Record<keyof FormValues, string>>
 
 const LoginTemplate: React.FC = () => {
+    const navigate = useNavigate()
     const [values, setValues] = useState<FormValues>({
         name: "",
         nickname: "",
@@ -86,7 +88,13 @@ const LoginTemplate: React.FC = () => {
                     return response.json()
                 })
                 .then((data) => {
+                    if (!data?.token) {
+                        throw new Error("토큰이 응답되지 않았습니다")
+                    }
+
+                    localStorage.setItem("token", data.token)
                     console.log("로그인 성공:", data)
+                    navigate("/")
                 })
                 .catch((error) => {
                     console.error("로그인 오류:", error)

@@ -13,6 +13,8 @@ import {
     Portal,
     CloseButton,
 } from "@chakra-ui/react"
+import { toaster } from "../ui/toaster"
+import { useNavigate } from "react-router"
 
 import "../../fonts.css"
 
@@ -45,6 +47,8 @@ const AGREEMENTS = {
 } as const
 
 const RegisterTemplate: React.FC = () => {
+    const navigate = useNavigate()
+
     const [values, setValues] = useState<FormValues>({
         name: "",
         nickname: "",
@@ -123,15 +127,41 @@ const RegisterTemplate: React.FC = () => {
             })
                 .then((response) => {
                     if (!response.ok) {
-                        throw new Error("로그인 실패")
+                        return response.json().then((errorData) => {
+                            const err = new Error("회원가입 실패")
+                            ;(err as any).code = response.status
+                            ;(err as any).body = errorData
+                            throw err
+                        })
                     }
                     return response.json()
                 })
                 .then((data) => {
-                    console.log("로그인 성공:", data)
+                    toaster.create({
+                        description: "회원가입이 완료되었습니다!",
+                        type: "success",
+                        action: {
+                            label: "로그인",
+                            onClick: () => navigate("/login"),
+                        },
+                    })
                 })
-                .catch((error) => {
-                    console.error("로그인 오류:", error)
+                .catch((error: any) => {
+                    if (error?.code === 409) {
+                        toaster.create({
+                            description: "이미 존재하는 이메일입니다",
+                            type: "error",
+                        })
+                        return
+                    } else if (error?.code === 429) {
+                        toaster.create({
+                            description: "잠시 후 다시 시도해주세요",
+                            type: "error",
+                        })
+                        return
+                    }
+
+                    console.error("회원가입 오류:", error)
                 })
         }
     }
