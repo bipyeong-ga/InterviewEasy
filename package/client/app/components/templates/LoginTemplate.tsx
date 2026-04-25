@@ -69,7 +69,28 @@ const LoginTemplate: React.FC = () => {
         setSubmitted(true)
 
         if (Object.keys(nextErrors).length === 0) {
-            console.log("로그인 성공", values)
+            fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: values.email,
+                    password: values.password,
+                }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("로그인 실패")
+                    }
+                    return response.json()
+                })
+                .then((data) => {
+                    console.log("로그인 성공:", data)
+                })
+                .catch((error) => {
+                    console.error("로그인 오류:", error)
+                })
         }
     }
 
