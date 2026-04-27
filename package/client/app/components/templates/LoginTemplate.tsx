@@ -10,6 +10,7 @@ import {
     Image,
     Checkbox,
     Center,
+    AbsoluteCenter,
 } from "@chakra-ui/react"
 import { useNavigate } from "react-router"
 
@@ -155,7 +156,7 @@ const LoginTemplate: React.FC = () => {
                                     다시 만나서 반가워요 !
                                 </Text>
                             </Box>
-                            <Box marginTop="20%">
+                            <Box marginTop="2%">
                                 <Input
                                     placeholder="이메일"
                                     size="lg"
@@ -228,31 +229,75 @@ const LoginTemplate: React.FC = () => {
                             >
                                 로그인
                             </Button>
+                            <Box position="relative" w="full" py="4">
+                                <Box
+                                    borderBottom="1px solid"
+                                    borderColor="gray.400"
+                                />
+                                <AbsoluteCenter
+                                    bg="#F8FAFC"
+                                    px="4"
+                                    color="#64748B"
+                                >
+                                    또는
+                                </AbsoluteCenter>
+                            </Box>
                             <Box>
                                 <Center>
-                                    <HStack gapX="6">
-                                        <Image src="/images/github.svg"></Image>
-                                        <Box
-                                            borderRadius="100px"
-                                            backgroundColor="#FFFFFF"
-                                            width="40px"
-                                            height="40px"
+                                    <VStack gapX="6">
+                                        <Button
+                                            mt="2"
+                                            h="54px"
+                                            bg="Black"
+                                            color="white"
+                                            borderRadius="14px"
+                                            fontSize="16px"
+                                            w="464px"
                                         >
-                                            <Center h="100%">
-                                                <Image src="/images/google.svg"></Image>
-                                            </Center>
-                                        </Box>
-                                        <Box
-                                            borderRadius="100px"
-                                            backgroundColor="#FFFFFF"
-                                            width="40px"
-                                            height="40px"
+                                            <Image
+                                                w="22px"
+                                                src="/images/apple.png"
+                                            ></Image>
+
+                                            <Text> Apple로 로그인</Text>
+                                        </Button>
+                                        <Button
+                                            mt="2"
+                                            h="54px"
+                                            bg="white"
+                                            color="black"
+                                            borderRadius="14px"
+                                            fontSize="16px"
+                                            w="100%"
                                         >
-                                            <Center h="90%">
-                                                <Image src="/images/apple.svg"></Image>
-                                            </Center>
-                                        </Box>
-                                    </HStack>
+                                            <Box
+                                                borderRadius="100px"
+                                                backgroundColor="#FFFFFF"
+                                                width="40px"
+                                                height="40px"
+                                            >
+                                                <Center h="100%">
+                                                    <Image src="/images/google.svg"></Image>
+                                                </Center>
+                                            </Box>
+                                            <Text> Google로 로그인</Text>
+                                        </Button>
+                                        <Button
+                                            mt="2"
+                                            h="54px"
+                                            bg="#1E2226"
+                                            color="white"
+                                            borderRadius="14px"
+                                            fontSize="16px"
+                                            w="100%"
+                                        >
+                                            <Image
+                                                w="30px"
+                                                src="/images/github.webp"
+                                            ></Image>
+                                            <Text> Github로 로그인</Text>
+                                        </Button>
+                                    </VStack>
                                 </Center>
                             </Box>
                         </VStack>
