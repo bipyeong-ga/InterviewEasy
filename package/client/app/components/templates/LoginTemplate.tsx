@@ -205,7 +205,7 @@ const LoginTemplate: React.FC = () => {
                                             <Checkbox.Indicator />
                                         </Checkbox.Control>
                                         <Checkbox.Label color="#94A3B8">
-                                            자동로그인
+                                            이메일 고정
                                         </Checkbox.Label>
                                     </Checkbox.Root>
                                 </Box>
@@ -244,7 +244,7 @@ const LoginTemplate: React.FC = () => {
                             </Box>
                             <Box>
                                 <Center>
-                                    <VStack gapX="6">
+                                    <VStack w="100%" maxW="464px" gap="3">
                                         <Button
                                             mt="2"
                                             h="54px"
@@ -252,7 +252,7 @@ const LoginTemplate: React.FC = () => {
                                             color="white"
                                             borderRadius="14px"
                                             fontSize="16px"
-                                            w="464px"
+                                            w="100%"
                                         >
                                             <Image
                                                 w="22px"
