@@ -131,14 +131,14 @@ const LoginTemplate: React.FC = () => {
             </Flex>
 
             <Flex
-                flex={{ base: 1, lg: "0 0 560px" }}
+                flex={1}
                 justify={{ base: "flex-start", lg: "center" }}
                 align={{ base: "stretch", lg: "center" }}
                 p={{ base: 4, md: 6, lg: 12 }}
                 pt={{ base: 6, md: 6, lg: 12 }}
                 backgroundColor="#F8FAFC"
             >
-                <Box w="100%" maxW="560px">
+                <Box w="100%">
                     <form onSubmit={handleSubmit}>
                         <VStack align="stretch" gap={{ base: 4, md: 5 }}>
                             <Box>
@@ -244,7 +244,7 @@ const LoginTemplate: React.FC = () => {
                             </Box>
                             <Box>
                                 <Center>
-                                    <VStack w="100%" maxW="464px" gap="3">
+                                    <VStack w="100%" gap="3">
                                         <Button
                                             mt="2"
                                             h="54px"
