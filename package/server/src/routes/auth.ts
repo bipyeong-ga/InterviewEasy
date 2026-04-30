@@ -15,6 +15,11 @@ const loginLimiter = rateLimit({
     limit: 5,
     standardHeaders: "draft-7",
     legacyHeaders: false,
+    handler: (_, res) => {
+        res.status(429).json({
+            error: "Too many login attempts. Please try again in a minute.",
+        })
+    },
 })
 
 const registerLimiter = rateLimit({
@@ -22,6 +27,11 @@ const registerLimiter = rateLimit({
     limit: 10,
     standardHeaders: "draft-7",
     legacyHeaders: false,
+    handler: (_, res) => {
+        res.status(429).json({
+            error: "Too many registration attempts. Please try again in 10 minutes.",
+        })
+    },
 })
 
 // 회원가입
