@@ -13,8 +13,8 @@ function GlassyOrb() {
                 muted
                 playsInline
                 onLoadedMetadata={(e) => {
-                    e.currentTarget.defaultPlaybackRate = 2;
-                    e.currentTarget.playbackRate = 2;
+                    e.currentTarget.defaultPlaybackRate = 2
+                    e.currentTarget.playbackRate = 2
                 }}
                 style={{
                     filter: "hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1)",
@@ -25,7 +25,7 @@ function GlassyOrb() {
                 }}
             />
         </div>
-    );
+    )
 }
 
 const MainTemplate: React.FC = () => {
@@ -43,7 +43,7 @@ const MainTemplate: React.FC = () => {
                 alignItems="center"
                 bg="transparent"
                 overflow="hidden"
-            > 
+            >
                 <Box
                     w="100%"
                     maxW="6xl"
@@ -86,9 +86,10 @@ const MainTemplate: React.FC = () => {
                             borderRadius="xl"
                             mt={10}
                             onClick={() => {
-                                const el = document.getElementById('target-section');
+                                const el =
+                                    document.getElementById("target-section")
                                 if (el) {
-                                    el.scrollIntoView({ behavior: 'smooth' });
+                                    el.scrollIntoView({ behavior: "smooth" })
                                 }
                             }}
                         >

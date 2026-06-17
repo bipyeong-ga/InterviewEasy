@@ -8,6 +8,8 @@ import {
     useRouteError,
 } from "react-router"
 
+// import "./fonts.css"
+
 import ErrorTemplate from "./components/templates/ErrorTemplate"
 import type { Route } from "./+types/root"
 import { Provider } from "./components/ui/provider"
