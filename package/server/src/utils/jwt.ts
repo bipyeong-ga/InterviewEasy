@@ -7,7 +7,6 @@ import jwt, {
 
 const rawSecret = process.env.JWT_SECRET
 if (!rawSecret) {
-    // Fail fast if secret is not configured
     throw new Error("JWT_SECRET is not set. Refuse to start without it.")
 }
 const SECRET_KEY: Secret = rawSecret
