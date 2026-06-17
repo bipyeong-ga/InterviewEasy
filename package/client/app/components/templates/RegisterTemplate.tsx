@@ -30,7 +30,6 @@ type FormErrors = Partial<Record<keyof FormValues, string>>
 
 type ModalType = "terms1" | "terms2" | "terms3" | null
 
-// 약관 데이터 분리
 const AGREEMENTS = {
     terms1: {
         title: "서비스 이용약관",
@@ -98,13 +97,13 @@ const RegisterTemplate: React.FC = () => {
 
     const handleChange =
         (field: keyof FormValues) =>
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            const nextValues = { ...values, [field]: event.target.value }
-            setValues(nextValues)
-            if (submitted) {
-                setErrors(validate(nextValues))
+            (event: React.ChangeEvent<HTMLInputElement>) => {
+                const nextValues = { ...values, [field]: event.target.value }
+                setValues(nextValues)
+                if (submitted) {
+                    setErrors(validate(nextValues))
+                }
             }
-        }
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -129,8 +128,8 @@ const RegisterTemplate: React.FC = () => {
                     if (!response.ok) {
                         return response.json().then((errorData) => {
                             const err = new Error("회원가입 실패")
-                            ;(err as any).code = response.status
-                            ;(err as any).body = errorData
+                                ; (err as any).code = response.status
+                                ; (err as any).body = errorData
                             throw err
                         })
                     }

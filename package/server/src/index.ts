@@ -45,18 +45,18 @@ async function runMigrations() {
         )
         const sql = fs.readFileSync(migrationFile, "utf-8")
         await pool.query(sql)
-        console.log("✅ Migrations completed")
+        console.log("Migrations success")
     } catch (error) {
-        console.error("❌ Migration error:", error)
+        console.error("Migration failed:", error)
     }
 }
 
-// Database 연결 테스트 및 마이그레이션 실행
+// DB 연결 테스트 및 마이그레이션 실행
 pool.query("SELECT NOW()", async (err, res) => {
     if (err) {
-        console.error("❌ Database connection failed:", err)
+        console.error("Database connection error:", err)
     } else {
-        console.log("✅ Database connected:", res.rows[0])
+        console.log("Connected:", res.rows[0])
         await runMigrations()
     }
 })
@@ -65,8 +65,11 @@ const apiRouter = express.Router()
 
 app.use("/api", apiRouter)
 
-// 인증 라우트
-apiRouter.use("/auth", authRouter)
+apiRouter.use("/auth", authRouter) // 인증 라우트
+
+// apiRouter.use("/", authRouter) // 업로드 쪽
+
+// apiRouter.use("/ai", authRouter) // 인증 라우트
 
 apiRouter.get("/health", (req, res) => {
     res.json({ status: "ok" })

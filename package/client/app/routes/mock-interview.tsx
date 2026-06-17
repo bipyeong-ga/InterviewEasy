@@ -1,6 +1,5 @@
 import type { Route } from "./+types/main"
-import MainTemplate from "~/components/templates/MainTemplate"
-
+import MockInterviewTemplate from "~/components/templates/MockInterviewTemplate"
 export function meta({}: Route.MetaArgs) {
     return [
         { title: "title" },
@@ -12,5 +11,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Main() {
-    return <MainTemplate />
+    return <MockInterviewTemplate />
 }

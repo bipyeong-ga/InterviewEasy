@@ -1,5 +1,5 @@
 import type { Route } from "./+types/main"
-import MainTemplate from "~/components/templates/MainTemplate"
+import ApplicationTemplate from "~/components/templates/ApplicationTemplate"
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -12,5 +12,5 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Main() {
-    return <MainTemplate />
+    return <ApplicationTemplate />
 }

@@ -256,7 +256,7 @@ const LoginTemplate: React.FC = () => {
                                         >
                                             <Image
                                                 w="22px"
-                                                src="/images/apple.png"
+                                                src="/images/login/apple.png"
                                             ></Image>
 
                                             <Text> Apple로 로그인</Text>
@@ -269,6 +269,10 @@ const LoginTemplate: React.FC = () => {
                                             borderRadius="14px"
                                             fontSize="16px"
                                             w="100%"
+                                            onClick={() =>
+                                                (window.location.href =
+                                                    "/api/auth/oauth/google")
+                                            }
                                         >
                                             <Box
                                                 borderRadius="100px"
@@ -277,7 +281,7 @@ const LoginTemplate: React.FC = () => {
                                                 height="40px"
                                             >
                                                 <Center h="100%">
-                                                    <Image src="/images/google.svg"></Image>
+                                                    <Image src="/images/login/google.svg"></Image>
                                                 </Center>
                                             </Box>
                                             <Text> Google로 로그인</Text>
@@ -290,10 +294,14 @@ const LoginTemplate: React.FC = () => {
                                             borderRadius="14px"
                                             fontSize="16px"
                                             w="100%"
+                                            onClick={() =>
+                                                (window.location.href =
+                                                    "/api/auth/oauth/github")
+                                            }
                                         >
                                             <Image
                                                 w="30px"
-                                                src="/images/github.webp"
+                                                src="/images/login/github.webp"
                                             ></Image>
                                             <Text> Github로 로그인</Text>
                                         </Button>
