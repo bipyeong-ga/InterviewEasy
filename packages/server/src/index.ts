@@ -5,9 +5,11 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import pool from "./db"
 import authRouter from "./routes/auth"
+import resumesRouter from "./routes/resumes"
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
+import multer from "multer"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -39,13 +41,15 @@ const port = process.env.PORT || 3000
 // 마이그레이션 실행
 async function runMigrations() {
     try {
-        const migrationFile = path.join(
-            __dirname,
-            "../migrations/001_create_users_table.sql",
-        )
-        const sql = fs.readFileSync(migrationFile, "utf-8")
-        await pool.query(sql)
-        console.log("Migrations success")
+        const migrationsDir = path.join(__dirname, "../migrations")
+        const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith(".sql")).sort()
+        for (const file of files) {
+            const migrationFile = path.join(migrationsDir, file)
+            const sql = fs.readFileSync(migrationFile, "utf-8")
+            await pool.query(sql)
+            console.log(`Migration ${file} executed successfully`)
+        }
+        console.log("All migrations executed successfully")
     } catch (error) {
         console.error("Migration failed:", error)
     }
@@ -66,6 +70,7 @@ const apiRouter = express.Router()
 app.use("/api", apiRouter)
 
 apiRouter.use("/auth", authRouter) // 인증 라우트
+apiRouter.use("/resumes", resumesRouter) // 이력서 라우트
 
 // apiRouter.use("/", authRouter) // 업로드 쪽
 
@@ -73,6 +78,18 @@ apiRouter.use("/auth", authRouter) // 인증 라우트
 
 apiRouter.get("/health", (req, res) => {
     res.json({ status: "ok" })
+})
+
+// Global Error Handler Middleware to return JSON errors instead of default HTML
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("Unhandled error:", err)
+    if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({ error: "파일 크기가 너무 큽니다. 최대 50MB까지 업로드할 수 있습니다." })
+        }
+        return res.status(400).json({ error: `파일 업로드 오류: ${err.message}` })
+    }
+    res.status(err.status || 500).json({ error: err.message || "서버 내부 오류가 발생했습니다." })
 })
 
 app.listen(port, () => {

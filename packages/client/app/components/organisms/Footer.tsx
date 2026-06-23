@@ -18,10 +18,10 @@ import BlockLink from "../atoms/BlockLink"
 
 export function Footer() {
     const serviceItems = [
-        { label: "서비스 소개", path: "/portfolio/2d" },
-        { label: "공고 확인", path: "/portfolio/3d" },
-        { label: "자소서 / 이력서", path: "/portfolio/animation" },
-        { label: "모의 면접", path: "/portfolio/programming" },
+        { label: "서비스 소개", path: "/" },
+        { label: "공고 확인", path: "/post" },
+        { label: "자소서 / 이력서", path: "/analyze-application" },
+        { label: "모의 면접", path: "/mock-interview" },
     ]
     const supportItems = [
         { label: "자주 묻는 질문", path: "/about" },
@@ -29,9 +29,9 @@ export function Footer() {
         { label: "공지사항", path: "/careers" },
     ]
     const legalItems = [
-        { label: "이용 약관", path: "/privacy" },
-        { label: "개인정보 처리방침", path: "/terms" },
-        { label: "마켓팅 수신 동의", path: "/terms" },
+        { label: "이용 약관", path: "/legal/terms" },
+        { label: "개인정보 처리방침", path: "/legal/privacy" },
+        { label: "마켓팅 수신 동의", path: "/legal/marketing-consent" },
     ]
 
     return (
@@ -104,12 +104,12 @@ export function Footer() {
                                                 color: "#94A3B8",
                                             }}
                                             onMouseEnter={(e) =>
-                                                (e.currentTarget.style.textDecoration =
-                                                    "underline")
+                                            (e.currentTarget.style.textDecoration =
+                                                "underline")
                                             }
                                             onMouseLeave={(e) =>
-                                                (e.currentTarget.style.textDecoration =
-                                                    "none")
+                                            (e.currentTarget.style.textDecoration =
+                                                "none")
                                             }
                                         >
                                             {label}
@@ -137,12 +137,12 @@ export function Footer() {
                                                 color: "#94A3B8",
                                             }}
                                             onMouseEnter={(e) =>
-                                                (e.currentTarget.style.textDecoration =
-                                                    "underline")
+                                            (e.currentTarget.style.textDecoration =
+                                                "underline")
                                             }
                                             onMouseLeave={(e) =>
-                                                (e.currentTarget.style.textDecoration =
-                                                    "none")
+                                            (e.currentTarget.style.textDecoration =
+                                                "none")
                                             }
                                         >
                                             {label}
@@ -169,12 +169,12 @@ export function Footer() {
                                                 color: "#94A3B8",
                                             }}
                                             onMouseEnter={(e) =>
-                                                (e.currentTarget.style.textDecoration =
-                                                    "underline")
+                                            (e.currentTarget.style.textDecoration =
+                                                "underline")
                                             }
                                             onMouseLeave={(e) =>
-                                                (e.currentTarget.style.textDecoration =
-                                                    "none")
+                                            (e.currentTarget.style.textDecoration =
+                                                "none")
                                             }
                                         >
                                             {label}

@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
+import { useNavigate, useLocation } from "react-router"
+import { useAuth } from "../../hooks/useAuth"
 import {
     Box,
     Button,
@@ -50,11 +52,34 @@ const STEP_LABELS = [
 ]
 
 const MockInterviewTemplate: React.FC = () => {
+    const navigate = useNavigate()
+    const location = useLocation()
+    const { isLoggedIn, loading } = useAuth()
+
     const [step, setStep] = useState(0)
     const [selectedJobs, setSelectedJobs] = useState<string[]>([])
     const [selectedResume, setSelectedResume] = useState<string | null>(null)
     const [interviewType, setInterviewType] = useState<string>("mixed") // default 'mixed' to match selection in screenshot
     const [targetCompany, setTargetCompany] = useState("")
+
+    useEffect(() => {
+        if (!loading && !isLoggedIn) {
+            const redirectPath = encodeURIComponent(location.pathname + location.search)
+            navigate(`/login?redirect=${redirectPath}`)
+        }
+    }, [loading, isLoggedIn, navigate, location])
+
+    if (loading) {
+        return (
+            <Center minH="100vh">
+                <Text>로딩 중...</Text>
+            </Center>
+        )
+    }
+
+    if (!isLoggedIn) {
+        return null
+    }
     const [questionCount, setQuestionCount] = useState<number>(10)
     const [cameraOk, setCameraOk] = useState(false)
     const [micOk, setMicOk] = useState(false)
@@ -294,8 +319,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                         isCurrent
                                                             ? "white"
                                                             : active
-                                                              ? "#2563EB"
-                                                              : "#94A3B8"
+                                                                ? "#2563EB"
+                                                                : "#94A3B8"
                                                     }
                                                     fontWeight="bold"
                                                     fontSize="xs"
@@ -1295,8 +1320,8 @@ const MockInterviewTemplate: React.FC = () => {
                                         {canStartInterview
                                             ? "면접 시작하기"
                                             : checkingPermissions
-                                              ? "권한 확인 중..."
-                                              : "권한 허용 후 시작하기"}
+                                                ? "권한 확인 중..."
+                                                : "권한 허용 후 시작하기"}
                                     </Button>
                                 ) : (
                                     <Button

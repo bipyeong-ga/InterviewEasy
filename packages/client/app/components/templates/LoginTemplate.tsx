@@ -12,7 +12,8 @@ import {
     Center,
     AbsoluteCenter,
 } from "@chakra-ui/react"
-import { useNavigate } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
+import { useAuth } from "../../hooks/useAuth"
 
 import BlockLink from "../atoms/BlockLink"
 
@@ -30,6 +31,8 @@ type FormErrors = Partial<Record<keyof FormValues, string>>
 
 const LoginTemplate: React.FC = () => {
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const { login } = useAuth()
     const [values, setValues] = useState<FormValues>({
         name: "",
         nickname: "",
@@ -57,13 +60,13 @@ const LoginTemplate: React.FC = () => {
 
     const handleChange =
         (field: keyof FormValues) =>
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            const nextValues = { ...values, [field]: event.target.value }
-            setValues(nextValues)
-            if (submitted) {
-                setErrors(validate(nextValues))
+            (event: React.ChangeEvent<HTMLInputElement>) => {
+                const nextValues = { ...values, [field]: event.target.value }
+                setValues(nextValues)
+                if (submitted) {
+                    setErrors(validate(nextValues))
+                }
             }
-        }
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -93,9 +96,10 @@ const LoginTemplate: React.FC = () => {
                         throw new Error("토큰이 응답되지 않았습니다")
                     }
 
-                    localStorage.setItem("token", data.token)
+                    login(data.token, data.user)
                     console.log("로그인 성공:", data)
-                    navigate("/")
+                    const redirectUrl = searchParams.get("redirect") || "/"
+                    navigate(redirectUrl)
                 })
                 .catch((error) => {
                     console.error("로그인 오류:", error)
@@ -270,8 +274,8 @@ const LoginTemplate: React.FC = () => {
                                             fontSize="16px"
                                             w="100%"
                                             onClick={() =>
-                                                (window.location.href =
-                                                    "/api/auth/oauth/google")
+                                            (window.location.href =
+                                                "/api/auth/oauth/google")
                                             }
                                         >
                                             <Box
@@ -295,8 +299,8 @@ const LoginTemplate: React.FC = () => {
                                             fontSize="16px"
                                             w="100%"
                                             onClick={() =>
-                                                (window.location.href =
-                                                    "/api/auth/oauth/github")
+                                            (window.location.href =
+                                                "/api/auth/oauth/github")
                                             }
                                         >
                                             <Image

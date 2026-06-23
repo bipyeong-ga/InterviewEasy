@@ -1154,10 +1154,10 @@ const PostTemplate: React.FC = () => {
                         color="gray.400"
                         fontSize="sm"
                     >
-                        지도 영역
+                        AD
                     </Box>
 
-                    {/* Result count */}
+                    {/* Result count
                     <Flex align="center" justify="space-between" mb={4}>
                         <Text fontSize="sm" color="gray.500">
                             총{" "}
@@ -1166,7 +1166,7 @@ const PostTemplate: React.FC = () => {
                             </Text>
                             개의 공고
                         </Text>
-                    </Flex>
+                    </Flex> */}
 
                     {/* Grid */}
                     {filteredPosts.length > 0 ? (

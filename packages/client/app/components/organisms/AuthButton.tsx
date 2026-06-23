@@ -1,66 +1,15 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { HStack, Button, Avatar, Menu, Text, Portal } from "@chakra-ui/react"
 import { useNavigate } from "react-router"
 import BlockLink from "../atoms/BlockLink"
-
-type User = {
-    id?: number
-    email?: string
-    name?: string
-    profile_image_url?: string
-}
+import { useAuth } from "../../hooks/useAuth"
 
 export default function AuthButton() {
-    const [user, setUser] = useState<User | null>(null)
+    const { user, logout } = useAuth()
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const token = localStorage.getItem("token")
-        if (!token) {
-            // maybe there is a user snapshot stored (from OAuth)
-            const raw = localStorage.getItem("user")
-            if (raw) {
-                try {
-                    setUser(JSON.parse(raw))
-                } catch {
-                    setUser(null)
-                }
-            }
-            return
-        }
-
-        // try to fetch /api/auth/me with Bearer token
-        ;(async () => {
-            try {
-                const resp = await fetch("/api/auth/me", {
-                    headers: { Authorization: `Bearer ${token}` },
-                })
-                if (!resp.ok) {
-                    localStorage.removeItem("token")
-                    localStorage.removeItem("user")
-                    setUser(null)
-                    return
-                }
-                const data = await resp.json()
-                setUser(data)
-                // cache a small snapshot
-                localStorage.setItem("user", JSON.stringify(data))
-            } catch (e) {
-                setUser(null)
-            }
-        })()
-    }, [])
-
     const handleLogout = async () => {
-        try {
-            // call server logout to clear cookie (if used)
-            await fetch("/api/auth/logout", { method: "POST" })
-        } catch (e) {
-            // ignore
-        }
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
-        setUser(null)
+        await logout()
         navigate("/login")
     }
 

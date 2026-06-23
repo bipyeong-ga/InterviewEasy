@@ -1,11 +1,11 @@
 import type { Route } from "./+types/main"
 import MockInterviewTemplate from "~/components/templates/MockInterviewTemplate"
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
     return [
-        { title: "title" },
+        { title: "모의면접" },
         {
             name: "description",
-            content: "description",
+            content: "모의면접",
         },
     ]
 }

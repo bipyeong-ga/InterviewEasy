@@ -15,11 +15,26 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaSearch, FaBars } from "react-icons/fa";
+import { useLocation } from "react-router";
 
 import BlockLink from "../atoms/BlockLink";
 import AuthButton from "./AuthButton";
 
-export default function Header() {
+export default function Header({
+    bg,
+    boxShadow,
+    borderBottom,
+    borderColor,
+    ...rest
+}: {
+    bg?: string;
+    boxShadow?: string;
+    borderBottom?: string;
+    borderColor?: string;
+    [key: string]: any;
+}) {
+    const location = useLocation();
+    const isLandingPage = location.pathname === "/";
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -34,6 +49,11 @@ export default function Header() {
         };
     }, []);
 
+    const finalBg = bg !== undefined ? bg : (isLandingPage ? (scrolled ? "white" : "transparent") : "white");
+    const finalShadow = boxShadow !== undefined ? boxShadow : (isLandingPage ? (scrolled ? "sm" : "none") : "none");
+    const finalBorderBottom = borderBottom !== undefined ? borderBottom : (isLandingPage ? "none" : "1px solid");
+    const finalBorderColor = borderColor !== undefined ? borderColor : (isLandingPage ? "transparent" : "gray.100");
+
     return (
         <Box
             position="fixed"
@@ -42,9 +62,12 @@ export default function Header() {
             w="100%"
             zIndex={1000}
             transition="all 0.25s ease"
-            bg={scrolled ? "white" : "transparent"}
-            boxShadow={scrolled ? "sm" : "none"}
-            backdropFilter={scrolled ? "blur(10px)" : "none"}
+            bg={finalBg}
+            boxShadow={finalShadow}
+            borderBottom={finalBorderBottom}
+            borderColor={finalBorderColor}
+            backdropFilter={finalBg === "transparent" ? "blur(10px)" : "none"}
+            {...rest}
         >
             <Flex
                 h="72px"
@@ -71,7 +94,7 @@ export default function Header() {
                 >
                     <BlockLink to="/post">
                         <Link color="gray.800" fontWeight="bold">
-                            공고 확인
+                            채용 공고
                         </Link>
                     </BlockLink>
 
@@ -148,7 +171,7 @@ export default function Header() {
                                             color="gray.800"
                                             fontWeight="bold"
                                         >
-                                            공고 확인
+                                            채용 공고
                                         </Link>
                                     </BlockLink>
 

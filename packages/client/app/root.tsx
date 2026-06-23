@@ -14,6 +14,7 @@ import ErrorTemplate from "./components/templates/ErrorTemplate"
 import type { Route } from "./+types/root"
 import { Provider } from "./components/ui/provider"
 import { Toaster } from "./components/ui/toaster"
+import { AuthProvider } from "./hooks/useAuth"
 
 export const links: Route.LinksFunction = () => [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,7 +43,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Links />
             </head>
             <body>
-                <Provider>{children}</Provider>
+                <AuthProvider>
+                    <Provider>{children}</Provider>
+                </AuthProvider>
                 <ScrollRestoration />
                 <Scripts />
             </body>
@@ -71,8 +74,8 @@ export function ErrorBoundary() {
         error instanceof Error
             ? parseInt(error.message.match(/\d+/)?.[0] || "") || null
             : isRouteErrorResponse(error)
-              ? error.status
-              : null
+                ? error.status
+                : null
 
     if (!isDev) {
         return (
