@@ -14,6 +14,7 @@ import {
     Image,
 } from "@chakra-ui/react"
 import { FaLocationDot } from "react-icons/fa6";
+import { IoSparklesSharp } from "react-icons/io5";
 import {
     FaSearch,
     FaMapMarkerAlt,
@@ -29,7 +30,8 @@ import {
 } from "react-icons/fa"
 import { useNavigate } from "react-router"
 import Header from "../organisms/Header"
-import { MOCK_POSTS, REGIONS, type Post, type Region } from "../../data/mockPosts"
+import { REGIONS, type Post, type Region } from "../../data/mockPosts"
+import { useEffect } from "react"
 
 // ────────────────────────────────────────────────
 // Job Card
@@ -37,9 +39,11 @@ import { MOCK_POSTS, REGIONS, type Post, type Region } from "../../data/mockPost
 function JobCard({
     post,
     onToggleBookmark,
+    recommendReason,
 }: {
     post: Post
     onToggleBookmark: (id: number) => void
+    recommendReason?: string
 }) {
     const navigate = useNavigate()
     const colors = ["#1a1a1a", "#0066CC", "#FF4500", "#E8001D", "#00B900", "#6B3FA0", "#005BAC"]
@@ -141,7 +145,7 @@ function JobCard({
             </HStack>
 
             {/* Bottom */}
-            <Flex justify="space-between" align="center">
+            <Flex justify="space-between" align="center" mt={3}>
                 <Badge
                     colorPalette="blue"
                     variant="subtle"
@@ -160,6 +164,20 @@ function JobCard({
                     {post.deadline}
                 </Text>
             </Flex>
+
+            {/* AI Recommend Reason */}
+            {recommendReason && (
+                <Box mt={3} pt={3} borderTop="1px dashed" borderColor="blue.100">
+                    <HStack align="flex-start" gap={1.5}>
+                        <Box color="blue.500" mt={0.5}>
+                            <IoSparklesSharp size={12} />
+                        </Box>
+                        <Text fontSize="xs" color="blue.600" css={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                            {recommendReason}
+                        </Text>
+                    </HStack>
+                </Box>
+            )}
         </Box>
     )
 }
@@ -755,7 +773,9 @@ function JobFilterPanel({
     )
 }
 const PostTemplate: React.FC = () => {
-    const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
+    const navigate = useNavigate()
+    const [posts, setPosts] = useState<Post[]>([])
+    const [recommendedJobs, setRecommendedJobs] = useState<any[]>([])
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedRegion, setSelectedRegion] = useState("서울")
     const [selectedDistricts, setSelectedDistricts] = useState<string[]>([])
@@ -773,6 +793,60 @@ const PostTemplate: React.FC = () => {
     const toggleTopPanel = (panel: "career" | "education") => {
         setOpenTopPanel((prev) => (prev === panel ? null : panel))
     }
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const token = localStorage.getItem("token")
+                const resp = await fetch("/api/posts", {
+                    headers: {
+                        ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    }
+                })
+                if (resp.ok) {
+                    const data = await resp.json()
+                    const formatted = data.map((d: any) => ({
+                        id: d.id,
+                        companyName: d.company_name,
+                        companyLogo: d.company_logo,
+                        title: d.title,
+                        location: d.location,
+                        district: d.district,
+                        jobCategory: d.job_category,
+                        techStack: d.tech_stack,
+                        deadline: d.deadline,
+                        experience: d.experience,
+                        employmentType: d.employment_type,
+                        salary: d.salary,
+                        description: d.description,
+                        responsibilities: d.responsibilities,
+                        requirements: d.requirements,
+                        preferredRequirements: d.preferred_requirements,
+                        benefits: d.benefits,
+                        bookmarked: d.bookmarked
+                    }))
+                    setPosts(formatted)
+                }
+
+                if (token) {
+                    const resumeResp = await fetch("/api/resumes", {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                    if (resumeResp.ok) {
+                        const resumesData = await resumeResp.json()
+                        const resumeWithRecs = resumesData.find((r: any) => r.recommended_jobs && Array.isArray(r.recommended_jobs) && r.recommended_jobs.length > 0)
+                        if (resumeWithRecs) {
+                            setRecommendedJobs(resumeWithRecs.recommended_jobs)
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch posts or resumes:", err)
+            }
+        }
+        fetchPosts()
+    }, [])
+
 
     const handleToggleDistrict = (d: string) => {
         setSelectedDistricts((prev) =>
@@ -807,10 +881,29 @@ const PostTemplate: React.FC = () => {
         setSelectedEducationLevels([])
     }
 
-    const handleToggleBookmark = (id: number) => {
-        setPosts((prev) =>
-            prev.map((p) => (p.id === id ? { ...p, bookmarked: !p.bookmarked } : p))
-        )
+    const handleToggleBookmark = async (id: number) => {
+        try {
+            const post = posts.find(p => p.id === id)
+            if (!post) return
+
+            const token = localStorage.getItem("token")
+            const resp = await fetch(`/api/posts/${id}/bookmark`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ isBookmarked: !post.bookmarked })
+            })
+
+            if (resp.ok) {
+                setPosts((prev) =>
+                    prev.map((p) => (p.id === id ? { ...p, bookmarked: !p.bookmarked } : p))
+                )
+            }
+        } catch (err) {
+            console.error("Failed to toggle bookmark:", err)
+        }
     }
 
     const filteredPosts = useMemo(() => {
@@ -1140,7 +1233,7 @@ const PostTemplate: React.FC = () => {
                     )}
 
                     {/* Map placeholder */}
-                    <Box
+                    {/* <Box
                         w="100%"
                         h="150px"
                         bg="gray.200"
@@ -1155,7 +1248,7 @@ const PostTemplate: React.FC = () => {
                         fontSize="sm"
                     >
                         AD
-                    </Box>
+                    </Box> */}
 
                     {/* Result count
                     <Flex align="center" justify="space-between" mb={4}>
@@ -1167,6 +1260,30 @@ const PostTemplate: React.FC = () => {
                             개의 공고
                         </Text>
                     </Flex> */}
+
+                    {/* AI Recommended Jobs */}
+                    {recommendedJobs.length > 0 && (
+                        <Box mb={8} bg="blue.50" p={5} borderRadius="xl" border="1px solid" borderColor="blue.100">
+                            <Flex align="center" gap={2} mb={4}>
+                                <FaBriefcase color="#3182CE" />
+                                <Text fontSize="lg" fontWeight="bold" color="blue.700">이력서 기반 AI 맞춤 추천 공고</Text>
+                            </Flex>
+                            <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
+                                {recommendedJobs.map((job, idx) => {
+                                    const matchedPost = posts.find(p => p.title === job.job_title && p.companyName === job.company)
+                                    if (!matchedPost) return null
+                                    return (
+                                        <JobCard
+                                            key={idx}
+                                            post={matchedPost}
+                                            onToggleBookmark={handleToggleBookmark}
+                                            recommendReason={job.reason}
+                                        />
+                                    )
+                                })}
+                            </SimpleGrid>
+                        </Box>
+                    )}
 
                     {/* Grid */}
                     {filteredPosts.length > 0 ? (

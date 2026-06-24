@@ -8,9 +8,10 @@ export default defineConfig({
     server: {
         proxy: {
             "/api": {
-                target: "http://127.0.0.1:3000",
+                target: process.env.API_URL || "http://localhost:3000",
                 changeOrigin: true,
             },
         },
+        host: "0.0.0.0", // Ensure Vite listens on all network interfaces for Docker
     },
 })

@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser"
 import pool from "./db"
 import authRouter from "./routes/auth"
 import resumesRouter from "./routes/resumes"
+import jobsRouter from "./routes/jobs"
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
@@ -71,8 +72,13 @@ app.use("/api", apiRouter)
 
 apiRouter.use("/auth", authRouter) // 인증 라우트
 apiRouter.use("/resumes", resumesRouter) // 이력서 라우트
+apiRouter.use("/jobs", jobsRouter) // 공고 관련 라우트
+import postsRouter from "./routes/posts"
+apiRouter.use("/posts", postsRouter) // 공고 조회 라우트
+import usersRouter from "./routes/users"
+apiRouter.use("/users", usersRouter) // 사용자 프로필 관리 라우트
 
-// apiRouter.use("/", authRouter) // 업로드 쪽
+// No longer using express.static for uploads, using DB storage instead
 
 // apiRouter.use("/ai", authRouter) // 인증 라우트
 

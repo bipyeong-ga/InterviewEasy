@@ -11,24 +11,35 @@ import {
     Spinner,
     Code,
     CodeBlock,
-    createHighlightJsAdapter,
+    Icon,
+    createShikiAdapter,
+    Clipboard,
+    IconButton,
+    Menu,
 } from "@chakra-ui/react"
 import { useNavigate, useLocation } from "react-router"
 import { useAuth } from "../../hooks/useAuth"
 import Header from "../organisms/Header"
 import { toaster } from "../ui/toaster"
-import { FaPlus, FaTrash, FaArrowRight, FaFileAlt, FaCheck, FaTimes, FaCloudUploadAlt, FaEdit } from "react-icons/fa"
+import { FaPlus, FaTrash, FaArrowRight, FaFileAlt, FaCheck, FaTimes, FaCloudUploadAlt, FaEdit, FaCode, FaHtml5, FaCss3, FaJs, FaPython, FaTerminal, FaDatabase, FaFileCode, FaEllipsisV, FaHeart, FaRegHeart } from "react-icons/fa"
 import ReactMarkdown from "react-markdown"
 import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
+import type { DropResult } from "@hello-pangea/dnd"
 import "katex/dist/katex.min.css"
 import { Prose } from "../ui/prose"
-import hljs from "highlight.js"
-import "highlight.js/styles/github-dark.css"
+import type { HighlighterGeneric } from "shiki"
 
-const highlightJsAdapter = createHighlightJsAdapter({
-    load: async () => hljs,
-    loadSync: () => hljs,
+const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
+    async load() {
+        const { createHighlighter } = await import("shiki")
+        return createHighlighter({
+            langs: ["tsx", "scss", "html", "bash", "json", "python", "javascript", "typescript", "css", "sql", "xml", "js", "ts", "sh"],
+            themes: ["github-dark"],
+        })
+    },
+    theme: "github-dark",
 })
 
 // Space Invader pixel art icon
@@ -71,6 +82,15 @@ interface MarkdownRendererProps {
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+    const preprocessedContent = React.useMemo(() => {
+        if (!content) return ""
+        // Convert \\[ ... \\] or \[ ... \] to $$ ... $$
+        let processed = content.replace(/\\+\[([\s\S]*?)\\+\]/g, (_, math) => `$$${math}$$`)
+        // Convert \\( ... \\) or \( ... \) to $ ... $
+        processed = processed.replace(/\\+\(([\s\S]*?)\\+\)/g, (_, math) => `$${math}$`)
+        return processed
+    }, [content])
+
     const components = {
         code({ node, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || "")
@@ -78,16 +98,52 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             const codeText = String(children).replace(/\n$/, "")
 
             if (match) {
+                const getLanguageIcon = (lang: string) => {
+                    switch (lang.toLowerCase()) {
+                        case "html":
+                        case "xml":
+                            return { icon: FaHtml5, color: "orange.400" }
+                        case "css":
+                        case "scss":
+                            return { icon: FaCss3, color: "blue.400" }
+                        case "javascript":
+                        case "js":
+                        case "json":
+                            return { icon: FaJs, color: "yellow.400" }
+                        case "typescript":
+                        case "ts":
+                        case "tsx":
+                            return { icon: FaCode, color: "blue.500" }
+                        case "python":
+                            return { icon: FaPython, color: "blue.300" }
+                        case "bash":
+                        case "sh":
+                            return { icon: FaTerminal, color: "gray.300" }
+                        case "sql":
+                            return { icon: FaDatabase, color: "blue.200" }
+                        default:
+                            return { icon: FaFileCode, color: "gray.400" }
+                    }
+                }
+                const langConfig = getLanguageIcon(language)
+
                 return (
                     <CodeBlock.Root maxW="100%" size="sm" mt={3} mb={3} code={codeText} language={language}>
-                        <CodeBlock.Header px={4} py={2} bg="gray.100" borderTopRadius="md" borderBottom="1px solid" borderColor="gray.200" display="flex" justifyContent="space-between" alignItems="center">
-                            <Text fontSize="xs" fontWeight="bold" color="gray.600">
-                                {language.toUpperCase()}
-                            </Text>
-                            <CodeBlock.CopyTrigger />
+                        <CodeBlock.Header display="flex" justifyContent="space-between" alignItems="center">
+                            <CodeBlock.Title>
+                                <Icon as={langConfig.icon} color={langConfig.color} mr={2} />
+                                {language}
+                            </CodeBlock.Title>
+                            <Clipboard.Root value={codeText}>
+                                <Clipboard.Trigger asChild>
+                                    <IconButton variant="ghost" size="xs" color="gray.400" _hover={{ color: "white", bg: "whiteAlpha.200" }} minW="8" h="8">
+                                        <Clipboard.Indicator />
+                                    </IconButton>
+                                </Clipboard.Trigger>
+                            </Clipboard.Root>
                         </CodeBlock.Header>
                         <CodeBlock.Content>
-                            <CodeBlock.Code bg="gray.900" color="gray.50" p={4} borderBottomRadius="md" fontSize="xs" display="block" overflowX="auto" fontFamily="monospace">
+                            <CodeBlock.Code fontFamily="'JetBrains Mono', Consolas, monospace" fontSize="sm">
                                 <CodeBlock.CodeText />
                             </CodeBlock.Code>
                         </CodeBlock.Content>
@@ -96,7 +152,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             }
 
             return (
-                <Code bg="gray.100" color="blue.700" px={1.5} py={0.5} borderRadius="md" fontSize="xs" fontWeight="semibold" {...props}>
+                <Code fontFamily="'JetBrains Mono', Consolas, monospace" bg="gray.100" color="blue.700" px={1.5} py={0.5} borderRadius="md" fontSize="xs" fontWeight="semibold" {...props}>
                     {children}
                 </Code>
             )
@@ -104,14 +160,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     }
 
     return (
-        <CodeBlock.AdapterProvider value={highlightJsAdapter}>
+        <CodeBlock.AdapterProvider value={shikiAdapter}>
             <Prose maxW="100%" color="gray.800">
                 <ReactMarkdown
                     remarkPlugins={[remarkMath]}
                     rehypePlugins={[rehypeKatex]}
                     components={components}
                 >
-                    {content}
+                    {preprocessedContent}
                 </ReactMarkdown>
             </Prose>
         </CodeBlock.AdapterProvider>
@@ -142,6 +198,7 @@ const ApplicationTemplate: React.FC = () => {
     const [editTitleText, setEditTitleText] = useState("")
 
     const [messages, setMessages] = useState<any[]>([])
+    const [likedJobs, setLikedJobs] = useState<any[]>([])
     const chatEndRef = useRef<HTMLDivElement>(null)
 
     // Check Authentication
@@ -155,6 +212,7 @@ const ApplicationTemplate: React.FC = () => {
     useEffect(() => {
         if (user) {
             fetchResumes()
+            fetchLikedJobs()
         }
     }, [user])
 
@@ -173,6 +231,54 @@ const ApplicationTemplate: React.FC = () => {
     useEffect(() => {
         scrollToBottom()
     }, [messages])
+
+    const fetchLikedJobs = async () => {
+        try {
+            const token = localStorage.getItem("token")
+            const resp = await fetch("/api/jobs/liked", {
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+            })
+            if (resp.ok) {
+                const data = await handleJsonResponse(resp)
+                setLikedJobs(data)
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
+    const toggleLikeJob = async (job: any, isLiked: boolean) => {
+        try {
+            const token = localStorage.getItem("token")
+            const method = isLiked ? "DELETE" : "POST"
+            const resp = await fetch("/api/jobs/like", {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({
+                    job_title: job.job_title,
+                    company: job.company,
+                    reason: job.reason,
+                    link: job.link
+                })
+            })
+
+            if (resp.ok) {
+                if (isLiked) {
+                    setLikedJobs(prev => prev.filter(j => !(j.job_title === job.job_title && j.company === job.company)))
+                } else {
+                    const data = await handleJsonResponse(resp)
+                    setLikedJobs(prev => [data.likedJob, ...prev])
+                }
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     const fetchResumes = async () => {
         setIsFetchingResumes(true)
@@ -207,6 +313,38 @@ const ApplicationTemplate: React.FC = () => {
             })
         } finally {
             setIsFetchingResumes(false)
+        }
+    }
+
+    const handleDragEnd = async (result: DropResult) => {
+        if (!result.destination) return
+        if (result.destination.index === result.source.index) return
+
+        const items = Array.from(resumes)
+        const [reorderedItem] = items.splice(result.source.index, 1)
+        items.splice(result.destination.index, 0, reorderedItem)
+
+        // Optimistic update
+        setResumes(items)
+
+        // Persist
+        const orderPayload = items.map((item, index) => ({
+            id: item.id,
+            orderIndex: index
+        }))
+
+        try {
+            const token = localStorage.getItem("token")
+            await fetch("/api/resumes/reorder", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ order: orderPayload })
+            })
+        } catch (e) {
+            console.error("Failed to save reorder", e)
         }
     }
 
@@ -412,7 +550,11 @@ const ApplicationTemplate: React.FC = () => {
             }
 
             const reply = await handleJsonResponse(resp)
-            setMessages((prev) => [...prev, reply])
+            setMessages((prev) => [
+                ...prev.slice(0, -1),
+                reply.userMessage,
+                reply.assistantMessage,
+            ])
         } catch (err: any) {
             toaster.create({
                 title: "채팅 오류",
@@ -475,69 +617,101 @@ const ApplicationTemplate: React.FC = () => {
                                 </Text>
                             </Flex>
                         ) : (
-                            resumes.map((resume) => {
-                                const isSelected = selectedResume?.id === resume.id
-                                return (
-                                    <HStack
-                                        key={resume.id}
-                                        p={3.5}
-                                        bg={isSelected ? "#EBF3FF" : "transparent"}
-                                        borderRadius="xl"
-                                        _hover={{ bg: isSelected ? "#EBF3FF" : "gray.50" }}
-                                        cursor="pointer"
-                                        onClick={() => {
-                                            setSelectedResume(resume)
-                                            setMessages([])
-                                        }}
-                                        justifyContent="space-between"
-                                        transition="all 0.2s"
-                                        role="group"
-                                    >
-                                        <HStack gap={3} overflow="hidden" flex={1}>
-                                            <Box color={isSelected ? "blue.600" : "gray.400"} mt="2px">
-                                                <FaFileAlt size={12} />
-                                            </Box>
-                                            <Text
-                                                fontSize="sm"
-                                                fontWeight={isSelected ? "semibold" : "medium"}
-                                                color={isSelected ? "blue.600" : "gray.600"}
-                                                truncate
-                                                w="100%"
-                                            >
-                                                {resume.title}
-                                            </Text>
-                                        </HStack>
-                                        <HStack gap={1} opacity={0} _groupHover={{ opacity: 1 }} transition="opacity 0.2s">
-                                            <Button
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setIsEditingTitle(true)
-                                                    setEditTitleText(resume.title)
-                                                }}
-                                                variant="ghost"
-                                                size="2xs"
-                                                p={1}
-                                                borderRadius="md"
-                                                color="gray.400"
-                                                _hover={{ color: "blue.600", bg: "gray.50" }}
-                                            >
-                                                <FaEdit size={10} />
-                                            </Button>
-                                            <Button
-                                                onClick={(e) => handleDeleteResume(resume.id, e)}
-                                                variant="ghost"
-                                                size="2xs"
-                                                p={1}
-                                                borderRadius="md"
-                                                color="gray.400"
-                                                _hover={{ color: "red.600", bg: "red.50" }}
-                                            >
-                                                <FaTrash size={10} />
-                                            </Button>
-                                        </HStack>
-                                    </HStack>
-                                )
-                            })
+                            <DragDropContext onDragEnd={handleDragEnd}>
+                                <Droppable droppableId="resumes-list">
+                                    {(provided) => (
+                                        <Box
+                                            display="flex"
+                                            flexDirection="column"
+                                            gap={1.5}
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                        >
+                                            {resumes.map((resume, index) => {
+                                                const isSelected = selectedResume?.id === resume.id
+                                                return (
+                                                    <Draggable key={resume.id.toString()} draggableId={resume.id.toString()} index={index}>
+                                                        {(provided, snapshot) => (
+                                                            <HStack
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                p={3.5}
+                                                                bg={isSelected ? "#EBF3FF" : (snapshot.isDragging ? "gray.50" : "transparent")}
+                                                                borderRadius="xl"
+                                                                _hover={{ bg: isSelected ? "#EBF3FF" : "gray.50" }}
+                                                                cursor="pointer"
+                                                                onClick={() => {
+                                                                    setSelectedResume(resume)
+                                                                    setMessages([])
+                                                                }}
+                                                                justifyContent="space-between"
+                                                                transition="all 0.2s"
+                                                                data-group
+                                                            >
+                                                                <HStack gap={3} overflow="hidden" flex={1}>
+                                                                    <Box color={isSelected ? "blue.600" : "gray.400"} mt="2px">
+                                                                        <FaFileAlt size={12} />
+                                                                    </Box>
+                                                                    <Text
+                                                                        fontSize="sm"
+                                                                        fontWeight={isSelected ? "semibold" : "medium"}
+                                                                        color={isSelected ? "blue.600" : "gray.600"}
+                                                                        truncate
+                                                                        w="100%"
+                                                                    >
+                                                                        {resume.title}
+                                                                    </Text>
+                                                                </HStack>
+                                                                {isSelected && (
+                                                                    <HStack gap={1}>
+                                                                        <Menu.Root>
+                                                                            <Menu.Trigger asChild>
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="2xs"
+                                                                                    p={1}
+                                                                                    borderRadius="md"
+                                                                                    color="gray.400"
+                                                                                    _hover={{ color: "gray.600", bg: "gray.100" }}
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                >
+                                                                                    <FaEllipsisV size={10} />
+                                                                                </Button>
+                                                                            </Menu.Trigger>
+                                                                            <Menu.Positioner>
+                                                                                <Menu.Content minW="auto" py={1} px={1} borderRadius="md" shadow="sm" border="1px solid" borderColor="gray.100" bg="white" zIndex={10}>
+                                                                                    <Menu.Item
+                                                                                        value="delete"
+                                                                                        color="red.600"
+                                                                                        px={2}
+                                                                                        py={1.5}
+                                                                                        fontSize="xs"
+                                                                                        cursor="pointer"
+                                                                                        _hover={{ bg: "red.50", color: "red.700" }}
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation()
+                                                                                            handleDeleteResume(resume.id, e)
+                                                                                        }}
+                                                                                    >
+                                                                                        <FaTrash size={10} style={{ marginRight: '6px' }} />
+                                                                                        삭제
+                                                                                    </Menu.Item>
+                                                                                </Menu.Content>
+                                                                            </Menu.Positioner>
+                                                                        </Menu.Root>
+                                                                    </HStack>
+                                                                )}
+                                                            </HStack>
+                                                        )}
+                                                    </Draggable>
+                                                )
+                                            })}
+                                            {provided.placeholder}
+                                        </Box>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         )}
                     </VStack>
                 </Box>
@@ -560,7 +734,6 @@ const ApplicationTemplate: React.FC = () => {
                             {/* Document Title Header */}
                             <Flex justify="space-between" align="start" borderBottom="1px solid" borderColor="gray.100" pb={5} mb={6}>
                                 <VStack align="start" gap={3}>
-                                    <SpaceInvaderIcon />
                                     <Box>
                                         {isEditingTitle ? (
                                             <HStack maxW="400px">
@@ -604,9 +777,19 @@ const ApplicationTemplate: React.FC = () => {
                                                 {selectedResume.title}
                                             </Heading>
                                         )}
-                                        <Text fontSize="xs" color="gray.400" mt={1}>
-                                            {formatDate(selectedResume.updated_at)}
-                                        </Text>
+                                        <HStack gap={2} mt={1.5} wrap="wrap" alignItems="center">
+                                            <Text fontSize="xs" color="gray.400">
+                                                {formatDate(selectedResume.updated_at)}
+                                            </Text>
+                                            {selectedResume.pdf_name && (
+                                                <>
+                                                    <Text fontSize="2xs" color="gray.300">•</Text>
+                                                    <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                                                        첨부파일: {selectedResume.pdf_name}
+                                                    </Text>
+                                                </>
+                                            )}
+                                        </HStack>
                                     </Box>
                                 </VStack>
 
@@ -660,6 +843,7 @@ const ApplicationTemplate: React.FC = () => {
                                                     </Heading>
                                                     <MarkdownRenderer content={selectedResume.improvements} />
                                                 </Box>
+
                                             </VStack>
 
                                             {/* Chat Conversation Logs */}
@@ -739,9 +923,11 @@ const ApplicationTemplate: React.FC = () => {
                                                         handleSendPromptOrChat()
                                                     }
                                                 }}
-                                                placeholder="프롬프트를 입력해주세요..."
+                                                placeholder="무엇이든 질문하세요"
                                                 fontSize="sm"
-                                                variant="unstyled"
+                                                border="none"
+                                                outline="none"
+                                                _focus={{ outline: "none", boxShadow: "none" }}
                                                 pl={4}
                                                 pr={12}
                                                 disabled={isGenerating || isUploading}

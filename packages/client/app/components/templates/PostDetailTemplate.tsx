@@ -26,7 +26,8 @@ import { FaLocationDot } from "react-icons/fa6";
 
 import { useNavigate, useParams } from "react-router"
 import Header from "../organisms/Header"
-import { MOCK_POSTS, type Post } from "../../data/mockPosts"
+import { type Post } from "../../data/mockPosts"
+import { useEffect } from "react"
 
 // ────────────────────────────────────────────────
 // Info Badge Row
@@ -179,7 +180,113 @@ const PostDetailTemplate: React.FC = () => {
 
     const [bookmarked, setBookmarked] = useState(false)
 
-    const post = MOCK_POSTS.find((p) => p.id === Number(id))
+    const [post, setPost] = useState<Post | null>(null)
+    const [relatedPosts, setRelatedPosts] = useState<Post[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchPost = async () => {
+            setLoading(true)
+            try {
+                const token = localStorage.getItem("token")
+                const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+                
+                const resp = await fetch(`/api/posts/${id}`, { headers })
+                if (resp.ok) {
+                    const d = await resp.json()
+                    const formattedPost = {
+                        id: d.id,
+                        companyName: d.company_name,
+                        companyLogo: d.company_logo,
+                        title: d.title,
+                        location: d.location,
+                        district: d.district,
+                        jobCategory: d.job_category,
+                        techStack: d.tech_stack,
+                        deadline: d.deadline,
+                        experience: d.experience,
+                        employmentType: d.employment_type,
+                        salary: d.salary,
+                        description: d.description,
+                        responsibilities: d.responsibilities,
+                        requirements: d.requirements,
+                        preferredRequirements: d.preferred_requirements,
+                        benefits: d.benefits,
+                        bookmarked: d.bookmarked
+                    }
+                    setPost(formattedPost)
+                    setBookmarked(formattedPost.bookmarked)
+
+                    const allResp = await fetch("/api/posts", { headers })
+                    if (allResp.ok) {
+                        const allData = await allResp.json()
+                        const formattedAll = allData.map((d: any) => ({
+                            id: d.id,
+                            companyName: d.company_name,
+                            companyLogo: d.company_logo,
+                            title: d.title,
+                            location: d.location,
+                            district: d.district,
+                            jobCategory: d.job_category,
+                            techStack: d.tech_stack,
+                            deadline: d.deadline,
+                            experience: d.experience,
+                            employmentType: d.employment_type,
+                            salary: d.salary,
+                            description: d.description,
+                            responsibilities: d.responsibilities,
+                            requirements: d.requirements,
+                            preferredRequirements: d.preferred_requirements,
+                            benefits: d.benefits,
+                            bookmarked: d.bookmarked
+                        }))
+                        setRelatedPosts(formattedAll.filter(
+                            (p: any) => p.id !== formattedPost.id && (p.jobCategory === formattedPost.jobCategory || p.location === formattedPost.location)
+                        ).slice(0, 3))
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch post:", err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        if (id) {
+            fetchPost()
+        }
+    }, [id])
+
+    const handleToggleBookmark = async () => {
+        if (!post) return
+        try {
+            const token = localStorage.getItem("token")
+            const resp = await fetch(`/api/posts/${post.id}/bookmark`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ isBookmarked: !bookmarked })
+            })
+
+            if (resp.ok) {
+                setBookmarked(!bookmarked)
+            }
+        } catch (err) {
+            console.error("Failed to toggle bookmark:", err)
+        }
+    }
+
+    if (loading) {
+        return (
+            <>
+                <Header />
+                <Flex pt="72px" minH="100vh" align="center" justify="center">
+                    <Text>로딩 중...</Text>
+                </Flex>
+            </>
+        )
+    }
 
     if (!post) {
         return (
@@ -195,10 +302,6 @@ const PostDetailTemplate: React.FC = () => {
             </>
         )
     }
-
-    const relatedPosts = MOCK_POSTS.filter(
-        (p) => p.id !== post.id && (p.jobCategory === post.jobCategory || p.location === post.location)
-    ).slice(0, 3)
 
     const isExpired = post.deadline === "채용 완료 시"
 
@@ -266,21 +369,16 @@ const PostDetailTemplate: React.FC = () => {
 
                                     {/* Bookmark + Apply */}
                                     <VStack gap={2}>
-                                        <Box
-                                            as="button"
-                                            p={3}
+                                        <Button
+                                            variant="outline"
+                                            colorPalette="red"
                                             borderRadius="full"
-                                            border="2px solid"
-                                            borderColor={bookmarked ? "red.300" : "gray.200"}
-                                            bg={bookmarked ? "red.50" : "white"}
-                                            color={bookmarked ? "red.400" : "gray.400"}
-                                            cursor="pointer"
-                                            onClick={() => setBookmarked((v) => !v)}
-                                            _hover={{ borderColor: "red.300", color: "red.400" }}
-                                            transition="all 0.15s"
+                                            px={6}
+                                            onClick={handleToggleBookmark}
                                         >
-                                            {bookmarked ? <FaHeart size={18} /> : <FaRegHeart size={18} />}
-                                        </Box>
+                                            {bookmarked ? <FaHeart color="var(--chakra-colors-red-500)" /> : <FaRegHeart />}
+                                            <Text ml={2}>{bookmarked ? "스크랩 됨" : "스크랩"}</Text>
+                                        </Button>
                                     </VStack>
                                 </Flex>
                             </Box>

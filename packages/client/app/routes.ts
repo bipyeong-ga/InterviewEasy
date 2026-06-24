@@ -9,5 +9,6 @@ export default [
     route("analyze-application", "routes/analyze-application.tsx"),
 
     route("post", "routes/post.tsx"),
-    route("post/:id", "routes/post-detail.tsx")
+    route("post/:id", "routes/post-detail.tsx"),
+    route("profile", "routes/profile.tsx")
 ] satisfies RouteConfig

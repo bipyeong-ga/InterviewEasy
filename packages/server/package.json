@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "tsx watch src/index.ts",
+        "dev": "tsx watch --exclude \"uploads/**\" src/index.ts",
         "start:dev": "tsx src/index.ts",
         "build": "tsc"
     },

@@ -15,7 +15,7 @@ router.get("/", async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id
         const result = await pool.query(
-            "SELECT id, title, content, created_at, updated_at FROM resumes WHERE user_id = $1 ORDER BY id ASC",
+            "SELECT id, title, content, raw_text, summary, improvements, recommended_jobs, pdf_name, created_at, updated_at FROM resumes WHERE user_id = $1 ORDER BY order_index ASC, id ASC",
             [userId]
         )
         res.json(result.rows)
@@ -47,7 +47,41 @@ router.get("/:id", async (req: Request, res: Response) => {
     }
 })
 
-// 3. Create a new resume (limit to 10 max)
+// 3. Reorder resumes
+router.put("/reorder", async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id
+        const { order } = req.body as { order: { id: number; orderIndex: number }[] }
+
+        if (!Array.isArray(order)) {
+            return res.status(400).json({ error: "Invalid order payload" })
+        }
+
+        // We can do this safely in a transaction
+        const client = await pool.connect()
+        try {
+            await client.query("BEGIN")
+            for (const item of order) {
+                await client.query(
+                    "UPDATE resumes SET order_index = $1 WHERE id = $2 AND user_id = $3",
+                    [item.orderIndex, item.id, userId]
+                )
+            }
+            await client.query("COMMIT")
+            res.status(200).json({ success: true })
+        } catch (e) {
+            await client.query("ROLLBACK")
+            throw e
+        } finally {
+            client.release()
+        }
+    } catch (error) {
+        console.error("Failed to reorder resumes:", error)
+        res.status(500).json({ error: "Internal server error" })
+    }
+})
+
+// 4. Create a new resume (limit to 10 max)
 router.post("/", async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id
@@ -364,42 +398,54 @@ router.post("/:id/upload", upload.single("file"), async (req: Request, res: Resp
             return res.status(400).json({ error: "PDF 파일에서 텍스트를 추출하지 못했습니다. 파일에 텍스트가 포함되어 있는지 확인하세요." })
         }
 
+        const apiKey = process.env.OPENAI_API_KEY
+        if (!apiKey || apiKey.trim() === "") {
+            return res.status(400).json({
+                error: "OPENAI_API_KEY가 설정되지 않았습니다. packages/server/.env 파일에 OpenAI API 키를 입력하고 서버를 재시작해 주세요."
+            })
+        }
+
         let summary = ""
         let improvements = ""
+        let recommendedJobs = "[]"
 
-        const apiKey = process.env.OPENAI_API_KEY
-        if (apiKey) {
-            try {
-                const systemPrompt = `
+        try {
+            const postsResult = await pool.query("SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100")
+            const postsList = postsResult.rows.map(p => `- [${p.company}] ${p.job_title} (기술스택: ${p.tech_stack.join(", ")})`).join("\n")
+
+            const systemPrompt = `
 너는 대한민국 최고의 개발자 채용 및 커리어 컨설턴트 AI이다.
-제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 두 가지를 제공해라.
+제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 세 가지를 제공해라.
 1. 이력서 요약(summary): 인재의 핵심 강점, 주요 스택, 프로젝트 요약을 전문성 있게 작성.
 2. 개선할 점(improvements): 면접에서 아쉬울 수 있는 부분이나 보강이 필요한 내용(수치화, 근거 부족 등)을 지적하고 구체적 개선 조언 제공.
+3. 추천 공고(recommended_jobs): 반드시 아래의 [실제 채용 공고 목록] 안에서만 이 이력서를 가진 지원자에게 가장 적합한 공고를 3~5개 골라 추천해라. (반드시 목록에 있는 job_title과 company를 그대로 써야 하며, 목록에 없는 회사는 절대 지어내지 마라. 추천 이유도 함께 포함.)
+
+[실제 채용 공고 목록]
+${postsList}
 
 [규칙]
 - 반드시 한국어로 대답해라.
-- 응답은 반드시 마크다운 글머리 기호(각 줄이 "-"로 시작) 목록 형태로 작성해라.
+- summary, improvements 응답은 반드시 마크다운 글머리 기호(각 줄이 "-"로 시작) 목록 형태로 작성해라.
 - 반드시 다음 구조의 JSON 형태로만 응답해라. 다른 서론/설명은 절대 포함하지 마라.
 JSON 구조:
 {
   "summary": "- **핵심 스택:** ...\\n- **경험 요약:** ...\\n- **인재 강점:** ...",
-  "improvements": "- **수치 보강:** ...\\n- **트러블슈팅 세분화:** ...\\n- **성과 연결:** ..."
+  "improvements": "- **수치 보강:** ...\\n- **트러블슈팅 세분화:** ...\\n- **성과 연결:** ...",
+  "recommended_jobs": [
+    { "job_title": "프론트엔드 개발자 (React)", "company": "네이버웹툰", "reason": "React 및 성능 최적화 경험이 돋보임" }
+  ]
 }
 `
-                const responseText = await callOpenAI(systemPrompt, extractedText, true)
-                const parsedResponse = JSON.parse(responseText)
-                summary = parsedResponse.summary || ""
-                improvements = parsedResponse.improvements || ""
-            } catch (openaiErr) {
-                console.error("OpenAI analysis failed:", openaiErr)
-                const mock = generateMockPDFAnalysis(extractedText)
-                summary = mock.summary
-                improvements = mock.improvements
-            }
-        } else {
-            const mock = generateMockPDFAnalysis(extractedText)
-            summary = mock.summary
-            improvements = mock.improvements
+            const responseText = await callOpenAI(systemPrompt, extractedText, true)
+            const parsedResponse = JSON.parse(responseText)
+            summary = parsedResponse.summary || ""
+            improvements = parsedResponse.improvements || ""
+            recommendedJobs = JSON.stringify(parsedResponse.recommended_jobs || [])
+        } catch (openaiErr: any) {
+            console.error("OpenAI analysis failed:", openaiErr)
+            return res.status(500).json({
+                error: `OpenAI 분석에 실패했습니다: ${openaiErr.message || openaiErr}`
+            })
         }
 
         // Update database and clear previous chat history
@@ -408,9 +454,10 @@ JSON 구조:
             [resumeId]
         )
 
+        const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8')
         const updateResult = await pool.query(
-            "UPDATE resumes SET raw_text = $1, summary = $2, improvements = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4 RETURNING *",
-            [extractedText, summary, improvements, resumeId]
+            "UPDATE resumes SET raw_text = $1, summary = $2, improvements = $3, recommended_jobs = $4, pdf_file = $5, pdf_name = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING *",
+            [extractedText, summary, improvements, recommendedJobs, req.file.buffer, originalName, resumeId]
         )
 
         res.json(updateResult.rows[0])
@@ -481,12 +528,16 @@ router.post("/:id/messages", async (req: Request, res: Response) => {
             [resumeId, message]
         )
 
-        let aiResponseText = ""
         const apiKey = process.env.OPENAI_API_KEY
+        if (!apiKey || apiKey.trim() === "") {
+            return res.status(400).json({
+                error: "OPENAI_API_KEY가 설정되지 않았습니다. packages/server/.env 파일에 OpenAI API 키를 입력하고 서버를 재시작해 주세요."
+            })
+        }
 
-        if (apiKey) {
-            try {
-                const systemPrompt = `
+        let aiResponseText = ""
+        try {
+            const systemPrompt = `
 너는 사용자의 이력서/자기소개서 기반 질의응답을 성심성의껏 도와주는 전문 취업 코칭 AI 어시스턴트이다.
 아래에 제공된 사용자의 이력서 텍스트 내용을 완벽히 파악하고, 이 내용에 기반하여 친절하고 구체적으로 사용자의 질문에 한국어로 대답해라.
 질문자가 면접 준비, 강점 질문, 프로젝트 질문, 기술 스택 연관성 등을 물어보면 적극적으로 조언해라.
@@ -494,14 +545,12 @@ router.post("/:id/messages", async (req: Request, res: Response) => {
 [이력서 본문]
 ${rawText}
 `
-                aiResponseText = await callOpenAI(systemPrompt, message, false, history)
-            } catch (openaiErr) {
-                console.error("OpenAI Q&A failed:", openaiErr)
-                aiResponseText = `OpenAI API 호출 중 오류가 발생했습니다. 임시 답변: 이력서의 내용을 바탕으로 판단했을 때, 입력해주신 내용 "${message}"에 대한 보강 및 면접 질문은 다음과 같이 추천합니다.\n1. 프로젝트 핵심 아키텍처에 대한 추가 기술\n2. 트러블슈팅 수치적 증빙 추가`
-            }
-        } else {
-            // Mock response if no API key
-            aiResponseText = generateMockQA(message, rawText)
+            aiResponseText = await callOpenAI(systemPrompt, message, false, history)
+        } catch (openaiErr: any) {
+            console.error("OpenAI Q&A failed:", openaiErr)
+            return res.status(500).json({
+                error: `OpenAI 응답 생성에 실패했습니다: ${openaiErr.message || openaiErr}`
+            })
         }
 
         // Save Assistant Message
