@@ -1511,7 +1511,22 @@ const MockInterviewTemplate: React.FC = () => {
                                         _hover={{ borderColor: "#2563EB", bg: "blue.50", transform: "translateY(-2px)", shadow: "md" }}
                                         onClick={() => {
                                             setIsModeModalOpen(false);
-                                            alert("EASY 모드로 면접을 시작합니다!");
+                                            
+                                            // Get the full resume text if one was selected
+                                            const selectedResumeData = resumes.find(r => r.id.toString() === selectedResume);
+                                            const resumeContent = selectedResumeData ? (selectedResumeData.raw_text || selectedResumeData.content) : "";
+
+                                            const state = {
+                                                selectedJobs,
+                                                customJob,
+                                                selectedResume,
+                                                resumeContent,
+                                                interviewType,
+                                                targetCompany,
+                                                questionCount
+                                            };
+
+                                            navigate("/interview?mode=EASY", { state });
                                         }}
                                         transition="all 0.2s"
                                     >
@@ -1528,7 +1543,22 @@ const MockInterviewTemplate: React.FC = () => {
                                         _hover={{ borderColor: "red.500", bg: "red.50", transform: "translateY(-2px)", shadow: "md" }}
                                         onClick={() => {
                                             setIsModeModalOpen(false);
-                                            alert("HARD 모드로 면접을 시작합니다!");
+                                            
+                                            // Get the full resume text if one was selected
+                                            const selectedResumeData = resumes.find(r => r.id.toString() === selectedResume);
+                                            const resumeContent = selectedResumeData ? (selectedResumeData.raw_text || selectedResumeData.content) : "";
+
+                                            const state = {
+                                                selectedJobs,
+                                                customJob,
+                                                selectedResume,
+                                                resumeContent,
+                                                interviewType,
+                                                targetCompany,
+                                                questionCount
+                                            };
+
+                                            navigate("/interview?mode=HARD", { state });
                                         }}
                                         transition="all 0.2s"
                                     >
