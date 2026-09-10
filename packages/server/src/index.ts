@@ -82,8 +82,8 @@ apiRouter.use("/users", usersRouter) // 사용자 프로필 관리 라우트
 
 import interviewRouter from "./routes/interviewRoutes"
 apiRouter.use("/interview", interviewRouter) // OpenAI 연동 라우트
+apiRouter.use("/ai", interviewRouter) // 통합 AI 라우트 (Node.js AI 엔진)
 
-// apiRouter.use("/ai", authRouter) // 인증 라우트 (삭제 또는 주석 유지)
 
 apiRouter.get("/health", (req, res) => {
     res.json({ status: "ok" })
