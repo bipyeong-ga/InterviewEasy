@@ -75,13 +75,13 @@ const MainTemplate: React.FC = () => {
                             fontSize={{ base: "3xl", md: "6xl" }}
                             fontWeight="bold"
                         >
-                            <Text color="#2563EB">쉽게</Text>
+                            <Text color="blue.600">쉽게</Text>
                             <Text>준비하세요</Text>
                         </HStack>
                         <Button
                             size="xl"
-                            bg={"#2563EB"}
-                            _hover={{ bg: "#1D4ED8" }}
+                            bg={"blue.600"}
+                            _hover={{ bg: "blue.700" }}
                             px="2rem"
                             borderRadius="xl"
                             mt={10}
@@ -150,7 +150,7 @@ const MainTemplate: React.FC = () => {
                 px="2rem"
                 display="flex"
                 justifyContent="center"
-                bg={"#2563EB"}
+                bg={"blue.600"}
             >
                 <Box w="100%" maxW="6xl" py="5rem" px="2rem" textAlign="center">
                     <VStack gap="1.5rem">
@@ -170,11 +170,11 @@ const MainTemplate: React.FC = () => {
 
                         <Button
                             size="xl"
-                            bg={"#FFFFFF"}
-                            _hover={{ bg: "#F1F5F9" }}
+                            bg={"white"}
+                            _hover={{ bg: "gray.100" }}
                             px="2rem"
                             borderRadius="xl"
-                            color={"#2563EB"}
+                            color={"blue.600"}
                         >
                             시작하기
                         </Button>

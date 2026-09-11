@@ -21,11 +21,21 @@ export interface AnswerEvaluation {
     sampleAnswer: string
 }
 
+export interface CompetencyScores {
+    problemSolving: number
+    logicalStructure: number
+    jobExpertise: number
+    specificity: number
+    delivery: number
+    confidence: number
+}
+
 export interface InterviewReportData {
     overallScore: number
     overallFeedback: string
     strengths: string[]
     improvements: string[]
+    competencies: CompetencyScores
     questionEvaluations: {
         questionId: number
         questionText: string
@@ -34,6 +44,15 @@ export interface InterviewReportData {
         feedback?: string
         status: "SUCCESS" | "FAILED"
     }[]
+}
+
+const DEFAULT_COMPETENCIES: CompetencyScores = {
+    problemSolving: 70,
+    logicalStructure: 70,
+    jobExpertise: 70,
+    specificity: 70,
+    delivery: 70,
+    confidence: 70,
 }
 
 // 직무별 전문 실전 면접 질문 데이터베이스 (Node.js 내장 AI 폴백 엔진)
@@ -105,7 +124,7 @@ export async function generateInterviewQuestionsList(params: {
     resumeText?: string
     count?: number
 }): Promise<QuestionItem[]> {
-    const count = params.count || 5
+    const count = params.count ?? 5
 
     if (
         !process.env.OPENAI_API_KEY ||
@@ -507,6 +526,7 @@ export async function generateInterviewReport(params: {
                 "사용 기술의 대안 비교 및 선정 이유를 구체화하면 효과적",
                 "답변 구조를 STAR 기법에 맞추어 더욱 일목요연하게 정리 권장",
             ],
+            competencies: DEFAULT_COMPETENCIES,
             questionEvaluations: params.results,
         }
     }
@@ -523,12 +543,20 @@ export async function generateInterviewReport(params: {
 [질문별 평가 내역]
 ${JSON.stringify(params.results, null, 2)}
 
-반드시 다음 JSON 형식으로만 응답해주세요:
+반드시 다음 JSON 형식으로만 응답해주세요. competencies의 각 항목은 0~100 사이 정수로, 답변 내용에 근거하여 평가해주세요:
 {
     "overallScore": 85,
     "overallFeedback": "지원자는 전반적으로...",
     "strengths": ["강점1", "강점2", "강점3"],
-    "improvements": ["개선점1", "개선점2", "개선점3"]
+    "improvements": ["개선점1", "개선점2", "개선점3"],
+    "competencies": {
+        "problemSolving": 72,
+        "logicalStructure": 85,
+        "jobExpertise": 68,
+        "specificity": 90,
+        "delivery": 55,
+        "confidence": 78
+    }
 }
 `
         const response = await client.chat.completions.create({
@@ -547,6 +575,40 @@ ${JSON.stringify(params.results, null, 2)}
 
         const content = response.choices[0].message.content || "{}"
         const parsed = JSON.parse(content)
+
+        const clampScore = (v: unknown, fallback: number) =>
+            typeof v === "number" && Number.isFinite(v)
+                ? Math.max(0, Math.min(100, Math.round(v)))
+                : fallback
+
+        const rawCompetencies = parsed.competencies || {}
+        const competencies: CompetencyScores = {
+            problemSolving: clampScore(
+                rawCompetencies.problemSolving,
+                DEFAULT_COMPETENCIES.problemSolving,
+            ),
+            logicalStructure: clampScore(
+                rawCompetencies.logicalStructure,
+                DEFAULT_COMPETENCIES.logicalStructure,
+            ),
+            jobExpertise: clampScore(
+                rawCompetencies.jobExpertise,
+                DEFAULT_COMPETENCIES.jobExpertise,
+            ),
+            specificity: clampScore(
+                rawCompetencies.specificity,
+                DEFAULT_COMPETENCIES.specificity,
+            ),
+            delivery: clampScore(
+                rawCompetencies.delivery,
+                DEFAULT_COMPETENCIES.delivery,
+            ),
+            confidence: clampScore(
+                rawCompetencies.confidence,
+                DEFAULT_COMPETENCIES.confidence,
+            ),
+        }
+
         return {
             overallScore:
                 typeof parsed.overallScore === "number"
@@ -561,6 +623,7 @@ ${JSON.stringify(params.results, null, 2)}
             improvements: Array.isArray(parsed.improvements)
                 ? parsed.improvements
                 : ["상황별 구체적 수치 제시 필요", "근거 보강"],
+            competencies,
             questionEvaluations: params.results,
         }
     } catch (error) {
@@ -578,6 +641,7 @@ ${JSON.stringify(params.results, null, 2)}
                 "의사소통 능력 우수",
             ],
             improvements: ["구체적 수치 제시", "기술적 근거 보강"],
+            competencies: DEFAULT_COMPETENCIES,
             questionEvaluations: params.results,
         }
     }
@@ -622,7 +686,7 @@ export async function analyzeCoverLetter(coverLetter: string): Promise<string> {
         return response.choices[0].message.content || ""
     } catch (error) {
         console.error("Cover Letter Analysis Error:", error)
-        return "자기소개서의 경험과 포부가 잘 드러나 있습니다. 구체적인 성과 지표를 추가하시면 더욱 좋습니다."
+        throw error
     }
 }
 
@@ -643,6 +707,6 @@ export async function analyzeResume(resumeText: string): Promise<string> {
         return response.choices[0].message.content || ""
     } catch (error) {
         console.error("Resume Analysis Error:", error)
-        return "경력 사항과 기술 스택이 잘 정돈되어 있습니다. 프로젝트별 본인의 기여도를 명시하면 더 효과적입니다."
+        throw error
     }
 }

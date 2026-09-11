@@ -18,8 +18,8 @@ export default function AuthButton() {
             <HStack gap={3}>
                 <BlockLink to="/register">
                     <Button
-                        bg="#2563EB"
-                        _hover={{ bg: "#1D4ED8" }}
+                        bg="blue.600"
+                        _hover={{ bg: "blue.700" }}
                         size="xs"
                         borderRadius="md"
                     >

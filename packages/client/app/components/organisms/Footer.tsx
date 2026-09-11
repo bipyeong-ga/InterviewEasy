@@ -35,7 +35,7 @@ export function Footer() {
     ]
 
     return (
-        <Box as="footer" py={12} bg={"#1E293B"}>
+        <Box as="footer" py={12} bg={"gray.800"}>
             <Container
                 maxW={{
                     base: "container.xl",
@@ -69,7 +69,7 @@ export function Footer() {
                             align="start"
                             gap={1}
                             fontSize="sm"
-                            color="#94A3B8"
+                            color="gray.400"
                         >
                             <Text>AI 기반 통합 취업 준비 플랫폼.</Text>
 
@@ -101,7 +101,7 @@ export function Footer() {
                                             to={path}
                                             style={{
                                                 fontSize: "0.875rem",
-                                                color: "#94A3B8",
+                                                color: "gray.400",
                                             }}
                                             onMouseEnter={(e) =>
                                             (e.currentTarget.style.textDecoration =
@@ -134,7 +134,7 @@ export function Footer() {
                                             to={path}
                                             style={{
                                                 fontSize: "0.875rem",
-                                                color: "#94A3B8",
+                                                color: "gray.400",
                                             }}
                                             onMouseEnter={(e) =>
                                             (e.currentTarget.style.textDecoration =
@@ -166,7 +166,7 @@ export function Footer() {
                                             to={path}
                                             style={{
                                                 fontSize: "0.875rem",
-                                                color: "#94A3B8",
+                                                color: "gray.400",
                                             }}
                                             onMouseEnter={(e) =>
                                             (e.currentTarget.style.textDecoration =
@@ -188,7 +188,7 @@ export function Footer() {
 
                 <Box
                     borderTopWidth="0.6px"
-                    borderColor="#475569"
+                    borderColor="gray.600"
                     w="full"
                     mb={6}
                 />
@@ -201,7 +201,7 @@ export function Footer() {
                 >
                     <Text
                         fontSize="sm"
-                        color="#475569"
+                        color="gray.600"
                         textAlign={{ base: "center", md: "left" }}
                         w={{ base: "full", md: "auto" }}
                     >
@@ -217,7 +217,7 @@ export function Footer() {
                                 href={path}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                color="#475569"
+                                color="gray.600"
                                 _hover={{ color: "#667eea" }}
                                 transition="color 0.2s"
                                 title={label}
@@ -242,7 +242,7 @@ export function Footer() {
                                 href={path}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                color="#475569"
+                                color="gray.600"
                                 _hover={{ color: "#667eea" }}
                                 transition="color 0.2s"
                                 title={label}

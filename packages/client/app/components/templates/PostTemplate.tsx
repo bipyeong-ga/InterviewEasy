@@ -51,7 +51,7 @@ function JobCard({
 
     return (
         <Box
-            bg="white"
+            bg="bg.panel"
             border="1px solid"
             borderColor="gray.200"
             borderRadius="xl"
@@ -138,7 +138,7 @@ function JobCard({
 
             {/* Location */}
             <HStack mb={3}>
-                <FaLocationDot color="#9CA3AF" size={12} />
+                <FaLocationDot color="gray.400" size={12} />
                 <Text fontSize="xs" color="gray.400">
                     {post.location} · {post.district} · {post.experience}
                 </Text>
@@ -207,10 +207,10 @@ function RegionFilterPanel({
     const formatCount = (n: number) => n.toLocaleString()
 
     return (
-        <Box borderTop="1px solid" borderColor="gray.100" bg="white">
+        <Box borderTop="1px solid" borderColor="border.muted" bg="bg.panel">
             {/* Region search */}
             <Box px={4} pt={3} pb={2}>
-                <InputGroup startElement={<FaSearch color="#9CA3AF" size={12} />} maxW="220px">
+                <InputGroup startElement={<FaSearch color="gray.400" size={12} />} maxW="220px">
                     <Input
                         placeholder="지역명 입력"
                         size="sm"
@@ -228,7 +228,7 @@ function RegionFilterPanel({
                 {/* Left: 2-column region list */}
                 <Box
                     borderRight="1px solid"
-                    borderColor="gray.100"
+                    borderColor="border.muted"
                     minW="230px"
                     flexShrink={0}
                     maxH="280px"
@@ -251,7 +251,7 @@ function RegionFilterPanel({
                         </VStack>
 
                         {/* Column 2 */}
-                        <VStack align="stretch" gap={0} flex={1} borderLeft="1px solid" borderColor="gray.100">
+                        <VStack align="stretch" gap={0} flex={1} borderLeft="1px solid" borderColor="border.muted">
                             {col2
                                 .filter((r) => r.name.includes(regionSearch))
                                 .map((r) => (
@@ -291,8 +291,8 @@ function RegionFilterPanel({
                                     <Checkbox.HiddenInput />
                                     <Checkbox.Control
                                         _checked={{
-                                            bg: "#2563EB",
-                                            borderColor: "#2563EB",
+                                            bg: "blue.600",
+                                            borderColor: "blue.600",
                                             color: "white",
                                         }}
                                         borderRadius="sm"
@@ -483,7 +483,7 @@ function PopupFrame({
             left={0}
             zIndex={20}
             w={width}
-            bg="white"
+            bg="bg.panel"
             border="1px solid"
             borderColor="gray.200"
             boxShadow="0 8px 22px rgba(0, 0, 0, 0.10)"
@@ -527,7 +527,7 @@ function CareerFilterPanel({
                             <Checkbox.Control
                                 borderRadius="sm"
                                 borderColor="gray.300"
-                                bg="white"
+                                bg="bg.panel"
                                 _checked={{
                                     bg: "blue.500",
                                     borderColor: "blue.500",
@@ -536,7 +536,7 @@ function CareerFilterPanel({
                             >
                                 <Checkbox.Indicator />
                             </Checkbox.Control>
-                            <Checkbox.Label color="gray.600" fontSize="xs">
+                            <Checkbox.Label color="fg.muted" fontSize="xs">
                                 {item}
                             </Checkbox.Label>
                         </Checkbox.Root>
@@ -552,7 +552,7 @@ function CareerFilterPanel({
                     <Checkbox.Control
                         borderRadius="sm"
                         borderColor="gray.300"
-                        bg="white"
+                        bg="bg.panel"
                         _checked={{
                             bg: "blue.500",
                             borderColor: "blue.500",
@@ -561,7 +561,7 @@ function CareerFilterPanel({
                     >
                         <Checkbox.Indicator />
                     </Checkbox.Control>
-                    <Checkbox.Label color="gray.600" fontSize="xs">
+                    <Checkbox.Label color="fg.muted" fontSize="xs">
                         경력무관
                     </Checkbox.Label>
                 </Checkbox.Root>
@@ -596,9 +596,9 @@ function CareerFilterPanel({
                 <Button
                     size="sm"
                     variant="outline"
-                    color="gray.600"
+                    color="fg.muted"
                     borderColor="gray.300"
-                    bg="white"
+                    bg="bg.panel"
                     _hover={{ bg: "gray.50" }}
                     borderRadius="md"
                     px={3}
@@ -613,9 +613,9 @@ function CareerFilterPanel({
                 <Button
                     size="sm"
                     variant="outline"
-                    color="gray.600"
+                    color="fg.muted"
                     borderColor="gray.300"
-                    bg="white"
+                    bg="bg.panel"
                     _hover={{ bg: "gray.50" }}
                     borderRadius="md"
                     px={3}
@@ -655,7 +655,7 @@ function EducationFilterPanel({
                     <Checkbox.Control
                         borderRadius="sm"
                         borderColor="gray.300"
-                        bg="white"
+                        bg="bg.panel"
                         _checked={{
                             bg: "blue.500",
                             borderColor: "blue.500",
@@ -664,7 +664,7 @@ function EducationFilterPanel({
                     >
                         <Checkbox.Indicator />
                     </Checkbox.Control>
-                    <Checkbox.Label color="gray.600" fontSize="xs">
+                    <Checkbox.Label color="fg.muted" fontSize="xs">
                         학력무관
                     </Checkbox.Label>
                 </Checkbox.Root>
@@ -700,9 +700,9 @@ function EducationFilterPanel({
                 <Button
                     size="sm"
                     variant="outline"
-                    color="gray.600"
+                    color="fg.muted"
                     borderColor="gray.300"
-                    bg="white"
+                    bg="bg.panel"
                     _hover={{ bg: "gray.50" }}
                     borderRadius="md"
                     px={3}
@@ -717,9 +717,9 @@ function EducationFilterPanel({
                 <Button
                     size="sm"
                     variant="outline"
-                    color="gray.600"
+                    color="fg.muted"
                     borderColor="gray.300"
-                    bg="white"
+                    bg="bg.panel"
                     _hover={{ bg: "gray.50" }}
                     borderRadius="md"
                     px={3}
@@ -741,7 +741,7 @@ function JobFilterPanel({
     onToggleJob: (j: string) => void
 }) {
     return (
-        <Box borderTop="1px solid" borderColor="gray.100" bg="white" px={4} py={4}>
+        <Box borderTop="1px solid" borderColor="border.muted" bg="bg.panel" px={4} py={4}>
             <SimpleGrid columns={{ base: 3, md: 6 }} gap={2}>
                 {FLAT_JOB_CATEGORIES.map((cat) => {
                     const active = selectedJobs.includes(cat)
@@ -945,7 +945,7 @@ const PostTemplate: React.FC = () => {
     return (
         <>
             <Header />
-            <Box pt="72px" minH="100vh" bg="gray.50">
+            <Box pt="72px" minH="100vh" bg="bg.subtle">
                 <Box maxW="1200px" mx="auto" px={6} py={6}>
 
                     <Box position="relative" mb={3}>
@@ -995,7 +995,7 @@ const PostTemplate: React.FC = () => {
 
                     {/* ── Filter Bar ── */}
                     <Box
-                        bg="white"
+                        bg="bg.panel"
                         border="1px solid"
                         borderColor="gray.200"
                         borderRadius="xl"
@@ -1014,7 +1014,7 @@ const PostTemplate: React.FC = () => {
                                 py={0}
                                 cursor="pointer"
                                 borderRight="1px solid"
-                                borderColor="gray.100"
+                                borderColor="border.muted"
                                 onClick={() => togglePanel("region")}
                                 bg={openPanel === "region" ? "blue.50" : "white"}
                                 _hover={{ bg: "blue.50" }}
@@ -1058,7 +1058,7 @@ const PostTemplate: React.FC = () => {
                                 py={0}
                                 cursor="pointer"
                                 borderRight="1px solid"
-                                borderColor="gray.100"
+                                borderColor="border.muted"
                                 onClick={() => togglePanel("job")}
                                 bg={openPanel === "job" ? "blue.50" : "white"}
                                 _hover={{ bg: "blue.50" }}
@@ -1096,7 +1096,7 @@ const PostTemplate: React.FC = () => {
                             {/* 검색 */}
                             <Flex flex={2} align="center" px={4}>
                                 <InputGroup
-                                    startElement={<FaSearch color="#9CA3AF" size={13} />}
+                                    startElement={<FaSearch color="gray.400" size={13} />}
                                     flex={1}
                                 >
                                     <Input
@@ -1305,7 +1305,7 @@ const PostTemplate: React.FC = () => {
                             gap={3}
                         >
                             <Text fontSize="4xl">🔍</Text>
-                            <Text fontSize="lg" fontWeight="bold" color="gray.600">
+                            <Text fontSize="lg" fontWeight="bold" color="fg.muted">
                                 검색 결과가 없습니다
                             </Text>
                             <Text fontSize="sm" color="gray.400">

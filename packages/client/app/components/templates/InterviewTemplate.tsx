@@ -11,11 +11,10 @@ import {
     Spinner,
     Progress,
     Card,
-    Accordion,
-    Separator,
     Center,
+    IconButton,
 } from "@chakra-ui/react"
-import { motion, AnimatePresence } from "motion/react"
+import { motion } from "motion/react"
 import {
     Camera,
     Mic,
@@ -31,6 +30,9 @@ import {
     Sparkles,
     Volume2,
     Clock,
+    X,
+    Circle,
+    ChevronDown,
 } from "lucide-react"
 import { toaster } from "../ui/toaster"
 
@@ -53,12 +55,40 @@ interface EvaluationResult {
     status: "SUCCESS" | "FAILED"
 }
 
+interface CompetencyScores {
+    problemSolving: number
+    logicalStructure: number
+    jobExpertise: number
+    specificity: number
+    delivery: number
+    confidence: number
+}
+
 interface ReportData {
     overallScore: number
     overallFeedback: string
     strengths: string[]
     improvements: string[]
+    competencies?: CompetencyScores
     questionEvaluations: EvaluationResult[]
+}
+
+interface DeliveryMetrics {
+    wpm: number
+    fillerPerMinute: number
+    avgAnswerSec: number
+    silenceRatio: number
+}
+
+const FILLER_WORDS = ["음", "어", "그러니까", "저기", "약간", "뭐랄까", "그", "이제"]
+
+function countFillerWords(text: string): number {
+    let count = 0
+    for (const filler of FILLER_WORDS) {
+        const matches = text.match(new RegExp(filler, "g"))
+        if (matches) count += matches.length
+    }
+    return count
 }
 
 interface InterviewTemplateProps {
@@ -90,6 +120,39 @@ type ActiveSubStage = "THINKING" | "ANSWERING"
 const THINKING_TIME_LIMIT = 5
 const ANSWER_TIME_LIMIT = 60
 
+const DEFAULT_COMPETENCIES: CompetencyScores = {
+    problemSolving: 70,
+    logicalStructure: 70,
+    jobExpertise: 70,
+    specificity: 70,
+    delivery: 70,
+    confidence: 70,
+}
+
+const RADAR_AXES: { key: keyof CompetencyScores; label: string }[] = [
+    { key: "problemSolving", label: "문제 해결력" },
+    { key: "logicalStructure", label: "논리적 구조" },
+    { key: "jobExpertise", label: "직무 전문성" },
+    { key: "specificity", label: "답변 구체성" },
+    { key: "delivery", label: "전달력" },
+    { key: "confidence", label: "자신감" },
+]
+
+function radarPoint(index: number, value: number, cx = 200, cy = 200, maxR = 160) {
+    const angleDeg = -90 + index * 60
+    const angleRad = (angleDeg * Math.PI) / 180
+    const r = (Math.max(0, Math.min(100, value)) / 100) * maxR
+    return { x: cx + r * Math.cos(angleRad), y: cy + r * Math.sin(angleRad) }
+}
+
+function scoreLabel(score: number): string {
+    if (score >= 90) return "매우 우수"
+    if (score >= 80) return "우수"
+    if (score >= 70) return "양호"
+    if (score >= 60) return "보통"
+    return "노력 필요"
+}
+
 const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
     mode,
     config,
@@ -99,6 +162,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
     // 메인 상태 머신
     const [stage, setStage] = useState<InterviewStage>("ONBOARDING")
     const [subStage, setSubStage] = useState<ActiveSubStage>("THINKING")
+    const [isFinishingAnswer, setIsFinishingAnswer] = useState(false)
 
     // 질문 및 진행 상태
     const [questions, setQuestions] = useState<Question[]>([])
@@ -113,6 +177,11 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
     const [activeBackgroundTasks, setActiveBackgroundTasks] =
         useState<number>(0)
     const [reportData, setReportData] = useState<ReportData | null>(null)
+    const [deliveryMetrics, setDeliveryMetrics] =
+        useState<DeliveryMetrics | null>(null)
+    const [expandedQuestionIndex, setExpandedQuestionIndex] = useState<
+        number | null
+    >(0)
     const [reportErrorMessage, setReportErrorMessage] = useState<string>("")
     const [onboardingErrorMessage, setOnboardingErrorMessage] =
         useState<string>("")
@@ -128,15 +197,40 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
     const speechDetectedRef = useRef<boolean>(false)
     const vadAnimationRef = useRef<number | null>(null)
 
+    // 딜리버리 지표(WPM/침묵 비율) 계산을 위한 답변 구간 측정
+    const recordingStartRef = useRef<number>(0)
+    const speechFrameCountRef = useRef<number>(0)
+    const totalFrameCountRef = useRef<number>(0)
+
     // 마지막 일괄 Whisper 처리를 위한 오디오 큐
     const recordedAnswersRef = useRef<
-        { question: Question; audioBlob: Blob; hasSpeech: boolean }[]
+        {
+            question: Question
+            audioBlob: Blob
+            hasSpeech: boolean
+            durationSec: number
+            silenceRatio: number
+        }[]
     >([])
     const [batchProgress, setBatchProgress] = useState<{
         current: number
         total: number
     }>({ current: 0, total: 0 })
     const isBatchProcessingRef = useRef<boolean>(false)
+    const isFinishingAnswerRef = useRef<boolean>(false)
+
+    // 세션 전체 영상 녹화 (다시보기용) 및 질문별 챕터 마커
+    const sessionRecorderRef = useRef<MediaRecorder | null>(null)
+    const sessionChunksRef = useRef<Blob[]>([])
+    const sessionStartRef = useRef<number>(0)
+    const lastChapterIndexRef = useRef<number>(-1)
+    const [chapters, setChapters] = useState<
+        { index: number; text: string; startTime: number }[]
+    >([])
+    const [sessionId, setSessionId] = useState<number | null>(null)
+    const [isUploadingSession, setIsUploadingSession] = useState(false)
+    const sessionVideoBlobRef = useRef<Blob | null>(null)
+    const replayVideoRef = useRef<HTMLVideoElement | null>(null)
 
     // 1. 질문 생성 API 호출 (온보딩 단계)
     const fetchQuestions = useCallback(async () => {
@@ -204,6 +298,33 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                 videoRef.current.play().catch(console.error)
             }
 
+            // 다시보기용 세션 전체 녹화 시작 (웹캠 화면 + 마이크 원본)
+            try {
+                const sessionMimeTypes = [
+                    "video/webm;codecs=vp9,opus",
+                    "video/webm;codecs=vp8,opus",
+                    "video/webm",
+                ]
+                const sessionMime = sessionMimeTypes.find((m) =>
+                    MediaRecorder.isTypeSupported(m),
+                )
+                const sessionRecorder = sessionMime
+                    ? new MediaRecorder(stream, { mimeType: sessionMime })
+                    : new MediaRecorder(stream)
+                sessionChunksRef.current = []
+                sessionRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        sessionChunksRef.current.push(e.data)
+                    }
+                }
+                sessionStartRef.current = Date.now()
+                lastChapterIndexRef.current = -1
+                sessionRecorder.start(1000)
+                sessionRecorderRef.current = sessionRecorder
+            } catch (sessionErr) {
+                console.warn("세션 녹화 초기화 실패 (다시보기 기능 비활성화):", sessionErr)
+            }
+
             // Web Audio API DSP 필터 체인 (Krisp형 잡음 제거 & 음성 선명화)
             try {
                 const AudioCtx =
@@ -266,12 +387,41 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             console.error("카메라 접근 실패:", err)
             toaster.create({
                 title: "카메라/마이크 접근 권한 필요",
-                description:
-                    "원활한 면접 진행을 위해 카메라와 마이크 권한을 허용해주세요.",
+                description: "원활한 면접 진행을 위해 카메라와 마이크 권한을 허용해주세요.",
                 type: "error",
             })
         }
     }
+
+    // INTERVIEW_ACTIVE로 전환되어 <video>가 마운트된 뒤에야 stream을 연결할 수 있으므로,
+    // startCamera 내부의 즉시 연결(당시 videoRef는 아직 null)과 별개로 여기서 재연결한다.
+    useEffect(() => {
+        if (
+            stage === "INTERVIEW_ACTIVE" &&
+            videoRef.current &&
+            mediaStreamRef.current
+        ) {
+            videoRef.current.srcObject = mediaStreamRef.current
+            videoRef.current.play().catch(console.error)
+        }
+    }, [stage])
+
+    // 질문이 바뀔 때마다 세션 녹화 기준 경과 시간을 챕터로 기록 (영상 구간 이동용)
+    useEffect(() => {
+        if (stage !== "INTERVIEW_ACTIVE") return
+        if (lastChapterIndexRef.current === currentIndex) return
+        const currentQ = questions[currentIndex]
+        if (!currentQ) return
+
+        lastChapterIndexRef.current = currentIndex
+        const startTime = sessionStartRef.current
+            ? (Date.now() - sessionStartRef.current) / 1000
+            : 0
+        setChapters((prev) => [
+            ...prev,
+            { index: currentIndex, text: currentQ.text, startTime },
+        ])
+    }, [stage, currentIndex, questions])
 
     // 스트림 정리
     useEffect(() => {
@@ -284,6 +434,9 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             }
             if (mediaStreamRef.current) {
                 mediaStreamRef.current.getTracks().forEach((t) => t.stop())
+            }
+            if (sessionRecorderRef.current?.state !== "inactive") {
+                sessionRecorderRef.current?.stop()
             }
         }
     }, [])
@@ -319,8 +472,11 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
         }
 
         speechDetectedRef.current = false
+        recordingStartRef.current = Date.now()
+        speechFrameCountRef.current = 0
+        totalFrameCountRef.current = 0
 
-        // 실시간 VAD (음성 활동 감지)
+        // 실시간 VAD (음성 활동 감지 + 침묵 비율 집계)
         const checkSpeechActivity = () => {
             const analyser = analyserRef.current
             if (analyser) {
@@ -335,7 +491,9 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                 }
                 const average = sum / (endIndex - startIndex)
 
+                totalFrameCountRef.current += 1
                 if (average > 15) {
+                    speechFrameCountRef.current += 1
                     speechDetectedRef.current = true
                 }
             }
@@ -404,32 +562,73 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
         })
     }, [])
 
+    // 세션 전체 녹화 중지 및 다시보기용 영상 Blob 확보
+    const stopSessionRecording = useCallback((): Promise<Blob | null> => {
+        return new Promise((resolve) => {
+            const recorder = sessionRecorderRef.current
+            if (!recorder || recorder.state === "inactive") {
+                if (sessionChunksRef.current.length > 0) {
+                    const mime = recorder?.mimeType || "video/webm"
+                    resolve(new Blob(sessionChunksRef.current, { type: mime }))
+                } else {
+                    resolve(null)
+                }
+                return
+            }
+            recorder.onstop = () => {
+                const mime = recorder.mimeType || "video/webm"
+                resolve(new Blob(sessionChunksRef.current, { type: mime }))
+            }
+            recorder.stop()
+        })
+    }, [])
+
     // 답변 완료 및 다음 단계 처리 (오디오 큐에 보관 후 즉시 다음 질문)
     const handleFinishAnswer = useCallback(async () => {
-        const currentQ = questions[currentIndex]
-        if (!currentQ) return
+        if (isFinishingAnswerRef.current) return
+        isFinishingAnswerRef.current = true
+        setIsFinishingAnswer(true)
 
-        // 1. 녹음 중지 및 오디오 블롭 획득
-        const audioBlob = await stopRecording()
-        const hasSpeech = speechDetectedRef.current && !!audioBlob && audioBlob.size > 1500
+        try {
+            const currentQ = questions[currentIndex]
+            if (!currentQ) return
 
-        // 2. 일괄 처리를 위한 오디오 큐에 보관
-        recordedAnswersRef.current.push({
-            question: currentQ,
-            audioBlob: audioBlob || new Blob([], { type: "audio/webm" }),
-            hasSpeech,
-        })
+            // 1. 녹음 중지 및 오디오 블롭 획득
+            const audioBlob = await stopRecording()
+            const hasSpeech = speechDetectedRef.current && !!audioBlob && audioBlob.size > 1500
+            const durationSec = recordingStartRef.current
+                ? (Date.now() - recordingStartRef.current) / 1000
+                : 0
+            const silenceRatio =
+                totalFrameCountRef.current > 0
+                    ? 1 -
+                      speechFrameCountRef.current / totalFrameCountRef.current
+                    : 0
 
-        // 3. 다음 질문 확인
-        if (currentIndex + 1 < questions.length) {
-            setCurrentIndex((prev) => prev + 1)
-            setSubStage("THINKING")
-            setCountdown(THINKING_TIME_LIMIT)
-        } else {
-            // 모든 질문 완료 -> 마지막 일괄 처리 단계로 이동
-            setStage("PROCESSING")
+            // 2. 일괄 처리를 위한 오디오 큐에 보관
+            recordedAnswersRef.current.push({
+                question: currentQ,
+                audioBlob: audioBlob || new Blob([], { type: "audio/webm" }),
+                hasSpeech,
+                durationSec,
+                silenceRatio,
+            })
+
+            // 3. 다음 질문 확인
+            if (currentIndex + 1 < questions.length) {
+                setCurrentIndex((prev) => prev + 1)
+                setSubStage("THINKING")
+                setCountdown(THINKING_TIME_LIMIT)
+            } else {
+                // 모든 질문 완료 -> 세션 녹화 종료 후 마지막 일괄 처리 단계로 이동
+                sessionVideoBlobRef.current = await stopSessionRecording()
+                setStage("PROCESSING")
+            }
+        } finally {
+            isFinishingAnswerRef.current = false
+            setIsFinishingAnswer(false)
         }
-    }, [currentIndex, questions, stopRecording])
+    }, [currentIndex, questions, stopRecording, stopSessionRecording])
 
     // 생각 시간 및 답변 시간 카운트다운 루프
     useEffect(() => {
@@ -559,6 +758,46 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             }),
         )
 
+        // 딜리버리 지표 계산 (실제 발화가 있었던 답변만 대상)
+        const validItems = items.filter(
+            (item) => item.hasSpeech && item.durationSec > 0,
+        )
+        if (validItems.length > 0) {
+            let totalWords = 0
+            let totalFillers = 0
+            let totalDurationSec = 0
+            let totalSilenceRatio = 0
+            for (const item of validItems) {
+                const answerText =
+                    evaluationsMap[item.question.id]?.answerText || ""
+                const wordCount = answerText
+                    .trim()
+                    .split(/\s+/)
+                    .filter(Boolean).length
+                totalWords += wordCount
+                totalFillers += countFillerWords(answerText)
+                totalDurationSec += item.durationSec
+                totalSilenceRatio += item.silenceRatio
+            }
+            const totalMinutes = totalDurationSec / 60
+            setDeliveryMetrics({
+                wpm:
+                    totalMinutes > 0
+                        ? Math.round(totalWords / totalMinutes)
+                        : 0,
+                fillerPerMinute:
+                    totalMinutes > 0
+                        ? Math.round((totalFillers / totalMinutes) * 10) / 10
+                        : 0,
+                avgAnswerSec: Math.round(
+                    totalDurationSec / validItems.length,
+                ),
+                silenceRatio: Math.round(
+                    (totalSilenceRatio / validItems.length) * 100,
+                ),
+            })
+        }
+
         // 모든 답변 처리 완료 -> 종합 리포트 생성
         try {
             const results = Object.values(evaluationsMap)
@@ -581,6 +820,37 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
 
             setReportData(data.report)
             setStage("REPORT")
+
+            // 다시보기용 영상 + 챕터 + 리포트를 백그라운드로 업로드 (화면 전환을 막지 않음)
+            const videoBlob = sessionVideoBlobRef.current
+            if (videoBlob && videoBlob.size > 0) {
+                setIsUploadingSession(true)
+                try {
+                    const uploadForm = new FormData()
+                    uploadForm.append(
+                        "video",
+                        videoBlob,
+                        `interview_${Date.now()}.webm`,
+                    )
+                    uploadForm.append("chapters", JSON.stringify(chapters))
+                    uploadForm.append("report", JSON.stringify(data.report))
+
+                    const uploadResp = await fetch("/api/interview-sessions", {
+                        method: "POST",
+                        body: uploadForm,
+                    })
+                    const uploadData = await uploadResp.json()
+                    if (uploadResp.ok && uploadData.id) {
+                        setSessionId(uploadData.id)
+                    } else {
+                        console.warn("면접 영상 업로드 실패:", uploadData.error)
+                    }
+                } catch (uploadErr) {
+                    console.warn("면접 영상 업로드 실패:", uploadErr)
+                } finally {
+                    setIsUploadingSession(false)
+                }
+            }
         } catch (err: any) {
             console.error("리포트 생성 실패:", err)
             setReportErrorMessage(
@@ -588,7 +858,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             )
             setStage("REPORT_ERROR")
         }
-    }, [config, questions])
+    }, [config, questions, chapters])
 
     // PROCESSING 단계 진입 시 일괄 처리 가동
     useEffect(() => {
@@ -615,7 +885,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Flex
                 w="100vw"
                 h="100vh"
-                bg="#0F172A"
+                bg="gray.50"
                 align="center"
                 justify="center"
                 p={6}
@@ -626,27 +896,27 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                 >
                     <Card.Root
                         maxW="600px"
-                        bg="#1E293B"
-                        color="white"
-                        borderColor="#334155"
+                        bg="white"
+                        color="gray.900"
+                        borderColor="gray.200"
                         p={8}
                         borderRadius="2xl"
-                        boxShadow="2xl"
+                        boxShadow="xl"
                     >
                         <VStack gap={6} align="center">
                             <Center
                                 w="64px"
                                 h="64px"
-                                bg="blue.500/20"
+                                bg="blue.50"
                                 borderRadius="full"
                             >
-                                <Sparkles size={32} color="#38BDF8" />
+                                <Sparkles size={32} color="blue.500" />
                             </Center>
                             <VStack gap={2} textAlign="center">
                                 <Text fontSize="24px" fontWeight="800">
                                     AI 모의면접 준비 중
                                 </Text>
-                                <Text fontSize="14px" color="#94A3B8">
+                                <Text fontSize="14px" color="gray.500">
                                     제출하신 정보와 직무에 맞추어 맞춤형 실전
                                     면접 질문을 생성하고 있습니다.
                                 </Text>
@@ -654,15 +924,16 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
 
                             <Box
                                 w="100%"
-                                bg="#0F172A"
+                                bg="gray.50"
                                 p={4}
                                 borderRadius="xl"
-                                border="1px solid #334155"
+                                border="1px solid"
+                                borderColor="gray.200"
                             >
                                 <Text
                                     fontSize="13px"
                                     fontWeight="700"
-                                    color="#38BDF8"
+                                    color="blue.600"
                                     mb={2}
                                 >
                                     💡 면접 진행 안내
@@ -671,7 +942,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                     align="start"
                                     gap={1.5}
                                     fontSize="12px"
-                                    color="#CBD5E1"
+                                    color="gray.600"
                                 >
                                     <Text>
                                         • 질문마다 생각할 시간(5초) 후 녹화가
@@ -689,11 +960,11 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             </Box>
 
                             <HStack gap={3} mt={2}>
-                                <Spinner size="md" color="#38BDF8" />
+                                <Spinner size="md" color="blue.500" />
                                 <Text
                                     fontSize="14px"
                                     fontWeight="600"
-                                    color="#94A3B8"
+                                    color="gray.500"
                                 >
                                     AI 질문 생성 중...
                                 </Text>
@@ -713,34 +984,34 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Flex
                 w="100vw"
                 h="100vh"
-                bg="#0F172A"
+                bg="gray.50"
                 align="center"
                 justify="center"
                 p={6}
             >
                 <Card.Root
                     maxW="500px"
-                    bg="#1E293B"
-                    color="white"
-                    borderColor="red.900"
+                    bg="white"
+                    color="gray.900"
+                    borderColor="red.200"
                     p={8}
                     borderRadius="2xl"
-                    boxShadow="2xl"
+                    boxShadow="xl"
                 >
                     <VStack gap={6} align="center" textAlign="center">
                         <Center
                             w="64px"
                             h="64px"
-                            bg="red.500/20"
+                            bg="red.50"
                             borderRadius="full"
                         >
-                            <AlertTriangle size={32} color="#F87171" />
+                            <AlertTriangle size={32} color="red.500" />
                         </Center>
                         <VStack gap={2}>
                             <Text fontSize="22px" fontWeight="800">
                                 질문 생성 오류
                             </Text>
-                            <Text fontSize="14px" color="#94A3B8">
+                            <Text fontSize="14px" color="gray.500">
                                 {onboardingErrorMessage ||
                                     "면접 질문을 생성하는 도중 오류가 발생했습니다."}
                             </Text>
@@ -749,17 +1020,17 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             <Button
                                 flex={1}
                                 variant="outline"
-                                borderColor="#475569"
-                                color="white"
+                                borderColor="gray.300"
+                                color="gray.700"
                                 onClick={() => navigate("/mock-interview")}
                             >
                                 나가기
                             </Button>
                             <Button
                                 flex={1}
-                                bg="#2563EB"
+                                bg="blue.600"
                                 color="white"
-                                _hover={{ bg: "#1D4ED8" }}
+                                _hover={{ bg: "blue.700" }}
                                 onClick={fetchQuestions}
                             >
                                 <RotateCcw
@@ -783,7 +1054,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Flex
                 w="100vw"
                 h="100vh"
-                bg="#0F172A"
+                bg="gray.50"
                 align="center"
                 justify="center"
                 p={6}
@@ -791,27 +1062,27 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                 <Card.Root
                     maxW="600px"
                     w="100%"
-                    bg="#1E293B"
-                    color="white"
-                    borderColor="#334155"
+                    bg="white"
+                    color="gray.900"
+                    borderColor="gray.200"
                     p={8}
                     borderRadius="2xl"
-                    boxShadow="2xl"
+                    boxShadow="xl"
                 >
                     <VStack gap={6} align="center">
                         <Center
                             w="64px"
                             h="64px"
-                            bg="blue.500/20"
+                            bg="blue.50"
                             borderRadius="full"
                         >
-                            <Camera size={32} color="#38BDF8" />
+                            <Camera size={32} color="blue.500" />
                         </Center>
                         <VStack gap={2} textAlign="center">
                             <Text fontSize="24px" fontWeight="800">
                                 질문 생성 완료! 면접을 시작할까요?
                             </Text>
-                            <Text fontSize="14px" color="#94A3B8">
+                            <Text fontSize="14px" color="gray.500">
                                 총 {questions.length}개의 면접 질문이
                                 준비되었습니다. 카메라와 마이크가 켜지며 면접이
                                 시작됩니다.
@@ -820,28 +1091,29 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
 
                         <Box
                             w="100%"
-                            bg="#0F172A"
+                            bg="gray.50"
                             p={5}
                             borderRadius="xl"
-                            border="1px solid #334155"
+                            border="1px solid"
+                            borderColor="gray.200"
                         >
                             <VStack align="start" gap={3}>
                                 <HStack>
-                                    <CheckCircle2 size={18} color="#4ADE80" />
+                                    <CheckCircle2 size={18} color="emerald.600" />
                                     <Text
                                         fontSize="13px"
                                         fontWeight="600"
-                                        color="#E2E8F0"
+                                        color="gray.700"
                                     >
                                         조용한 환경에서 또박또박 답변해 주세요.
                                     </Text>
                                 </HStack>
                                 <HStack>
-                                    <CheckCircle2 size={18} color="#4ADE80" />
+                                    <CheckCircle2 size={18} color="emerald.600" />
                                     <Text
                                         fontSize="13px"
                                         fontWeight="600"
-                                        color="#E2E8F0"
+                                        color="gray.700"
                                     >
                                         답변이 끝나면 바로 [답변 완료] 버튼을
                                         누르시면 됩니다.
@@ -853,9 +1125,9 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                         <Button
                             w="100%"
                             size="lg"
-                            bg="#2563EB"
+                            bg="blue.600"
                             color="white"
-                            _hover={{ bg: "#1D4ED8" }}
+                            _hover={{ bg: "blue.700" }}
                             h="52px"
                             fontSize="16px"
                             fontWeight="700"
@@ -878,7 +1150,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Flex
                 w="100vw"
                 h="100vh"
-                bg="#0B0F19"
+                bg="gray.900"
                 position="relative"
                 overflow="hidden"
                 direction="column"
@@ -886,93 +1158,82 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                 {/* 상단 헤더 바 */}
                 <Flex
                     w="100%"
-                    h="64px"
-                    bg="#1E293B/80"
-                    px={6}
+                    h="60px"
+                    flexShrink={0}
+                    px={{ base: 3, md: 7 }}
                     align="center"
                     justify="space-between"
-                    borderBottom="1px solid #334155"
+                    borderBottom="1px solid"
+                    borderColor="gray.700"
                     zIndex={10}
                 >
                     <HStack gap={3}>
-                        <Badge
-                            bg="blue.600"
-                            color="white"
-                            px={3}
-                            py={1}
-                            borderRadius="full"
-                            fontSize="12px"
+                        <IconButton
+                            aria-label="면접 나가기"
+                            variant="ghost"
+                            size="sm"
+                            color="gray.500"
+                            onClick={() => navigate("/mock-interview")}
                         >
-                            질문 {currentIndex + 1} / {questions.length}
-                        </Badge>
-                        {currentQuestion?.category && (
-                            <Badge
-                                variant="outline"
-                                color="#94A3B8"
-                                borderColor="#475569"
-                                px={2.5}
-                                py={1}
-                                borderRadius="md"
-                                fontSize="12px"
-                            >
-                                {currentQuestion.category}
-                            </Badge>
-                        )}
-                        {currentQuestion?.isReadded && (
-                            <Badge
-                                bg="purple.900"
-                                color="purple.200"
-                                px={2}
-                                py={0.5}
-                                borderRadius="md"
-                                fontSize="11px"
-                            >
-                                재진행 질문
-                            </Badge>
-                        )}
+                            <X size={18} />
+                        </IconButton>
+                        <Text
+                            fontSize="13.5px"
+                            fontWeight="600"
+                            color="gray.400"
+                            display={{ base: "none", md: "block" }}
+                        >
+                            모의면접 진행 중 · {mode}
+                        </Text>
                     </HStack>
 
-                    <HStack gap={4}>
-                        <HStack
-                            gap={2}
-                            bg="#0F172A"
-                            px={3}
-                            py={1.5}
-                            borderRadius="lg"
-                            border="1px solid #334155"
+                    <HStack gap={2}>
+                        <Text
+                            fontSize="12px"
+                            fontWeight="600"
+                            color="gray.500"
+                            mr={1}
+                            display={{ base: "none", sm: "block" }}
                         >
-                            <Clock size={16} color="#94A3B8" />
-                            <Text
-                                fontSize="13px"
-                                fontWeight="700"
-                                color="#E2E8F0"
-                            >
-                                전체 시간 {formatTime(totalSeconds)}
-                            </Text>
-                        </HStack>
+                            질문 {currentIndex + 1} / {questions.length}
+                        </Text>
+                        {questions.map((q, i) => (
+                            <Box
+                                key={q.id}
+                                w="20px"
+                                h="4px"
+                                borderRadius="full"
+                                bg={i <= currentIndex ? "blue.600" : "gray.700"}
+                            />
+                        ))}
+                    </HStack>
+
+                    <HStack gap={2} color="gray.500">
+                        <Clock size={14} />
+                        <Text fontFamily="mono" fontSize="12.5px" fontWeight="600">
+                            {formatTime(totalSeconds)}
+                        </Text>
                     </HStack>
                 </Flex>
 
-                {/* 중앙 메인 뷰: 비디오 및 질문 카드 */}
+                {/* 메인 분할 영역: 비디오 + 질문 사이드바 */}
                 <Flex
                     flex={1}
-                    position="relative"
-                    align="center"
-                    justify="center"
-                    p={6}
+                    gap={4}
+                    p={{ base: 3, md: 6 }}
+                    overflow="hidden"
+                    direction={{ base: "column", lg: "row" }}
                 >
-                    {/* 사용자 웹캠 비디오 */}
+                    {/* 비디오 패널 */}
                     <Box
-                        w="100%"
-                        maxW="900px"
-                        h="100%"
-                        maxH="560px"
-                        bg="#020617"
+                        flex={1}
+                        minH={{ base: "260px", lg: "auto" }}
+                        position="relative"
                         borderRadius="2xl"
                         overflow="hidden"
-                        position="relative"
-                        boxShadow="0 20px 40px rgba(0,0,0,0.6)"
-                        border="2px solid #1E293B"
+                        bg="gray.800"
+                        border="1px solid"
+                        borderColor="gray.700"
                     >
                         <video
                             ref={videoRef}
@@ -987,165 +1248,305 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             }}
                         />
 
-                        {/* 비디오 오버레이: 상단 상태 배지 */}
-                        <Flex
+                        {/* 내 화면 태그 */}
+                        <HStack
                             position="absolute"
                             top={4}
                             left={4}
                             gap={2}
-                            zIndex={5}
+                            bg="blackAlpha.600"
+                            backdropFilter="blur(6px)"
+                            px={3}
+                            py={1.5}
+                            borderRadius="lg"
+                            border="1px solid"
+                            borderColor="gray.700"
                         >
-                            {subStage === "THINKING" ? (
-                                <Badge
-                                    bg="amber.500"
-                                    color="black"
-                                    px={3}
-                                    py={1.5}
-                                    borderRadius="full"
-                                    fontSize="13px"
-                                    fontWeight="800"
-                                >
-                                    🤔 생각할 시간: {countdown}초
-                                </Badge>
-                            ) : (
-                                <Badge
-                                    bg="red.500"
-                                    color="white"
-                                    px={3}
-                                    py={1.5}
-                                    borderRadius="full"
-                                    fontSize="13px"
-                                    fontWeight="800"
-                                >
-                                    🔴 답변 진행 중: {countdown}초
-                                </Badge>
-                            )}
-                        </Flex>
+                            <Camera size={13} color="#C6CCD4" />
+                            <Text fontSize="11.5px" fontWeight="600" color="gray.200">
+                                내 화면
+                            </Text>
+                        </HStack>
 
-                        {/* 비디오 하단: 질문 텍스트 오버레이 */}
-                        <Box
+                        {/* REC 인디케이터 */}
+                        <HStack
                             position="absolute"
-                            bottom={0}
-                            left={0}
-                            right={0}
-                            bg="linear-gradient(to top, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.7) 70%, transparent 100%)"
-                            p={6}
-                            zIndex={5}
+                            top={4}
+                            right={4}
+                            gap={2}
+                            bg="blackAlpha.600"
+                            backdropFilter="blur(6px)"
+                            px={3}
+                            py={1.5}
+                            borderRadius="lg"
+                            border="1px solid"
+                            borderColor="gray.700"
                         >
+                            <Box
+                                w="7px"
+                                h="7px"
+                                borderRadius="full"
+                                bg="red.500"
+                                animation="pulse 1.5s infinite"
+                            />
+                            <Text fontFamily="mono" fontSize="11.5px" fontWeight="600" color="red.300">
+                                REC {formatTime(totalSeconds)}
+                            </Text>
+                        </HStack>
+
+                        {/* 마이크 레벨 (하단 중앙) */}
+                        <HStack
+                            position="absolute"
+                            bottom={4}
+                            left="50%"
+                            transform="translateX(-50%)"
+                            gap={2}
+                            bg="blackAlpha.600"
+                            backdropFilter="blur(6px)"
+                            px={4}
+                            py={2}
+                            borderRadius="full"
+                            border="1px solid"
+                            borderColor="gray.700"
+                        >
+                            <Mic size={14} color="#C6CCD4" />
+                            <HStack align="flex-end" gap="2.5px" h="14px">
+                                {[5, 10, 14, 8, 4].map((h, i) => (
+                                    <Box
+                                        key={i}
+                                        w="3px"
+                                        h={
+                                            subStage === "ANSWERING"
+                                                ? `${h}px`
+                                                : "4px"
+                                        }
+                                        bg={
+                                            subStage === "ANSWERING"
+                                                ? i === 2
+                                                    ? "blue.400"
+                                                    : "blue.500"
+                                                : "gray.700"
+                                        }
+                                        borderRadius="1px"
+                                        transition="height 0.15s ease"
+                                    />
+                                ))}
+                            </HStack>
+                        </HStack>
+                    </Box>
+
+                    {/* 우측 사이드바: 질문 카드 */}
+                    <VStack
+                        w={{ base: "100%", lg: "400px" }}
+                        flexShrink={0}
+                        gap={4}
+                        align="stretch"
+                    >
+                        <Box
+                            bg="gray.800"
+                            border="1px solid"
+                            borderColor="gray.700"
+                            borderRadius="2xl"
+                            p={6}
+                            flex={1}
+                            display="flex"
+                            flexDirection="column"
+                            overflow="hidden"
+                        >
+                            <HStack gap={2} mb={4}>
+                                <Badge
+                                    fontFamily="mono"
+                                    fontSize="11.5px"
+                                    fontWeight="700"
+                                    color="white"
+                                    bg="blue.600"
+                                    px={2.5}
+                                    py={0.5}
+                                    borderRadius="md"
+                                >
+                                    Q{currentIndex + 1}
+                                </Badge>
+                                {currentQuestion?.category && (
+                                    <Badge
+                                        variant="outline"
+                                        fontSize="11px"
+                                        fontWeight="600"
+                                        color="gray.400"
+                                        borderColor="gray.700"
+                                        px={2.5}
+                                        py={0.5}
+                                        borderRadius="md"
+                                    >
+                                        {currentQuestion.category}
+                                    </Badge>
+                                )}
+                                {currentQuestion?.isReadded && (
+                                    <Badge
+                                        bg="purple.900"
+                                        color="purple.200"
+                                        px={2}
+                                        py={0.5}
+                                        borderRadius="md"
+                                        fontSize="11px"
+                                    >
+                                        재진행 질문
+                                    </Badge>
+                                )}
+                            </HStack>
+
                             <motion.div
                                 key={currentQuestion?.id}
-                                initial={{ opacity: 0, y: 15 }}
+                                initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
                                 <Text
-                                    fontSize="13px"
+                                    fontSize="20px"
                                     fontWeight="700"
-                                    color="#38BDF8"
-                                    mb={1}
-                                >
-                                    Q{currentIndex + 1}. 면접관 질문
-                                </Text>
-                                <Text
-                                    fontSize={{ base: "18px", md: "22px" }}
-                                    fontWeight="800"
-                                    color="white"
-                                    lineHeight="1.4"
+                                    color="gray.50"
+                                    lineHeight="1.5"
                                 >
                                     {currentQuestion?.text}
                                 </Text>
-
-                                {/* 답변 진행 중 안내 */}
-                                {subStage === "ANSWERING" && (
-                                    <Box
-                                        mt={3}
-                                        p={2.5}
-                                        bg="blue.950/70"
-                                        borderRadius="lg"
-                                        border="1px solid #1E40AF"
-                                    >
-                                        <Text
-                                            fontSize="13px"
-                                            color="#93C5FD"
-                                            fontWeight="600"
-                                        >
-                                            🎙️ 마이크로 답변을 말씀해 주세요. 답변 완료 후 다음 질문으로 이동합니다.
-                                        </Text>
-                                    </Box>
-                                )}
                             </motion.div>
+
+                            <HStack
+                                mt={5}
+                                pt={4}
+                                borderTop="1px solid"
+                                borderColor="gray.700"
+                                justify="space-between"
+                            >
+                                {subStage === "THINKING" ? (
+                                    <HStack gap={2}>
+                                        <Box
+                                            w="7px"
+                                            h="7px"
+                                            borderRadius="full"
+                                            bg="amber.400"
+                                        />
+                                        <Text fontSize="12.5px" fontWeight="600" color="gray.300">
+                                            생각 중
+                                        </Text>
+                                    </HStack>
+                                ) : (
+                                    <HStack gap={2}>
+                                        <Box
+                                            w="7px"
+                                            h="7px"
+                                            borderRadius="full"
+                                            bg="red.500"
+                                            animation="pulse 1.5s infinite"
+                                        />
+                                        <Text fontSize="12.5px" fontWeight="600" color="gray.300">
+                                            답변 진행 중
+                                        </Text>
+                                    </HStack>
+                                )}
+                                <Text fontFamily="mono" fontSize="16px" fontWeight="700" color="gray.50">
+                                    {formatTime(countdown)}
+                                </Text>
+                            </HStack>
+
+                            <HStack
+                                mt={3}
+                                p={3}
+                                bg="gray.900"
+                                border="1px solid"
+                                borderColor="gray.700"
+                                borderRadius="lg"
+                                align="flex-start"
+                                gap={2}
+                            >
+                                <Mic size={14} color="#6B93D6" style={{ marginTop: "1px", flexShrink: 0 }} />
+                                <Text fontSize="12px" color="gray.400" lineHeight="1.55">
+                                    {subStage === "THINKING"
+                                        ? "잠시 답변을 정리해보세요. 준비되면 아래 버튼으로 바로 시작할 수 있습니다."
+                                        : "마이크로 답변을 말씀해 주세요. 답변을 마치면 아래 버튼을 눌러주세요."}
+                                </Text>
+                            </HStack>
+
+                            {/* 질문 진행 목록 */}
+                            <VStack mt={5} align="stretch" gap={2} overflowY="auto">
+                                {questions.map((q, i) => {
+                                    const isDone = i < currentIndex
+                                    const isCurrent = i === currentIndex
+                                    return (
+                                        <HStack
+                                            key={q.id}
+                                            gap={2.5}
+                                            opacity={isDone ? 0.55 : isCurrent ? 1 : 0.4}
+                                        >
+                                            {isDone ? (
+                                                <CheckCircle2 size={14} color="#059669" style={{ flexShrink: 0 }} />
+                                            ) : isCurrent ? (
+                                                <Box
+                                                    w="14px"
+                                                    h="14px"
+                                                    borderRadius="full"
+                                                    bg="blue.600"
+                                                    flexShrink={0}
+                                                />
+                                            ) : (
+                                                <Circle size={14} color="#3A4658" style={{ flexShrink: 0 }} />
+                                            )}
+                                            <Text
+                                                fontSize="12.5px"
+                                                color={isCurrent ? "gray.50" : "gray.400"}
+                                                fontWeight={isCurrent ? "600" : "400"}
+                                                lineClamp={1}
+                                            >
+                                                Q{i + 1}. {q.text}
+                                            </Text>
+                                        </HStack>
+                                    )
+                                })}
+                            </VStack>
                         </Box>
-                    </Box>
+                    </VStack>
                 </Flex>
 
-                {/* 하단 컨트롤 패널 */}
+                {/* 하단 컨트롤 바 */}
                 <Flex
                     w="100%"
                     h="84px"
-                    bg="#0F172A"
-                    px={8}
+                    flexShrink={0}
                     align="center"
                     justify="center"
-                    borderTop="1px solid #1E293B"
+                    gap={4}
+                    borderTop="1px solid"
+                    borderColor="gray.700"
                     zIndex={10}
                 >
                     {subStage === "THINKING" ? (
-                        <HStack gap={4}>
-                            <Text fontSize="14px" color="#94A3B8">
-                                잠시 답변을 정리해보세요. {countdown}초 후
-                                녹화가 시작됩니다.
-                            </Text>
-                            <Button
-                                bg="#2563EB"
-                                color="white"
-                                _hover={{ bg: "#1D4ED8" }}
-                                onClick={handleSkipThinking}
-                                fontWeight="700"
-                                px={6}
-                            >
-                                <Play
-                                    size={16}
-                                    style={{ marginRight: "6px" }}
-                                />
-                                바로 답변 시작
-                            </Button>
-                        </HStack>
+                        <Button
+                            bg="blue.600"
+                            color="white"
+                            _hover={{ bg: "blue.700" }}
+                            onClick={handleSkipThinking}
+                            fontWeight="700"
+                            px={7}
+                            h="48px"
+                            borderRadius="xl"
+                        >
+                            <Play size={16} style={{ marginRight: "8px" }} />
+                            바로 답변 시작
+                        </Button>
                     ) : (
-                        <HStack gap={6}>
-                            <HStack gap={2}>
-                                <Box
-                                    w="10px"
-                                    h="10px"
-                                    bg="red.500"
-                                    borderRadius="full"
-                                    animation="pulse 1.5s infinite"
-                                />
-                                <Text
-                                    fontSize="14px"
-                                    color="#EF4444"
-                                    fontWeight="700"
-                                >
-                                    녹화 및 답변 음성 수집 중
-                                </Text>
-                            </HStack>
-                            <Button
-                                size="lg"
-                                bg="#10B981"
-                                color="white"
-                                _hover={{ bg: "#059669" }}
-                                fontWeight="800"
-                                px={8}
-                                h="48px"
-                                onClick={handleFinishAnswer}
-                                boxShadow="0 4px 12px rgba(16, 185, 129, 0.3)"
-                            >
-                                <Check
-                                    size={18}
-                                    style={{ marginRight: "6px" }}
-                                />
-                                답변 완료
-                            </Button>
-                        </HStack>
+                        <Button
+                            bg="blue.600"
+                            color="white"
+                            _hover={{ bg: "blue.700" }}
+                            fontWeight="700"
+                            px={7}
+                            h="48px"
+                            borderRadius="xl"
+                            onClick={handleFinishAnswer}
+                            disabled={isFinishingAnswer}
+                        >
+                            답변 완료
+                            <Check size={16} style={{ marginLeft: "8px" }} />
+                        </Button>
                     )}
                 </Flex>
             </Flex>
@@ -1168,7 +1569,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Flex
                 w="100vw"
                 h="100vh"
-                bg="#0F172A"
+                bg="gray.50"
                 align="center"
                 justify="center"
                 p={6}
@@ -1180,28 +1581,28 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                     <Card.Root
                         maxW="540px"
                         w="100%"
-                        bg="#1E293B"
-                        color="white"
-                        borderColor="#334155"
+                        bg="white"
+                        color="gray.900"
+                        borderColor="gray.200"
                         p={8}
                         borderRadius="2xl"
-                        boxShadow="2xl"
+                        boxShadow="xl"
                     >
                         <VStack gap={6} align="center" textAlign="center">
                             <Center
                                 w="72px"
                                 h="72px"
-                                bg="blue.500/20"
+                                bg="blue.50"
                                 borderRadius="full"
                             >
-                                <Spinner size="xl" color="#38BDF8" />
+                                <Spinner size="xl" color="blue.500" />
                             </Center>
 
                             <VStack gap={2}>
                                 <Text fontSize="24px" fontWeight="800">
                                     면접 답변 종합 분석 중
                                 </Text>
-                                <Text fontSize="14px" color="#94A3B8">
+                                <Text fontSize="14px" color="gray.500">
                                     녹화된 답변 음성을 텍스트로 변환하고 AI가
                                     채점 및 피드백을 생성하고 있습니다.
                                 </Text>
@@ -1209,23 +1610,24 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
 
                             <Box
                                 w="100%"
-                                bg="#0F172A"
+                                bg="gray.50"
                                 p={5}
                                 borderRadius="xl"
-                                border="1px solid #334155"
+                                border="1px solid"
+                                borderColor="gray.200"
                             >
                                 <Flex justify="space-between" mb={2}>
                                     <Text
                                         fontSize="13px"
                                         fontWeight="700"
-                                        color="#94A3B8"
+                                        color="gray.500"
                                     >
                                         답변 처리 진행률
                                     </Text>
                                     <Text
                                         fontSize="13px"
                                         fontWeight="800"
-                                        color="#38BDF8"
+                                        color="blue.600"
                                     >
                                         {completedCount} / {totalCount} 질문
                                         완료 ({progressPercent}%)
@@ -1237,13 +1639,13 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                     size="sm"
                                     borderRadius="full"
                                 >
-                                    <Progress.Track bg="#334155">
-                                        <Progress.Range bg="#38BDF8" />
+                                    <Progress.Track bg="gray.200">
+                                        <Progress.Range bg="blue.500" />
                                     </Progress.Track>
                                 </Progress.Root>
                             </Box>
 
-                            <Text fontSize="12px" color="#64748B">
+                            <Text fontSize="12px" color="gray.500">
                                 모든 답변 처리가 완료되면 자동으로 종합 리포트
                                 화면으로 전환됩니다.
                             </Text>
@@ -1262,34 +1664,34 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Flex
                 w="100vw"
                 h="100vh"
-                bg="#0F172A"
+                bg="gray.50"
                 align="center"
                 justify="center"
                 p={6}
             >
                 <Card.Root
                     maxW="500px"
-                    bg="#1E293B"
-                    color="white"
-                    borderColor="red.900"
+                    bg="white"
+                    color="gray.900"
+                    borderColor="red.200"
                     p={8}
                     borderRadius="2xl"
-                    boxShadow="2xl"
+                    boxShadow="xl"
                 >
                     <VStack gap={6} align="center" textAlign="center">
                         <Center
                             w="64px"
                             h="64px"
-                            bg="red.500/20"
+                            bg="red.50"
                             borderRadius="full"
                         >
-                            <AlertTriangle size={32} color="#F87171" />
+                            <AlertTriangle size={32} color="red.500" />
                         </Center>
                         <VStack gap={2}>
                             <Text fontSize="22px" fontWeight="800">
                                 리포트 생성 실패
                             </Text>
-                            <Text fontSize="14px" color="#94A3B8">
+                            <Text fontSize="14px" color="gray.500">
                                 {reportErrorMessage ||
                                     "종합 리포트를 생성하는 도중 오류가 발생했습니다."}
                             </Text>
@@ -1298,18 +1700,18 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             <Button
                                 flex={1}
                                 variant="outline"
-                                borderColor="#475569"
-                                color="white"
+                                borderColor="gray.300"
+                                color="gray.700"
                                 onClick={() => navigate("/mock-interview")}
                             >
                                 나가기
                             </Button>
                             <Button
                                 flex={1}
-                                bg="#2563EB"
+                                bg="blue.600"
                                 color="white"
-                                _hover={{ bg: "#1D4ED8" }}
-                                onClick={generateFinalReport}
+                                _hover={{ bg: "blue.700" }}
+                                onClick={processAllAnswersInBatch}
                             >
                                 <RotateCcw
                                     size={16}
@@ -1332,8 +1734,8 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
             <Box
                 w="100vw"
                 minH="100vh"
-                bg="#0B0F19"
-                color="white"
+                bg="gray.50"
+                color="gray.900"
                 py={10}
                 px={{ base: 4, md: 8 }}
                 overflowY="auto"
@@ -1349,8 +1751,8 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                     >
                         <VStack align="start" gap={1}>
                             <Badge
-                                bg="blue.500/20"
-                                color="#38BDF8"
+                                bg="blue.50"
+                                color="blue.600"
                                 px={3}
                                 py={1}
                                 borderRadius="full"
@@ -1365,19 +1767,36 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             >
                                 면접 결과 종합 평가
                             </Text>
-                            <Text fontSize="14px" color="#94A3B8">
-                                목표 직무:{" "}
-                                {config?.selectedJobs?.join(", ") ||
-                                    "개발 직무"}{" "}
-                                | 희망 기업:{" "}
-                                {config?.targetCompany || "지정 기업"}
-                            </Text>
+                            <HStack fontSize="14px" color="gray.500" gap={2}>
+                                <Text>
+                                    목표 직무{" "}
+                                    <b style={{ color: "#374151", fontWeight: 600 }}>
+                                        {config?.selectedJobs?.join(", ") ||
+                                            "개발 직무"}
+                                    </b>
+                                </Text>
+                                <Text color="gray.300">·</Text>
+                                <Text>
+                                    희망 기업{" "}
+                                    <b style={{ color: "#374151", fontWeight: 600 }}>
+                                        {config?.targetCompany || "지정 기업"}
+                                    </b>
+                                </Text>
+                                <Text color="gray.300">·</Text>
+                                <Text fontFamily="mono">
+                                    {new Date().toLocaleDateString("ko-KR", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                    })}
+                                </Text>
+                            </HStack>
                         </VStack>
                         <HStack gap={3}>
                             <Button
                                 variant="outline"
-                                borderColor="#475569"
-                                color="white"
+                                borderColor="gray.300"
+                                color="gray.700"
                                 onClick={() => navigate("/mock-interview")}
                             >
                                 <RotateCcw
@@ -1387,9 +1806,9 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                 다시 면접보기
                             </Button>
                             <Button
-                                bg="#2563EB"
+                                bg="blue.600"
                                 color="white"
-                                _hover={{ bg: "#1D4ED8" }}
+                                _hover={{ bg: "blue.700" }}
                                 onClick={() => navigate("/")}
                             >
                                 <Home
@@ -1401,78 +1820,397 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                         </HStack>
                     </Flex>
 
-                    {/* 종합 점수 및 총평 카드 */}
+                    {/* 면접 영상 다시보기 */}
                     <Card.Root
-                        bg="#1E293B"
-                        borderColor="#334155"
+                        bg="white"
+                        borderColor="gray.200"
                         borderRadius="2xl"
                         p={6}
                         mb={8}
-                        boxShadow="xl"
+                        boxShadow="sm"
                     >
-                        <Flex
-                            direction={{ base: "column", md: "row" }}
-                            align="center"
-                            gap={8}
-                        >
-                            {/* 점수 원형 */}
-                            <VStack gap={1} minW="180px">
-                                <Center
-                                    w="130px"
-                                    h="130px"
-                                    borderRadius="full"
-                                    bg="linear-gradient(135deg, #2563EB 0%, #38BDF8 100%)"
-                                    boxShadow="0 8px 24px rgba(37,99,235,0.4)"
+                        <Text fontSize="16px" fontWeight="700" mb={4}>
+                            면접 영상 다시보기
+                        </Text>
+                        {isUploadingSession ? (
+                            <HStack color="gray.500" py={6} justify="center">
+                                <Spinner size="sm" />
+                                <Text fontSize="14px">
+                                    영상을 업로드하는 중입니다...
+                                </Text>
+                            </HStack>
+                        ) : sessionId ? (
+                            <VStack align="stretch" gap={4}>
+                                <Box
+                                    borderRadius="xl"
+                                    overflow="hidden"
+                                    bg="black"
+                                    maxW="720px"
+                                    mx="auto"
+                                    w="100%"
                                 >
-                                    <VStack gap={0}>
-                                        <Text
-                                            fontSize="36px"
-                                            fontWeight="900"
-                                            color="white"
-                                            lineHeight="1"
-                                        >
+                                    <video
+                                        ref={replayVideoRef}
+                                        controls
+                                        src={`/api/interview-sessions/${sessionId}/video`}
+                                        style={{
+                                            width: "100%",
+                                            display: "block",
+                                        }}
+                                    />
+                                </Box>
+                                {chapters.length > 0 && (
+                                    <Box overflowX="auto">
+                                        <HStack gap={2} pb={1}>
+                                            {chapters.map((ch, i) => (
+                                                <Button
+                                                    key={ch.index}
+                                                    size="sm"
+                                                    variant="outline"
+                                                    borderColor="gray.300"
+                                                    color="gray.700"
+                                                    flexShrink={0}
+                                                    _hover={{
+                                                        bg: "blue.600",
+                                                        borderColor: "blue.600",
+                                                        color: "white",
+                                                    }}
+                                                    onClick={() => {
+                                                        if (replayVideoRef.current) {
+                                                            replayVideoRef.current.currentTime =
+                                                                ch.startTime
+                                                            replayVideoRef.current.play().catch(
+                                                                () => {},
+                                                            )
+                                                        }
+                                                    }}
+                                                >
+                                                    질문 {i + 1}
+                                                </Button>
+                                            ))}
+                                        </HStack>
+                                    </Box>
+                                )}
+                            </VStack>
+                        ) : (
+                            <Text color="gray.500" fontSize="14px" py={4} textAlign="center">
+                                이 면접의 영상은 저장되지 않았습니다.
+                            </Text>
+                        )}
+                    </Card.Root>
+
+                    {/* 역량 프로필 + 딜리버리 지표 */}
+                    <Flex
+                        direction={{ base: "column", xl: "row" }}
+                        gap={6}
+                        mb={8}
+                        align="stretch"
+                    >
+                        {/* 역량 레이더 차트 */}
+                        <Card.Root
+                            flex={{ xl: "0 0 480px" }}
+                            bg="white"
+                            borderColor="gray.200"
+                            borderRadius="2xl"
+                            p={7}
+                            boxShadow="sm"
+                        >
+                            <Flex justify="space-between" align="flex-start" mb={1}>
+                                <Box>
+                                    <Text fontSize="15px" fontWeight="700" color="gray.900">
+                                        역량 프로필
+                                    </Text>
+                                    <Text fontSize="12.5px" color="gray.400" mt="2px">
+                                        6개 역량 축 · 권장 기준선 대비 비교
+                                    </Text>
+                                </Box>
+                                <VStack gap={0} align="flex-end">
+                                    <HStack gap={1} align="baseline">
+                                        <Text fontFamily="mono" fontSize="28px" fontWeight="700" color="gray.900">
                                             {reportData.overallScore}
                                         </Text>
-                                        <Text
-                                            fontSize="13px"
-                                            fontWeight="700"
-                                            color="white/80"
-                                        >
-                                            / 100점
+                                        <Text fontSize="14px" color="gray.400" fontWeight="600">
+                                            /100
                                         </Text>
-                                    </VStack>
-                                </Center>
-                                <Text
-                                    fontSize="14px"
-                                    fontWeight="700"
-                                    color="#CBD5E1"
-                                    mt={2}
-                                >
-                                    종합 평가 점수
-                                </Text>
-                            </VStack>
+                                    </HStack>
+                                    <Text fontSize="12px" fontWeight="700" color="blue.600" mt="2px">
+                                        {scoreLabel(reportData.overallScore)}
+                                    </Text>
+                                </VStack>
+                            </Flex>
 
-                            {/* 총평 */}
-                            <VStack align="start" gap={3} flex={1}>
-                                <HStack>
-                                    <Award size={20} color="#38BDF8" />
-                                    <Text
-                                        fontSize="17px"
-                                        fontWeight="800"
-                                        color="#38BDF8"
-                                    >
-                                        종합 총평
+                            {(() => {
+                                const competencies =
+                                    reportData.competencies || DEFAULT_COMPETENCIES
+                                const benchmarkValue = 70
+                                const candidatePoints = RADAR_AXES.map((axis, i) =>
+                                    radarPoint(i, competencies[axis.key]),
+                                )
+                                    .map((p) => `${p.x},${p.y}`)
+                                    .join(" ")
+                                const benchmarkPoints = RADAR_AXES.map((_, i) =>
+                                    radarPoint(i, benchmarkValue),
+                                )
+                                    .map((p) => `${p.x},${p.y}`)
+                                    .join(" ")
+                                const gridRings = [40, 80, 120, 160].map((r) =>
+                                    RADAR_AXES.map((_, i) => {
+                                        const p = radarPoint(i, (r / 160) * 100)
+                                        return `${p.x},${p.y}`
+                                    }).join(" "),
+                                )
+                                const labelPos: [number, number, "start" | "middle" | "end"][] = [
+                                    [200, 22, "middle"],
+                                    [360, 108, "start"],
+                                    [360, 272, "start"],
+                                    [200, 382, "middle"],
+                                    [40, 272, "end"],
+                                    [40, 108, "end"],
+                                ]
+                                return (
+                                    <Flex justify="center" mt={2}>
+                                        <svg width="360" height="360" viewBox="0 0 400 400">
+                                            {gridRings.map((pts, i) => (
+                                                <polygon
+                                                    key={i}
+                                                    points={pts}
+                                                    fill="none"
+                                                    stroke={i === gridRings.length - 1 ? "#E5E7EB" : "#EEF0F3"}
+                                                    strokeWidth={i === gridRings.length - 1 ? 1.5 : 1}
+                                                />
+                                            ))}
+                                            {RADAR_AXES.map((_, i) => {
+                                                const p = radarPoint(i, 100)
+                                                return (
+                                                    <line
+                                                        key={i}
+                                                        x1={200}
+                                                        y1={200}
+                                                        x2={p.x}
+                                                        y2={p.y}
+                                                        stroke="#E5E7EB"
+                                                        strokeWidth={1}
+                                                    />
+                                                )
+                                            })}
+                                            <polygon
+                                                points={benchmarkPoints}
+                                                fill="none"
+                                                stroke="#9CA3AF"
+                                                strokeWidth={1.75}
+                                                strokeDasharray="4 3"
+                                            />
+                                            <polygon
+                                                points={candidatePoints}
+                                                fill="#2563EB"
+                                                fillOpacity={0.14}
+                                                stroke="#2563EB"
+                                                strokeWidth={2.25}
+                                                strokeLinejoin="round"
+                                            />
+                                            {RADAR_AXES.map((axis, i) => {
+                                                const p = radarPoint(i, competencies[axis.key])
+                                                return <circle key={axis.key} cx={p.x} cy={p.y} r={4} fill="#2563EB" />
+                                            })}
+                                            {RADAR_AXES.map((axis, i) => {
+                                                const [lx, ly, anchor] = labelPos[i]
+                                                const value = competencies[axis.key]
+                                                return (
+                                                    <g key={axis.key}>
+                                                        <text
+                                                            x={lx}
+                                                            y={ly}
+                                                            textAnchor={anchor}
+                                                            fontFamily="Noto Sans KR"
+                                                            fontSize="12.5"
+                                                            fontWeight="700"
+                                                            fill="#374151"
+                                                        >
+                                                            {axis.label}
+                                                        </text>
+                                                        <text
+                                                            x={lx}
+                                                            y={ly + 15}
+                                                            textAnchor={anchor}
+                                                            fontFamily="JetBrains Mono"
+                                                            fontSize="12"
+                                                            fontWeight="600"
+                                                            fill={value < 60 ? "#EA580C" : "#2563EB"}
+                                                        >
+                                                            {value}
+                                                        </text>
+                                                    </g>
+                                                )
+                                            })}
+                                        </svg>
+                                    </Flex>
+                                )
+                            })()}
+
+                            <HStack justify="center" gap={5} mt={1}>
+                                <HStack gap={1.5}>
+                                    <Box w="12px" h="12px" borderRadius="3px" bg="blue.600" />
+                                    <Text fontSize="12.5px" color="gray.600" fontWeight="600">
+                                        내 점수
                                     </Text>
                                 </HStack>
-                                <Text
-                                    fontSize="14px"
-                                    color="#E2E8F0"
-                                    lineHeight="1.7"
-                                >
-                                    {reportData.overallFeedback}
+                                <HStack gap={1.5}>
+                                    <Box w="12px" h="0" borderTop="2px dashed" borderColor="gray.400" />
+                                    <Text fontSize="12.5px" color="gray.600" fontWeight="600">
+                                        권장 기준선
+                                    </Text>
+                                </HStack>
+                            </HStack>
+                        </Card.Root>
+
+                        {/* 딜리버리 지표 */}
+                        <Card.Root
+                            flex={1}
+                            bg="white"
+                            borderColor="gray.200"
+                            borderRadius="2xl"
+                            p={7}
+                            boxShadow="sm"
+                        >
+                            <Text fontSize="15px" fontWeight="700" color="gray.900">
+                                딜리버리 지표
+                            </Text>
+                            <Text fontSize="12.5px" color="gray.400" mt="2px" mb={5}>
+                                음성·발화 분석 기반 전달 방식 측정값
+                            </Text>
+
+                            {deliveryMetrics ? (
+                                <VStack align="stretch" gap={5}>
+                                    {[
+                                        {
+                                            label: "말하기 속도",
+                                            value: deliveryMetrics.wpm,
+                                            unit: "WPM",
+                                            domainMax: 220,
+                                            bandStart: 100,
+                                            bandEnd: 180,
+                                        },
+                                        {
+                                            label: "필러워드 빈도",
+                                            value: deliveryMetrics.fillerPerMinute,
+                                            unit: "회/분",
+                                            domainMax: 10,
+                                            bandStart: 0,
+                                            bandEnd: 2,
+                                        },
+                                        {
+                                            label: "평균 답변 길이",
+                                            value: deliveryMetrics.avgAnswerSec,
+                                            unit: "초",
+                                            domainMax: 120,
+                                            bandStart: 30,
+                                            bandEnd: 90,
+                                        },
+                                        {
+                                            label: "침묵 비율",
+                                            value: deliveryMetrics.silenceRatio,
+                                            unit: "%",
+                                            domainMax: 60,
+                                            bandStart: 0,
+                                            bandEnd: 20,
+                                        },
+                                    ].map((metric) => {
+                                        const ok =
+                                            metric.value >= metric.bandStart &&
+                                            metric.value <= metric.bandEnd
+                                        const clampedValue = Math.max(
+                                            0,
+                                            Math.min(metric.domainMax, metric.value),
+                                        )
+                                        const markerPct =
+                                            (clampedValue / metric.domainMax) * 100
+                                        const bandLeftPct =
+                                            (metric.bandStart / metric.domainMax) * 100
+                                        const bandWidthPct =
+                                            ((metric.bandEnd - metric.bandStart) /
+                                                metric.domainMax) *
+                                            100
+                                        return (
+                                            <Box key={metric.label}>
+                                                <Flex justify="space-between" align="baseline" mb={2}>
+                                                    <Text fontSize="13.5px" fontWeight="600" color="gray.700">
+                                                        {metric.label}
+                                                    </Text>
+                                                    <HStack gap={2} align="baseline">
+                                                        <HStack gap={1} align="baseline">
+                                                            <Text fontFamily="mono" fontSize="18px" fontWeight="700" color="gray.900">
+                                                                {metric.value}
+                                                            </Text>
+                                                            <Text fontSize="12px" color="gray.400" fontWeight="600">
+                                                                {metric.unit}
+                                                            </Text>
+                                                        </HStack>
+                                                        <Badge
+                                                            fontSize="11px"
+                                                            fontWeight="700"
+                                                            color={ok ? "emerald.700" : "orange.700"}
+                                                            bg={ok ? "emerald.50" : "orange.50"}
+                                                            px={2}
+                                                            py="1px"
+                                                            borderRadius="full"
+                                                        >
+                                                            {ok ? "적정" : "주의"}
+                                                        </Badge>
+                                                    </HStack>
+                                                </Flex>
+                                                <Box position="relative" h="8px" bg="gray.100" borderRadius="full">
+                                                    <Box
+                                                        position="absolute"
+                                                        left={`${bandLeftPct}%`}
+                                                        w={`${bandWidthPct}%`}
+                                                        h="8px"
+                                                        bg="emerald.50"
+                                                        borderRadius="full"
+                                                    />
+                                                    <Box
+                                                        position="absolute"
+                                                        left={`${markerPct}%`}
+                                                        top="-3px"
+                                                        w="3px"
+                                                        h="14px"
+                                                        bg={ok ? "blue.600" : "orange.600"}
+                                                        borderRadius="2px"
+                                                        transform="translateX(-50%)"
+                                                    />
+                                                </Box>
+                                            </Box>
+                                        )
+                                    })}
+                                    <Text fontSize="12px" color="gray.400" lineHeight="1.6" pt={2} borderTop="1px solid" borderColor="gray.100">
+                                        발화가 감지된 답변만 집계한 실측값이며, 음영 구간은 일반적으로 권장되는 참고 범위입니다.
+                                    </Text>
+                                </VStack>
+                            ) : (
+                                <Text color="gray.400" fontSize="13.5px" py={8} textAlign="center">
+                                    딜리버리 지표를 계산할 수 있는 답변이 부족합니다.
                                 </Text>
-                            </VStack>
-                        </Flex>
+                            )}
+                        </Card.Root>
+                    </Flex>
+
+                    {/* 종합 총평 */}
+                    <Card.Root
+                        bg="white"
+                        borderColor="gray.200"
+                        borderRadius="2xl"
+                        p={7}
+                        mb={8}
+                        boxShadow="sm"
+                    >
+                        <HStack gap={2} mb={2.5}>
+                            <Award size={18} color="#2563EB" />
+                            <Text fontSize="15px" fontWeight="700" color="gray.900">
+                                종합 총평
+                            </Text>
+                        </HStack>
+                        <Text fontSize="14.5px" color="gray.700" lineHeight="1.75">
+                            {reportData.overallFeedback}
+                        </Text>
                     </Card.Root>
 
                     {/* 강점 및 보완점 2열 카드 */}
@@ -1484,17 +2222,17 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                         {/* 강점 */}
                         <Card.Root
                             flex={1}
-                            bg="#1E293B"
-                            borderColor="#334155"
+                            bg="white"
+                            borderColor="gray.200"
                             borderRadius="2xl"
                             p={6}
                         >
                             <HStack mb={4}>
-                                <TrendingUp size={20} color="#4ADE80" />
+                                <TrendingUp size={20} color="emerald.600" />
                                 <Text
                                     fontSize="16px"
                                     fontWeight="800"
-                                    color="#4ADE80"
+                                    color="emerald.600"
                                 >
                                     주요 강점 (Strengths)
                                 </Text>
@@ -1502,10 +2240,10 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             <VStack align="start" gap={2}>
                                 {reportData.strengths.map((st, i) => (
                                     <HStack key={i} align="start" gap={2}>
-                                        <Text color="#4ADE80" fontWeight="700">
+                                        <Text color="emerald.600" fontWeight="700">
                                             ✓
                                         </Text>
-                                        <Text fontSize="14px" color="#E2E8F0">
+                                        <Text fontSize="14px" color="gray.700">
                                             {st}
                                         </Text>
                                     </HStack>
@@ -1516,17 +2254,17 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                         {/* 보완점 */}
                         <Card.Root
                             flex={1}
-                            bg="#1E293B"
-                            borderColor="#334155"
+                            bg="white"
+                            borderColor="gray.200"
                             borderRadius="2xl"
                             p={6}
                         >
                             <HStack mb={4}>
-                                <AlertCircle size={20} color="#FBBF24" />
+                                <AlertCircle size={20} color="orange.600" />
                                 <Text
                                     fontSize="16px"
                                     fontWeight="800"
-                                    color="#FBBF24"
+                                    color="orange.600"
                                 >
                                     개선 권장사항 (Improvements)
                                 </Text>
@@ -1534,10 +2272,10 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             <VStack align="start" gap={2}>
                                 {reportData.improvements.map((im, i) => (
                                     <HStack key={i} align="start" gap={2}>
-                                        <Text color="#FBBF24" fontWeight="700">
+                                        <Text color="orange.600" fontWeight="700">
                                             •
                                         </Text>
-                                        <Text fontSize="14px" color="#E2E8F0">
+                                        <Text fontSize="14px" color="gray.700">
                                             {im}
                                         </Text>
                                     </HStack>
@@ -1552,97 +2290,126 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                             질문별 상세 피드백 & 모범 답변
                         </Text>
 
-                        <VStack w="100%" gap={4}>
+                        <VStack w="100%" gap={3}>
                             {reportData.questionEvaluations.map(
                                 (evalItem, index) => {
                                     const isFailed =
                                         evalItem.status === "FAILED"
+                                    const isExpanded =
+                                        expandedQuestionIndex === index
 
                                     return (
                                         <Card.Root
                                             key={index}
                                             w="100%"
-                                            bg="#1E293B"
+                                            bg="white"
                                             borderColor={
-                                                isFailed ? "red.900" : "#334155"
+                                                isFailed ? "red.200" : "gray.200"
                                             }
                                             borderRadius="xl"
-                                            p={5}
+                                            overflow="hidden"
+                                            p={0}
                                         >
                                             <Flex
                                                 justify="space-between"
-                                                align="start"
-                                                mb={3}
+                                                align="center"
+                                                px={5}
+                                                py={4}
+                                                cursor="pointer"
+                                                _hover={{ bg: "gray.50" }}
+                                                onClick={() =>
+                                                    setExpandedQuestionIndex(
+                                                        isExpanded ? null : index,
+                                                    )
+                                                }
                                             >
-                                                <HStack gap={2}>
+                                                <HStack gap={3} minW={0}>
                                                     <Badge
+                                                        fontFamily="mono"
                                                         bg="blue.600"
                                                         color="white"
                                                         px={2.5}
                                                         py={0.5}
                                                         borderRadius="md"
                                                         fontSize="12px"
+                                                        flexShrink={0}
                                                     >
                                                         Q{index + 1}
                                                     </Badge>
                                                     <Text
-                                                        fontSize="16px"
+                                                        fontSize="14.5px"
                                                         fontWeight="700"
-                                                        color="white"
+                                                        color="gray.900"
+                                                        lineClamp={1}
                                                     >
                                                         {evalItem.questionText}
                                                     </Text>
                                                 </HStack>
-                                                {isFailed ? (
-                                                    <Badge
-                                                        bg="red.900"
-                                                        color="red.200"
-                                                        px={2.5}
-                                                        py={1}
-                                                        borderRadius="md"
-                                                        fontSize="12px"
-                                                    >
-                                                        처리 실패
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge
-                                                        bg="emerald.900"
-                                                        color="emerald.200"
-                                                        px={2.5}
-                                                        py={1}
-                                                        borderRadius="md"
-                                                        fontSize="13px"
-                                                        fontWeight="800"
-                                                    >
-                                                        {evalItem.score} / 10점
-                                                    </Badge>
-                                                )}
+                                                <HStack gap={3.5} flexShrink={0}>
+                                                    {isFailed ? (
+                                                        <Badge
+                                                            bg="red.50"
+                                                            color="red.700"
+                                                            px={2.5}
+                                                            py={1}
+                                                            borderRadius="md"
+                                                            fontSize="12px"
+                                                        >
+                                                            처리 실패
+                                                        </Badge>
+                                                    ) : (
+                                                        <Text
+                                                            fontFamily="mono"
+                                                            fontSize="14px"
+                                                            fontWeight="700"
+                                                            color="emerald.600"
+                                                        >
+                                                            {evalItem.score} / 10
+                                                        </Text>
+                                                    )}
+                                                    <ChevronDown
+                                                        size={16}
+                                                        color="#9CA3AF"
+                                                        style={{
+                                                            transform: isExpanded
+                                                                ? "rotate(180deg)"
+                                                                : "none",
+                                                            transition: "transform 0.15s ease",
+                                                        }}
+                                                    />
+                                                </HStack>
                                             </Flex>
 
+                                            {!isExpanded ? null : (
                                             <VStack
                                                 align="start"
                                                 gap={3}
-                                                mt={3}
+                                                px={5}
+                                                pb={5}
+                                                pt={1}
+                                                borderTop="1px solid"
+                                                borderColor="gray.100"
                                             >
                                                 {/* 지원자 답변 텍스트 */}
                                                 <Box
                                                     w="100%"
-                                                    bg="#0F172A"
+                                                    bg="gray.50"
                                                     p={3.5}
                                                     borderRadius="lg"
-                                                    border="1px solid #334155"
+                                                    border="1px solid"
+                                                    borderColor="gray.200"
                                                 >
                                                     <Text
                                                         fontSize="12px"
                                                         fontWeight="700"
-                                                        color="#94A3B8"
+                                                        color="gray.500"
                                                         mb={1}
                                                     >
                                                         내 답변 (STT 변환)
                                                     </Text>
                                                     <Text
                                                         fontSize="14px"
-                                                        color="#CBD5E1"
+                                                        color="gray.700"
                                                     >
                                                         {evalItem.answerText ||
                                                             "(답변 내용 없음)"}
@@ -1656,7 +2423,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                                             <Text
                                                                 fontSize="13px"
                                                                 fontWeight="700"
-                                                                color="#38BDF8"
+                                                                color="blue.600"
                                                                 mb={1}
                                                             >
                                                                 💡 AI 평가 및
@@ -1664,7 +2431,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                                             </Text>
                                                             <Text
                                                                 fontSize="13px"
-                                                                color="#E2E8F0"
+                                                                color="gray.700"
                                                                 lineHeight="1.6"
                                                             >
                                                                 {
@@ -1676,15 +2443,16 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                                         {evalItem.sampleAnswer && (
                                                             <Box
                                                                 w="100%"
-                                                                bg="#0D2847/50"
+                                                                bg="blue.50"
                                                                 p={3.5}
                                                                 borderRadius="lg"
-                                                                border="1px solid #1E40AF"
+                                                                border="1px solid"
+                                                                borderColor="blue.100"
                                                             >
                                                                 <Text
                                                                     fontSize="12px"
                                                                     fontWeight="700"
-                                                                    color="#60A5FA"
+                                                                    color="blue.700"
                                                                     mb={1}
                                                                 >
                                                                     ✨ 모범 답변
@@ -1692,7 +2460,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                                                 </Text>
                                                                 <Text
                                                                     fontSize="13px"
-                                                                    color="#BFDBFE"
+                                                                    color="gray.700"
                                                                     lineHeight="1.6"
                                                                 >
                                                                     {
@@ -1704,6 +2472,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({
                                                     </>
                                                 )}
                                             </VStack>
+                                            )}
                                         </Card.Root>
                                     )
                                 },

@@ -19,6 +19,7 @@ import { useLocation } from "react-router";
 
 import BlockLink from "../atoms/BlockLink";
 import AuthButton from "./AuthButton";
+import { ColorModeButton } from "../ui/color-mode";
 
 export default function Header({
     bg,
@@ -49,10 +50,10 @@ export default function Header({
         };
     }, []);
 
-    const finalBg = bg !== undefined ? bg : (isLandingPage ? (scrolled ? "white" : "transparent") : "white");
+    const finalBg = bg !== undefined ? bg : (isLandingPage ? (scrolled ? "bg.panel" : "transparent") : "bg.panel");
     const finalShadow = boxShadow !== undefined ? boxShadow : (isLandingPage ? (scrolled ? "sm" : "none") : "none");
     const finalBorderBottom = borderBottom !== undefined ? borderBottom : (isLandingPage ? "none" : "1px solid");
-    const finalBorderColor = borderColor !== undefined ? borderColor : (isLandingPage ? "transparent" : "gray.100");
+    const finalBorderColor = borderColor !== undefined ? borderColor : (isLandingPage ? "transparent" : "border");
 
     return (
         <Box
@@ -93,19 +94,19 @@ export default function Header({
                     display={{ base: "none", md: "flex" }}
                 >
                     <BlockLink to="/post">
-                        <Link color="gray.800" fontWeight="bold">
+                        <Link color="fg" fontWeight="bold">
                             채용 공고
                         </Link>
                     </BlockLink>
 
                     <BlockLink to="/analyze-application">
-                        <Link color="gray.800" fontWeight="bold">
+                        <Link color="fg" fontWeight="bold">
                             자소서 / 이력서
                         </Link>
                     </BlockLink>
 
                     <BlockLink to="/mock-interview">
-                        <Link color="gray.800" fontWeight="bold">
+                        <Link color="fg" fontWeight="bold">
                             모의 면접
                         </Link>
                     </BlockLink>
@@ -115,12 +116,12 @@ export default function Header({
                     align="center"
                     display={{ base: "none", lg: "flex" }}
                 >
-                    <InputGroup startElement={<FaSearch color="#2563EB" />}>
+                    <InputGroup startElement={<FaSearch color="blue.600" />}>
                         <Input
                             placeholder="면접 Easy"
                             minW="360px"
                             borderRadius="md"
-                            borderColor="#2563EB"
+                            borderColor="blue.600"
                             borderWidth={1.5}
                             px={4}
                             _placeholder={{ color: "gray.400" }}
@@ -134,6 +135,7 @@ export default function Header({
                     gap={3}
                     display={{ base: "none", md: "flex" }}
                 >
+                    <ColorModeButton />
                     <AuthButton />
                 </Flex>
 
@@ -168,7 +170,7 @@ export default function Header({
                                 >
                                     <BlockLink to="/post">
                                         <Link
-                                            color="gray.800"
+                                            color="fg"
                                             fontWeight="bold"
                                         >
                                             채용 공고
@@ -177,7 +179,7 @@ export default function Header({
 
                                     <BlockLink to="/analyze-application">
                                         <Link
-                                            color="gray.800"
+                                            color="fg"
                                             fontWeight="bold"
                                         >
                                             자소서 / 이력서
@@ -186,16 +188,17 @@ export default function Header({
 
                                     <BlockLink to="/mock-interview">
                                         <Link
-                                            color="gray.800"
+                                            color="fg"
                                             fontWeight="bold"
                                         >
                                             모의 면접
                                         </Link>
                                     </BlockLink>
 
-                                    <Box pt={4}>
+                                    <HStack pt={4} justify="space-between">
                                         <AuthButton />
-                                    </Box>
+                                        <ColorModeButton />
+                                    </HStack>
                                 </VStack>
                             </Drawer.Body>
                         </Drawer.Content>

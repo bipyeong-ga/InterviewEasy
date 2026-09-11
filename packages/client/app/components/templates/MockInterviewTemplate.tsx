@@ -369,10 +369,10 @@ const MockInterviewTemplate: React.FC = () => {
     }
 
     return (
-        <Box bg="#F8FAFC" minH="100vh" overflow="hidden">
+        <Box bg="bg.subtle" minH="100vh" overflow="hidden">
             <Center
                 h="calc(100vh - 72px)"
-                px={8}
+                px={{ base: 3, md: 8 }}
                 pt={2}
                 pb={2}
                 alignItems="flex-start"
@@ -407,20 +407,20 @@ const MockInterviewTemplate: React.FC = () => {
                                                     border="2px solid"
                                                     borderColor={
                                                         active
-                                                            ? "#2563EB"
-                                                            : "#E2E8F0"
+                                                            ? "blue.600"
+                                                            : "gray.200"
                                                     }
                                                     bg={
                                                         isCurrent
-                                                            ? "#2563EB"
+                                                            ? "blue.600"
                                                             : "white"
                                                     }
                                                     color={
                                                         isCurrent
                                                             ? "white"
                                                             : active
-                                                                ? "#2563EB"
-                                                                : "#94A3B8"
+                                                                ? "blue.600"
+                                                                : "gray.400"
                                                     }
                                                     fontWeight="bold"
                                                     fontSize="xs"
@@ -446,8 +446,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                     textAlign="center"
                                                     color={
                                                         active
-                                                            ? "#2563EB"
-                                                            : "#94A3B8"
+                                                            ? "blue.600"
+                                                            : "gray.400"
                                                     }
                                                     whiteSpace="nowrap"
                                                     transition="all 0.25s ease"
@@ -464,8 +464,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                     mx={1}
                                                     bg={
                                                         idx < step
-                                                            ? "#2563EB"
-                                                            : "#E2E8F0"
+                                                            ? "blue.600"
+                                                            : "gray.200"
                                                     }
                                                     transition="all 0.25s ease"
                                                 />
@@ -488,7 +488,7 @@ const MockInterviewTemplate: React.FC = () => {
                             style={{
                                 background: "white",
                                 borderRadius: "24px",
-                                border: "1px solid #F1F5F9",
+                                border: "1px solid gray.100",
                                 boxShadow:
                                     "0 10px 30px -10px rgba(0, 0, 0, 0.04)",
                                 padding: "28px",
@@ -505,7 +505,7 @@ const MockInterviewTemplate: React.FC = () => {
                                     <Text
                                         fontSize="20px"
                                         fontWeight="800"
-                                        color="#0F172A"
+                                        color="gray.900"
                                     >
                                         {step === 0 &&
                                             "어떤 직무로 면접 볼까요?"}
@@ -522,7 +522,7 @@ const MockInterviewTemplate: React.FC = () => {
                                     <Text
                                         fontSize="12px"
                                         fontWeight="500"
-                                        color="#64748B"
+                                        color="gray.500"
                                     >
                                         {step === 0 &&
                                             "직무에 맞는 예상 질문을 생성해 드려요"}
@@ -541,7 +541,7 @@ const MockInterviewTemplate: React.FC = () => {
                                 <Text
                                     fontSize="12px"
                                     fontWeight="700"
-                                    color="#94A3B8"
+                                    color="gray.400"
                                 >
                                     {step + 1} / 6
                                 </Text>
@@ -591,13 +591,13 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 fontSize="14px"
                                                                 borderColor={
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#E2E8F0"
+                                                                        ? "blue.600"
+                                                                        : "gray.200"
                                                                 }
                                                                 color={
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#334155"
+                                                                        ? "blue.600"
+                                                                        : "gray.700"
                                                                 }
                                                                 bg="white"
                                                                 fontWeight={
@@ -607,8 +607,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 }
                                                                 _hover={{
                                                                     borderColor:
-                                                                        "#2563EB",
-                                                                    color: "#2563EB",
+                                                                        "blue.600",
+                                                                    color: "blue.600",
                                                                 }}
                                                                 transition="all 0.15s"
                                                             >
@@ -643,13 +643,13 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 fontSize="14px"
                                                                 borderColor={
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#E2E8F0"
+                                                                        ? "blue.600"
+                                                                        : "gray.200"
                                                                 }
                                                                 color={
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#334155"
+                                                                        ? "blue.600"
+                                                                        : "gray.700"
                                                                 }
                                                                 bg="white"
                                                                 fontWeight={
@@ -659,8 +659,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 }
                                                                 _hover={{
                                                                     borderColor:
-                                                                        "#2563EB",
-                                                                    color: "#2563EB",
+                                                                        "blue.600",
+                                                                    color: "blue.600",
                                                                 }}
                                                                 transition="all 0.15s"
                                                             >
@@ -677,8 +677,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                             onChange={(e) => setCustomJob(e.target.value)}
                                                             h="44px"
                                                             borderRadius="lg"
-                                                            borderColor="#E2E8F0"
-                                                            _focus={{ borderColor: "#2563EB", boxShadow: "0 0 0 1px #2563EB" }}
+                                                            borderColor="gray.200"
+                                                            _focus={{ borderColor: "blue.600", boxShadow: "0 0 0 1px blue.600" }}
                                                             fontSize="14px"
                                                             bg="white"
                                                         />
@@ -719,12 +719,12 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 align="center"
                                                                 justify="space-between"
                                                                 p="12px 18px"
-                                                                bg="#F8FAFC"
+                                                                bg="gray.50"
                                                                 borderRadius="14px"
                                                                 border="2px solid"
                                                                 borderColor={
                                                                     isSelected
-                                                                        ? "#2563EB"
+                                                                        ? "blue.600"
                                                                         : "transparent"
                                                                 }
                                                                 cursor="pointer"
@@ -734,7 +734,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                                     )
                                                                 }
                                                                 _hover={{
-                                                                    bg: "#F1F5F9",
+                                                                    bg: "gray.100",
                                                                 }}
                                                                 transition="all 0.15s"
                                                             >
@@ -744,14 +744,14 @@ const MockInterviewTemplate: React.FC = () => {
                                                                         h="36px"
                                                                         bg="white"
                                                                         borderRadius="8px"
-                                                                        border="1px solid #E2E8F0"
+                                                                        border="1px solid gray.200"
                                                                     >
                                                                         <FileText
                                                                             size={18}
                                                                             color={
                                                                                 isSelected
-                                                                                    ? "#2563EB"
-                                                                                    : "#64748B"
+                                                                                    ? "blue.600"
+                                                                                    : "gray.500"
                                                                             }
                                                                         />
                                                                     </Center>
@@ -762,13 +762,13 @@ const MockInterviewTemplate: React.FC = () => {
                                                                         <Text
                                                                             fontSize="14px"
                                                                             fontWeight="700"
-                                                                            color="#0F172A"
+                                                                            color="gray.900"
                                                                         >
                                                                             {doc.title}
                                                                         </Text>
                                                                         <Text
                                                                             fontSize="11px"
-                                                                            color="#94A3B8"
+                                                                            color="gray.400"
                                                                             fontWeight="500"
                                                                         >
                                                                             최근수정일: {new Date(doc.created_at).toLocaleDateString()}
@@ -778,7 +778,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 {isSelected && (
                                                                     <CheckCircle2
                                                                         size={18}
-                                                                        color="#2563EB"
+                                                                        color="blue.600"
                                                                     />
                                                                 )}
                                                             </Flex>
@@ -800,7 +800,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                 />
                                                 <Center
                                                     border="2px dashed"
-                                                    borderColor={isDragActive ? "#2563EB" : "#CBD5E1"}
+                                                    borderColor={isDragActive ? "blue.600" : "gray.300"}
                                                     bg={isDragActive ? "blue.50" : "transparent"}
                                                     opacity={isUploading ? 0.6 : 1}
                                                     pointerEvents={isUploading ? "none" : "auto"}
@@ -814,26 +814,26 @@ const MockInterviewTemplate: React.FC = () => {
                                                     onDragLeave={onDragLeave}
                                                     onDrop={onDrop}
                                                     _hover={{
-                                                        bg: "#F8FAFC",
-                                                        borderColor: "#2563EB",
+                                                        bg: "gray.50",
+                                                        borderColor: "blue.600",
                                                     }}
                                                     transition="all 0.15s"
                                                 >
                                                     <UploadCloud
                                                         size={24}
-                                                        color={isDragActive ? "#2563EB" : "#94A3B8"}
+                                                        color={isDragActive ? "blue.600" : "gray.400"}
                                                     />
                                                     <Text
                                                         fontSize="13px"
                                                         fontWeight="700"
-                                                        color={isDragActive ? "#2563EB" : "#475569"}
+                                                        color={isDragActive ? "blue.600" : "gray.600"}
                                                     >
                                                         {isUploading ? "업로드 중..." : "클릭 또는 파일 드롭"}
                                                     </Text>
                                                     <Text
                                                         fontSize="11px"
                                                         fontWeight="500"
-                                                        color="#94A3B8"
+                                                        color="gray.400"
                                                     >
                                                         PDF, 이미지, 문서 등
                                                     </Text>
@@ -892,8 +892,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                             border="2px solid"
                                                             borderColor={
                                                                 isSelected
-                                                                    ? "#2563EB"
-                                                                    : "#E2E8F0"
+                                                                    ? "blue.600"
+                                                                    : "gray.200"
                                                             }
                                                             cursor="pointer"
                                                             onClick={() =>
@@ -904,8 +904,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                             _hover={{
                                                                 borderColor:
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#94A3B8",
+                                                                        ? "blue.600"
+                                                                        : "gray.400",
                                                             }}
                                                             transition="all 0.2s"
                                                         >
@@ -913,7 +913,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 mb={4}
                                                                 color={
                                                                     isSelected
-                                                                        ? "#2563EB"
+                                                                        ? "blue.600"
                                                                         : "#3B82F6"
                                                                 }
                                                             >
@@ -929,8 +929,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 fontWeight="800"
                                                                 color={
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#0F172A"
+                                                                        ? "blue.600"
+                                                                        : "gray.900"
                                                                 }
                                                                 mb={1.5}
                                                             >
@@ -939,7 +939,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                             <Text
                                                                 fontSize="12px"
                                                                 fontWeight="500"
-                                                                color="#94A3B8"
+                                                                color="gray.400"
                                                                 textAlign="left"
                                                                 lineHeight="short"
                                                             >
@@ -968,20 +968,20 @@ const MockInterviewTemplate: React.FC = () => {
                                                     }
                                                     h="48px"
                                                     borderRadius="12px"
-                                                    borderColor="#E2E8F0"
+                                                    borderColor="gray.200"
                                                     px={4}
                                                     fontSize="14px"
                                                     fontWeight="500"
                                                     _focus={{
-                                                        borderColor: "#2563EB",
+                                                        borderColor: "blue.600",
                                                         boxShadow:
-                                                            "0 0 0 1px #2563EB",
+                                                            "0 0 0 1px blue.600",
                                                     }}
                                                 />
                                                 <HStack
                                                     align="flex-start"
                                                     gap={1.5}
-                                                    color="#64748B"
+                                                    color="gray.500"
                                                 >
                                                     <Text
                                                         fontSize="12px"
@@ -1048,8 +1048,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                             border="2px solid"
                                                             borderColor={
                                                                 isSelected
-                                                                    ? "#2563EB"
-                                                                    : "#E2E8F0"
+                                                                    ? "blue.600"
+                                                                    : "gray.200"
                                                             }
                                                             cursor="pointer"
                                                             onClick={() =>
@@ -1060,8 +1060,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                             _hover={{
                                                                 borderColor:
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#94A3B8",
+                                                                        ? "blue.600"
+                                                                        : "gray.400",
                                                             }}
                                                             transition="all 0.2s"
                                                         >
@@ -1070,8 +1070,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 fontWeight="800"
                                                                 color={
                                                                     isSelected
-                                                                        ? "#2563EB"
-                                                                        : "#0F172A"
+                                                                        ? "blue.600"
+                                                                        : "gray.900"
                                                                 }
                                                                 mb={1}
                                                             >
@@ -1080,7 +1080,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                             <Text
                                                                 fontSize="13px"
                                                                 fontWeight="500"
-                                                                color="#94A3B8"
+                                                                color="gray.400"
                                                             >
                                                                 {opt.desc}
                                                             </Text>
@@ -1100,8 +1100,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                 {/* <Flex gap={2} w="full" align="stretch">
                                                     <Box
                                                         flex={1}
-                                                        bg="#F8FAFC"
-                                                        border="1px solid #E2E8F0"
+                                                        bg="gray.50"
+                                                        border="1px solid gray.200"
                                                         borderRadius="10px"
                                                         px="12px"
                                                         py="8px"
@@ -1109,7 +1109,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                         <Text
                                                             fontSize="10px"
                                                             fontWeight="700"
-                                                            color="#64748B"
+                                                            color="gray.500"
                                                             mb={1}
                                                         >
                                                             카메라 장치
@@ -1137,7 +1137,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                                 fontSize:
                                                                     "12px",
                                                                 fontWeight: 700,
-                                                                color: "#0F172A",
+                                                                color: "gray.900",
                                                             }}
                                                         >
                                                             <option value="">
@@ -1167,8 +1167,8 @@ const MockInterviewTemplate: React.FC = () => {
 
                                                     <Box
                                                         flex={1}
-                                                        bg="#F8FAFC"
-                                                        border="1px solid #E2E8F0"
+                                                        bg="gray.50"
+                                                        border="1px solid gray.200"
                                                         borderRadius="10px"
                                                         px="12px"
                                                         py="8px"
@@ -1176,7 +1176,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                         <Text
                                                             fontSize="10px"
                                                             fontWeight="700"
-                                                            color="#64748B"
+                                                            color="gray.500"
                                                             mb={1}
                                                         >
                                                             디버그
@@ -1184,7 +1184,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                         <Text
                                                             fontSize="11px"
                                                             fontWeight="700"
-                                                            color="#0F172A"
+                                                            color="gray.900"
                                                             lineHeight="short"
                                                         >
                                                             {cameraStatus}
@@ -1192,7 +1192,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                         <Text
                                                             fontSize="10px"
                                                             fontWeight="600"
-                                                            color="#64748B"
+                                                            color="gray.500"
                                                             lineHeight="short"
                                                         >
                                                             {micStatus}
@@ -1204,20 +1204,20 @@ const MockInterviewTemplate: React.FC = () => {
                                                     align="center"
                                                     gap={2}
                                                     p="8px 12px"
-                                                    bg="#F8FAFC"
+                                                    bg="gray.50"
                                                     borderRadius="10px"
-                                                    border="1px solid #E2E8F0"
+                                                    border="1px solid gray.200"
                                                     justify="space-between"
                                                 >
                                                     <HStack gap={2}>
                                                         <Video
                                                             size={14}
-                                                            color="#334155"
+                                                            color="gray.700"
                                                         />
                                                         <Text
                                                             fontSize="11px"
                                                             fontWeight="700"
-                                                            color="#0F172A"
+                                                            color="gray.900"
                                                         >
                                                             카메라
                                                         </Text>
@@ -1227,8 +1227,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                         fontWeight="700"
                                                         color={
                                                             cameraOk
-                                                                ? "#10B981"
-                                                                : "#EF4444"
+                                                                ? "emerald.500"
+                                                                : "red.500"
                                                         }
                                                     >
                                                         {cameraOk
@@ -1241,20 +1241,20 @@ const MockInterviewTemplate: React.FC = () => {
                                                     align="center"
                                                     gap={2}
                                                     p="8px 12px"
-                                                    bg="#F8FAFC"
+                                                    bg="gray.50"
                                                     borderRadius="10px"
-                                                    border="1px solid #E2E8F0"
+                                                    border="1px solid gray.200"
                                                     justify="space-between"
                                                 >
                                                     <HStack gap={2}>
                                                         <Mic
                                                             size={14}
-                                                            color="#334155"
+                                                            color="gray.700"
                                                         />
                                                         <Text
                                                             fontSize="11px"
                                                             fontWeight="700"
-                                                            color="#0F172A"
+                                                            color="gray.900"
                                                         >
                                                             마이크
                                                         </Text>
@@ -1264,8 +1264,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                         fontWeight="700"
                                                         color={
                                                             micOk
-                                                                ? "#10B981"
-                                                                : "#EF4444"
+                                                                ? "emerald.500"
+                                                                : "red.500"
                                                         }
                                                     >
                                                         {micOk
@@ -1276,7 +1276,7 @@ const MockInterviewTemplate: React.FC = () => {
 
                                                 <Box
                                                     h="275px"
-                                                    bg="#1E293B"
+                                                    bg="gray.800"
                                                     borderRadius="16px"
                                                     position="relative"
                                                     overflow="hidden"
@@ -1308,7 +1308,7 @@ const MockInterviewTemplate: React.FC = () => {
                                                             height: "100%",
                                                             objectFit: "cover",
                                                             backgroundColor:
-                                                                "#0F172A",
+                                                                "gray.900",
                                                             opacity: cameraOk
                                                                 ? 1
                                                                 : 0,
@@ -1327,10 +1327,10 @@ const MockInterviewTemplate: React.FC = () => {
                                                         >
                                                             <Video
                                                                 size={42}
-                                                                color="#94A3B8"
+                                                                color="gray.400"
                                                             />
                                                             <Text
-                                                                color="#94A3B8"
+                                                                color="gray.400"
                                                                 fontSize="13px"
                                                                 fontWeight="700"
                                                                 textAlign="center"
@@ -1401,12 +1401,12 @@ const MockInterviewTemplate: React.FC = () => {
                                         px="20px"
                                         fontSize="13px"
                                         borderRadius="11px"
-                                        borderColor="#E2E8F0"
-                                        color="#475569"
+                                        borderColor="gray.200"
+                                        color="gray.600"
                                         fontWeight="700"
                                         _hover={{
-                                            bg: "#F8FAFC",
-                                            borderColor: "#CBD5E1",
+                                            bg: "gray.50",
+                                            borderColor: "gray.300",
                                         }}
                                         onClick={handlePrev}
                                     >
@@ -1424,11 +1424,11 @@ const MockInterviewTemplate: React.FC = () => {
                                         px="24px"
                                         fontSize="13px"
                                         borderRadius="11px"
-                                        bg="#2563EB"
+                                        bg="blue.600"
                                         color="white"
                                         fontWeight="800"
                                         _hover={{
-                                            bg: "#1D4ED8",
+                                            bg: "blue.700",
                                             transform: canStartInterview
                                                 ? "scale(1.02)"
                                                 : "none",
@@ -1436,7 +1436,7 @@ const MockInterviewTemplate: React.FC = () => {
                                         transition="all 0.15s"
                                         disabled={!canStartInterview}
                                         _disabled={{
-                                            bg: "#94A3B8",
+                                            bg: "gray.400",
                                             color: "white",
                                             opacity: 1,
                                             cursor: "not-allowed",
@@ -1459,12 +1459,12 @@ const MockInterviewTemplate: React.FC = () => {
                                         px="24px"
                                         fontSize="13px"
                                         borderRadius="11px"
-                                        bg="#2563EB"
+                                        bg="blue.600"
                                         color="white"
                                         fontWeight="800"
-                                        _hover={{ bg: isNextDisabled ? "#94A3B8" : "#1D4ED8" }}
+                                        _hover={{ bg: isNextDisabled ? "gray.400" : "blue.700" }}
                                         disabled={isNextDisabled}
-                                        _disabled={{ bg: "#94A3B8", cursor: "not-allowed", opacity: 1 }}
+                                        _disabled={{ bg: "gray.400", cursor: "not-allowed", opacity: 1 }}
                                         onClick={handleNext}
                                     >
                                         다음
@@ -1508,7 +1508,7 @@ const MockInterviewTemplate: React.FC = () => {
                                         borderWidth="1px"
                                         borderRadius="lg"
                                         cursor="pointer"
-                                        _hover={{ borderColor: "#2563EB", bg: "blue.50", transform: "translateY(-2px)", shadow: "md" }}
+                                        _hover={{ borderColor: "blue.600", bg: "blue.50", transform: "translateY(-2px)", shadow: "md" }}
                                         onClick={() => {
                                             setIsModeModalOpen(false);
                                             
@@ -1530,7 +1530,7 @@ const MockInterviewTemplate: React.FC = () => {
                                         }}
                                         transition="all 0.2s"
                                     >
-                                        <Text fontWeight="800" fontSize="lg" color="#2563EB">EASY 모드</Text>
+                                        <Text fontWeight="800" fontSize="lg" color="blue.600">EASY 모드</Text>
                                         <Text fontSize="sm" color="gray.600" mt={1}>기본적인 질문 위주로 평이한 난이도의 면접이 진행됩니다.</Text>
                                     </Box>
 

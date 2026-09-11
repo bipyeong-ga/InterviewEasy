@@ -4,6 +4,7 @@ export type User = {
     id?: number
     email?: string
     name?: string
+    nickname?: string
     profile_image_url?: string
 }
 

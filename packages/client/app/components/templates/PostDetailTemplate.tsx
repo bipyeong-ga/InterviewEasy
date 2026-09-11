@@ -34,7 +34,7 @@ import { useEffect } from "react"
 // ────────────────────────────────────────────────
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
     return (
-        <Flex align="center" gap={3} py={3} borderBottom="1px solid" borderColor="gray.100">
+        <Flex align="center" gap={3} py={3} borderBottom="1px solid" borderColor="border.muted">
             <Box color="blue.500" minW="16px">{icon}</Box>
             <Text fontSize="sm" color="gray.500" minW="80px">{label}</Text>
             <Text fontSize="sm" fontWeight="medium" color="gray.800">{value}</Text>
@@ -78,9 +78,9 @@ function CompanyLogo({ post }: { post: Post }) {
         <Box
             w="100%"
             h="120px"
-            bg="gray.50"
+            bg="bg.subtle"
             border="1px solid"
-            borderColor="gray.100"
+            borderColor="border.muted"
             borderRadius="xl"
             display="flex"
             alignItems="center"
@@ -123,7 +123,7 @@ function RelatedJobCard({ post }: { post: Post }) {
     const navigate = useNavigate()
     return (
         <Box
-            bg="white"
+            bg="bg.panel"
             border="1px solid"
             borderColor="gray.200"
             borderRadius="xl"
@@ -136,14 +136,14 @@ function RelatedJobCard({ post }: { post: Post }) {
             <Box
                 w="100%"
                 h="56px"
-                bg="gray.50"
+                bg="bg.subtle"
                 borderRadius="lg"
                 mb={3}
                 display="flex"
                 alignItems="center"
                 px={3}
                 border="1px solid"
-                borderColor="gray.100"
+                borderColor="border.muted"
             >
                 <Text fontWeight="800" fontSize="16px" color="gray.700">
                     {post.companyName.replace("(주) ", "").slice(0, 6)}
@@ -294,7 +294,7 @@ const PostDetailTemplate: React.FC = () => {
                 <Header />
                 <Flex pt="72px" minH="100vh" align="center" justify="center" direction="column" gap={4}>
                     <Text fontSize="5xl">😢</Text>
-                    <Text fontSize="xl" fontWeight="bold" color="gray.600">공고를 찾을 수 없습니다</Text>
+                    <Text fontSize="xl" fontWeight="bold" color="fg.muted">공고를 찾을 수 없습니다</Text>
                     <Button onClick={() => navigate("/post")} bg="blue.500" color="white" borderRadius="full">
                         목록으로 돌아가기
                     </Button>
@@ -308,7 +308,7 @@ const PostDetailTemplate: React.FC = () => {
     return (
         <>
             <Header />
-            <Box pt="72px" minH="100vh" bg="gray.50">
+            <Box pt="72px" minH="100vh" bg="bg.subtle">
                 <Box maxW="1200px" mx="auto" px={6} py={8}>
 
                     {/* Back button */}
@@ -331,7 +331,7 @@ const PostDetailTemplate: React.FC = () => {
 
                             {/* Hero Card */}
                             <Box
-                                bg="white"
+                                bg="bg.panel"
                                 borderRadius="2xl"
                                 border="1px solid"
                                 borderColor="gray.200"
@@ -343,7 +343,7 @@ const PostDetailTemplate: React.FC = () => {
 
                                 <Flex justify="space-between" align="flex-start" gap={4}>
                                     <Box flex={1}>
-                                        <Text fontSize="xl" fontWeight="bold" color="gray.900" mb={1}>
+                                        <Text fontSize="xl" fontWeight="bold" color="fg" mb={1}>
                                             {post.title}
                                         </Text>
                                         <Text fontSize="sm" color="gray.500" mb={3}>{post.companyName}</Text>
@@ -385,7 +385,7 @@ const PostDetailTemplate: React.FC = () => {
 
                             {/* Info Card */}
                             <Box
-                                bg="white"
+                                bg="bg.panel"
                                 borderRadius="2xl"
                                 border="1px solid"
                                 borderColor="gray.200"
@@ -403,7 +403,7 @@ const PostDetailTemplate: React.FC = () => {
                             </Box>
 
                             <Box
-                                bg="white"
+                                bg="bg.panel"
                                 borderRadius="2xl"
                                 border="1px solid"
                                 borderColor="gray.200"
@@ -413,7 +413,7 @@ const PostDetailTemplate: React.FC = () => {
                                 boxShadow="sm"
                             >
                                 <Flex align="center" gap={2} mb={4}>
-                                    <FaCode color="#2563EB" size={16} />
+                                    <FaCode color="blue.600" size={16} />
                                     <Text fontSize="md" fontWeight="bold" color="gray.800">기술 스택</Text>
                                 </Flex>
                                 <HStack gap={2} flexWrap="wrap">
@@ -435,7 +435,7 @@ const PostDetailTemplate: React.FC = () => {
 
                             {/* Description + sections */}
                             <Box
-                                bg="white"
+                                bg="bg.panel"
                                 borderRadius="2xl"
                                 border="1px solid"
                                 borderColor="gray.200"
@@ -450,7 +450,7 @@ const PostDetailTemplate: React.FC = () => {
                                         <Box w="4px" h="20px" bg="blue.500" borderRadius="full" />
                                         <Text fontSize="lg" fontWeight="bold" color="gray.800">회사 소개</Text>
                                     </Flex>
-                                    <Text fontSize="sm" color="gray.600" lineHeight="1.8" pl={4}>
+                                    <Text fontSize="sm" color="fg.muted" lineHeight="1.8" pl={4}>
                                         {post.description}
                                     </Text>
                                 </Box>
@@ -466,7 +466,7 @@ const PostDetailTemplate: React.FC = () => {
                         <Box w={{ base: "100%", lg: "320px" }} flexShrink={0}>
                             {/* Sticky Apply Card */}
                             <Box
-                                bg="white"
+                                bg="bg.panel"
                                 borderRadius="2xl"
                                 border="1px solid"
                                 borderColor="gray.200"

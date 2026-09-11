@@ -136,7 +136,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                             </CodeBlock.Title>
                             <Clipboard.Root value={codeText}>
                                 <Clipboard.Trigger asChild>
-                                    <IconButton variant="ghost" size="xs" color="gray.400" _hover={{ color: "white", bg: "whiteAlpha.200" }} minW="8" h="8">
+                                    <IconButton aria-label="코드 복사" variant="ghost" size="xs" color="gray.400" _hover={{ color: "white", bg: "whiteAlpha.200" }} minW="8" h="8">
                                         <Clipboard.Indicator />
                                     </IconButton>
                                 </Clipboard.Trigger>
@@ -573,16 +573,25 @@ const ApplicationTemplate: React.FC = () => {
     }
 
     return (
-        <Box h="100vh" w="100vw" overflow="hidden" bg="#F3F7FA" display="flex" flexDirection="column">
+        <Box h={{ base: "auto", md: "100vh" }} minH="100vh" w="100vw" overflow="hidden" bg="#F3F7FA" display="flex" flexDirection="column">
             <Header />
-            <Flex h="calc(100vh - 72px)" mt="72px" w="100%" overflow="hidden" p={6} gap={6}>
+            <Flex
+                h={{ base: "auto", md: "calc(100vh - 72px)" }}
+                mt="72px"
+                w="100%"
+                overflow={{ base: "visible", md: "hidden" }}
+                direction={{ base: "column", md: "row" }}
+                p={{ base: 3, md: 6 }}
+                gap={{ base: 3, md: 6 }}
+            >
                 {/* Left Sidebar Card */}
                 <Box
-                    w="280px"
-                    minW="280px"
+                    w={{ base: "100%", md: "280px" }}
+                    minW={{ base: "100%", md: "280px" }}
+                    maxH={{ base: "260px", md: "none" }}
                     borderRadius="2xl"
                     shadow="sm"
-                    h="100%"
+                    h={{ base: "auto", md: "100%" }}
                     bg="white"
                     display="flex"
                     flexDirection="column"
@@ -719,13 +728,14 @@ const ApplicationTemplate: React.FC = () => {
                 {/* Right Main Panel Card */}
                 <Box
                     flex={1}
-                    h="100%"
+                    h={{ base: "auto", md: "100%" }}
+                    minH={{ base: "60vh", md: "auto" }}
                     bg="white"
                     borderRadius="2xl"
                     shadow="sm"
                     display="flex"
                     flexDirection="column"
-                    p={8}
+                    p={{ base: 4, md: 8 }}
                     overflow="hidden"
                     position="relative"
                 >
@@ -817,7 +827,30 @@ const ApplicationTemplate: React.FC = () => {
 
                             {/* Main Content Area */}
                             {selectedResume.raw_text ? (
-                                <>
+                                <Flex flex={1} gap={5} overflow="hidden" direction={{ base: "column", lg: "row" }}>
+                                    {/* 원본 자소서·이력서 텍스트 */}
+                                    <Box
+                                        flex="1"
+                                        minW={0}
+                                        maxH={{ base: "260px", lg: "none" }}
+                                        h={{ base: "auto", lg: "100%" }}
+                                        overflowY="auto"
+                                        border="1px solid"
+                                        borderColor="gray.100"
+                                        borderRadius="xl"
+                                        bg="gray.50"
+                                        p={4}
+                                    >
+                                        <Heading fontSize="xs" fontWeight="bold" color="gray.500" mb={3} textTransform="uppercase" letterSpacing="wider">
+                                            원본 문서
+                                        </Heading>
+                                        <Text fontSize="sm" color="gray.700" whiteSpace="pre-wrap" lineHeight="1.7">
+                                            {selectedResume.raw_text}
+                                        </Text>
+                                    </Box>
+
+                                    {/* AI 피드백 & 대화 */}
+                                    <Box flex="1" minW={0} h={{ base: "auto", lg: "100%" }} display="flex" flexDirection="column" overflow="hidden">
                                     {/* Unified Scrolling View */}
                                     <Box flex={1} overflowY="auto" pr={2} mb={4} position="relative">
                                         {isUploading && (
@@ -912,7 +945,7 @@ const ApplicationTemplate: React.FC = () => {
                                             shadow="sm"
                                             _focusWithin={{
                                                 borderColor: "blue.400",
-                                                boxShadow: "0 0 0 1px #2563EB",
+                                                boxShadow: "0 0 0 1px blue.600",
                                             }}
                                         >
                                             <Input
@@ -955,7 +988,8 @@ const ApplicationTemplate: React.FC = () => {
                                             </Button>
                                         </Flex>
                                     </Box>
-                                </>
+                                    </Box>
+                                </Flex>
                             ) : (
                                 /* Empty state - Drag & Drop / Upload Box */
                                 <Box flex={1} display="flex" alignItems="center" justifyContent="center" h="100%" w="100%">

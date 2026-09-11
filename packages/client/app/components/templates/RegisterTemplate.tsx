@@ -171,7 +171,7 @@ const RegisterTemplate: React.FC = () => {
         <Flex
             w="100%"
             minH="100vh"
-            bg="#f7f8fa"
+            bg="bg.subtle"
             direction={{ base: "column", lg: "row" }}
         >
             <Flex
@@ -290,13 +290,13 @@ const RegisterTemplate: React.FC = () => {
                                     <Text
                                         fontSize="14px"
                                         textDecoration={"underline"}
-                                        color={"#64748B"}
+                                        color={"gray.500"}
                                         cursor="pointer"
                                         onClick={() => openModal("terms1")}
                                     >
                                         서비스 이용약관
                                     </Text>
-                                    <Text fontSize="13px" color={"#64748B"}>
+                                    <Text fontSize="13px" color={"gray.500"}>
                                         (필수)
                                     </Text>
                                 </HStack>{" "}
@@ -316,13 +316,13 @@ const RegisterTemplate: React.FC = () => {
                                     <Text
                                         fontSize="14px"
                                         textDecoration={"underline"}
-                                        color={"#64748B"}
+                                        color={"gray.500"}
                                         cursor="pointer"
                                         onClick={() => openModal("terms2")}
                                     >
                                         개인정보 수집 및 이용동의
                                     </Text>
-                                    <Text fontSize="13px" color={"#64748B"}>
+                                    <Text fontSize="13px" color={"gray.500"}>
                                         (필수)
                                     </Text>
                                 </HStack>
@@ -342,13 +342,13 @@ const RegisterTemplate: React.FC = () => {
                                     <Text
                                         fontSize="14px"
                                         textDecoration={"underline"}
-                                        color={"#64748B"}
+                                        color={"gray.500"}
                                         cursor="pointer"
                                         onClick={() => openModal("terms3")}
                                     >
                                         멤버십 이용약관
                                     </Text>
-                                    <Text fontSize="13px" color={"#64748B"}>
+                                    <Text fontSize="13px" color={"gray.500"}>
                                         (선택)
                                     </Text>
                                 </HStack>

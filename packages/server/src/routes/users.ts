@@ -19,54 +19,45 @@ const upload = multer({
     }
 })
 
-// 1. Update profile (name and/or image)
+// 1. Update profile (name, nickname, and/or image)
 router.put("/profile", authMiddleware, upload.single("profile_image"), async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id
-        const { name } = req.body
+        const { name, nickname } = req.body
 
-        if (!name && !req.file) {
+        if (!name && !nickname && !req.file) {
             return res.status(400).json({ error: "No data provided to update" })
         }
 
-        let query = ""
-        let params: any[] = []
+        const setClauses: string[] = []
+        const params: any[] = []
 
-        if (name && req.file) {
-            const profileImageUrl = `/api/users/${userId}/profile-image?t=${Date.now()}`
-            query = `
-                UPDATE users 
-                SET name = $1, 
-                    profile_image_url = $2, 
-                    profile_image = $3,
-                    profile_image_type = $4,
-                    updated_at = CURRENT_TIMESTAMP 
-                WHERE id = $5 
-                RETURNING id, email, name, nickname, profile_image_url
-            `
-            params = [name, profileImageUrl, req.file.buffer, req.file.mimetype, userId]
-        } else if (name) {
-            query = `
-                UPDATE users 
-                SET name = $1, 
-                    updated_at = CURRENT_TIMESTAMP 
-                WHERE id = $2 
-                RETURNING id, email, name, nickname, profile_image_url
-            `
-            params = [name, userId]
-        } else if (req.file) {
-            const profileImageUrl = `/api/users/${userId}/profile-image?t=${Date.now()}`
-            query = `
-                UPDATE users 
-                SET profile_image_url = $1, 
-                    profile_image = $2,
-                    profile_image_type = $3,
-                    updated_at = CURRENT_TIMESTAMP 
-                WHERE id = $4 
-                RETURNING id, email, name, nickname, profile_image_url
-            `
-            params = [profileImageUrl, req.file.buffer, req.file.mimetype, userId]
+        if (name) {
+            params.push(name)
+            setClauses.push(`name = $${params.length}`)
         }
+        if (nickname) {
+            params.push(nickname)
+            setClauses.push(`nickname = $${params.length}`)
+        }
+        if (req.file) {
+            const profileImageUrl = `/api/users/${userId}/profile-image?t=${Date.now()}`
+            params.push(profileImageUrl)
+            setClauses.push(`profile_image_url = $${params.length}`)
+            params.push(req.file.buffer)
+            setClauses.push(`profile_image = $${params.length}`)
+            params.push(req.file.mimetype)
+            setClauses.push(`profile_image_type = $${params.length}`)
+        }
+        setClauses.push("updated_at = CURRENT_TIMESTAMP")
+
+        params.push(userId)
+        const query = `
+            UPDATE users
+            SET ${setClauses.join(", ")}
+            WHERE id = $${params.length}
+            RETURNING id, email, name, nickname, profile_image_url
+        `
 
         const result = await pool.query(query, params)
         if (result.rows.length === 0) {
