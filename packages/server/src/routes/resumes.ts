@@ -767,9 +767,9 @@ router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
         const rawText = resumeResult.rows[0].raw_text || ""
         const pdfName = resumeResult.rows[0].pdf_name || "자소서 원본"
 
-        // Fetch available job postings from posts table
+        // Fetch all job postings from posts table so AI can search the entire database
         const postsResult = await pool.query(
-            "SELECT id, title as job_title, company_name as company, company_logo, location, district, job_category, tech_stack, experience, salary, deadline, description FROM posts ORDER BY id ASC LIMIT 50"
+            "SELECT id, title as job_title, company_name as company, company_logo, location, district, job_category, tech_stack, experience, salary, deadline, description, responsibilities, requirements, preferred_requirements FROM posts ORDER BY id ASC"
         )
         const availablePosts = postsResult.rows
 
