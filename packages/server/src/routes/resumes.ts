@@ -734,7 +734,7 @@ router.get("/:id/messages", async (req: Request, res: ExpressResponse) => {
         }
 
         const result = await pool.query(
-            "SELECT id, resume_id, sender, message, citations, created_at FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
+            "SELECT id, resume_id, sender, message, citations, recommended_jobs, created_at FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
             [resumeId],
         )
         res.json(result.rows)
@@ -767,6 +767,12 @@ router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
         const rawText = resumeResult.rows[0].raw_text || ""
         const pdfName = resumeResult.rows[0].pdf_name || "자소서 원본"
 
+        // Fetch available job postings from posts table
+        const postsResult = await pool.query(
+            "SELECT id, title as job_title, company_name as company, company_logo, location, district, job_category, tech_stack, experience, salary, deadline, description FROM posts ORDER BY id ASC LIMIT 50"
+        )
+        const availablePosts = postsResult.rows
+
         // Fetch previous chat history
         const historyResult = await pool.query(
             "SELECT sender, message FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
@@ -783,12 +789,23 @@ router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
         const apiKey = process.env.OPENAI_API_KEY
         let aiResponseText = ""
         let messageCitations: any[] = []
+        let messageRecommendedJobs: any[] = []
 
         if (apiKey && apiKey.trim() !== "") {
             try {
                 const systemPrompt = `
-너는 사용자의 이력서/자기소개서 기반 질의응답을 성심성의껏 도와주는 전문 취업 코칭 AI 어시스턴트이다.
-아래에 제공된 [이력서 본문]에 철저히 기반하여 사실에 입각해 친절하고 구체적으로 사용자의 질문에 한국어로 대답해라.
+너는 사용자의 이력서/자기소개서 기반 질의응답 및 채용 공고 추천을 성심성의껏 도와주는 전문 취업 코칭 AI 어시스턴트이다.
+아래에 제공된 [이력서 본문]과 [실제 채용 공고 목록]에 철저히 기반하여 사실에 입각해 친절하고 구체적으로 사용자의 질문에 한국어로 대답해라.
+
+[CRITICAL: 채용 공고 추천(recommended_jobs) 원칙]
+1. 사용자가 채용 공고 추천, 적합한 직무/기업 추천을 요청한 경우:
+   - 반드시 아래의 [실제 채용 공고 목록] 안에서만 이력서의 기술 스택 및 경력과 가장 적합한 공고를 최대 5개 골라 recommended_jobs에 담아라.
+   - 각 추천 항목은 { "id": number, "company": string, "job_title": string, "location": string, "district": string, "tech_stack": string[], "reason": string, "company_logo": string } 형식이어야 한다.
+   - reason에는 이력서의 어떤 역량/경험 때문에 이 공고를 추천하는지 1~2문장으로 명확히 서술해라.
+   - [실제 채용 공고 목록]이 비어있거나, 이력서와 부합하는 공고가 전혀 없다면 recommended_jobs는 빈 배열 []로 설정하고, answer에 현재 부합하는 공고가 없음을 명확히 안내해라.
+   - [실제 채용 공고 목록]에 없는 가짜 기업이나 공고를 지어내는 것은 엄격히 금지된다.
+2. 사용자가 공고 추천과 무관한 일반 질문(면접 대비, 이력서 첨삭 등)을 한 경우:
+   - recommended_jobs는 빈 배열 []로 반환해라.
 
 [CRITICAL: 참조(Citations) 및 인용문(Quote) 생성 원칙 - 매우 중요]
 1. citations의 quote는 반드시 아래 [이력서 본문]에 실제로 존재하는 문장을 한 글자도 바꾸지 않고 그대로(Exact Substring) 복사하여 작성해야 한다.
@@ -810,11 +827,26 @@ JSON 형식으로 응답해라:
       "quote": "이력서 본문에 존재하는 실제 문장",
       "section": "이력서 본문"
     }
+  ],
+  "recommended_jobs": [
+    {
+      "id": 1,
+      "company": "회사명",
+      "job_title": "공고 제목",
+      "location": "서울",
+      "district": "강남구",
+      "tech_stack": ["React", "TypeScript"],
+      "reason": "추천 사유",
+      "company_logo": "로고 URL"
+    }
   ]
 }
 
 [이력서 본문]
 ${rawText}
+
+[실제 채용 공고 목록]
+${JSON.stringify(availablePosts, null, 2)}
 `
                 const rawJson = await callOpenAI(
                     systemPrompt,
@@ -825,6 +857,23 @@ ${rawText}
                 const parsed = JSON.parse(rawJson)
                 const rawAnswer = parsed.answer || ""
                 const rawCits = parsed.citations || []
+                let rawJobs = Array.isArray(parsed.recommended_jobs) ? parsed.recommended_jobs : []
+                
+                // Enforce maximum 5 jobs & validate against availablePosts
+                rawJobs = rawJobs.slice(0, 5).map((job: any) => {
+                    const matched = availablePosts.find((p: any) => p.id === job.id || (p.job_title === job.job_title && p.company === job.company))
+                    return {
+                        id: matched ? matched.id : job.id,
+                        company: matched ? matched.company : job.company,
+                        job_title: matched ? matched.job_title : job.job_title,
+                        company_logo: matched ? matched.company_logo : (job.company_logo || ""),
+                        location: matched ? matched.location : (job.location || ""),
+                        district: matched ? matched.district : (job.district || ""),
+                        tech_stack: matched ? (Array.isArray(matched.tech_stack) ? matched.tech_stack : JSON.parse(matched.tech_stack || "[]")) : (job.tech_stack || []),
+                        reason: job.reason || "이력서의 직무 역량 및 프로젝트 경험과 일치하여 추천합니다.",
+                    }
+                })
+
                 const remapped = deduplicateAndRemapMessage(
                     rawAnswer,
                     rawCits,
@@ -833,22 +882,25 @@ ${rawText}
                 )
                 aiResponseText = remapped.answer
                 messageCitations = remapped.citations
+                messageRecommendedJobs = rawJobs
             } catch (openaiErr: any) {
                 console.error("OpenAI Q&A failed:", openaiErr)
-                const mock = generateMockQA(message, rawText, pdfName)
+                const mock = generateMockQA(message, rawText, pdfName, availablePosts)
                 aiResponseText = mock.answer
                 messageCitations = mock.citations
+                messageRecommendedJobs = mock.recommended_jobs || []
             }
         } else {
-            const mock = generateMockQA(message, rawText, pdfName)
+            const mock = generateMockQA(message, rawText, pdfName, availablePosts)
             aiResponseText = mock.answer
             messageCitations = mock.citations
+            messageRecommendedJobs = mock.recommended_jobs || []
         }
 
         // Save Assistant Message
         const aiMsgResult = await pool.query(
-            "INSERT INTO resume_messages (resume_id, sender, message, citations) VALUES ($1, 'assistant', $2, $3) RETURNING *",
-            [resumeId, aiResponseText, JSON.stringify(messageCitations)],
+            "INSERT INTO resume_messages (resume_id, sender, message, citations, recommended_jobs) VALUES ($1, 'assistant', $2, $3, $4) RETURNING *",
+            [resumeId, aiResponseText, JSON.stringify(messageCitations), JSON.stringify(messageRecommendedJobs)],
         )
 
         res.json({
@@ -1126,7 +1178,8 @@ function generateMockQA(
     userMessage: string,
     resumeText: string,
     filename: string = "자소서 원본",
-): { answer: string; citations: any[] } {
+    availablePosts: any[] = [],
+): { answer: string; citations: any[]; recommended_jobs?: any[] } {
     const sentences = extractCleanSentences(resumeText)
     const quote1 =
         sentences[0] ||
@@ -1139,6 +1192,86 @@ function generateMockQA(
         "예기치 못한 프론트엔드 에러 발생 시 앱이 완전히 멈추지 않도록 Error Boundary를 설계합니다."
 
     const msg = userMessage.toLowerCase()
+
+    if (
+        msg.includes("공고") ||
+        msg.includes("추천") ||
+        msg.includes("채용") ||
+        msg.includes("일자리") ||
+        msg.includes("포지션")
+    ) {
+        if (!availablePosts || availablePosts.length === 0) {
+            return {
+                answer: `현재 등록된 채용 공고 중 이력서와 일치하는 공고를 찾을 수 없습니다. [1]\n\n새로운 채용 공고가 등록되면 다시 추천을 요청해 주세요!`,
+                citations: [
+                    {
+                        id: 1,
+                        title: "이력서 직무 역량",
+                        filename,
+                        keywords: "공고 추천, 직무 매칭",
+                        published: "2026. 03. 29",
+                        objective: "공고 추천 매칭 기준",
+                        quote: quote1,
+                        section: "이력서 본문",
+                    },
+                ],
+                recommended_jobs: [],
+            }
+        }
+
+        const lowerResume = resumeText.toLowerCase()
+        const scoredPosts = availablePosts.map((post) => {
+            let score = 0
+            const techList: string[] = Array.isArray(post.tech_stack)
+                ? post.tech_stack
+                : typeof post.tech_stack === "string"
+                ? JSON.parse(post.tech_stack || "[]")
+                : []
+            for (const t of techList) {
+                if (lowerResume.includes(t.toLowerCase())) score += 3
+            }
+            if (post.job_category && lowerResume.includes(post.job_category.toLowerCase())) score += 1
+            if (post.job_title && lowerResume.includes(post.job_title.toLowerCase())) score += 1
+            if (post.description && lowerResume.includes(post.description.slice(0, 30).toLowerCase())) score += 1
+            return { post, score, techList }
+        })
+
+        // Sort by score descending and take up to 5 posts
+        scoredPosts.sort((a, b) => b.score - a.score)
+        const top5 = scoredPosts.slice(0, 5)
+
+        const topPosts = top5.map((item) => {
+            const p = item.post
+            const techList = item.techList
+            return {
+                id: p.id,
+                company: p.company || p.company_name,
+                job_title: p.job_title || p.title,
+                company_logo: p.company_logo || "",
+                location: p.location || "서울",
+                district: p.district || "",
+                tech_stack: techList,
+                reason: `이력서에 명시된 핵심 역량(${techList.slice(0, 3).join(", ") || "직무 역량"}) 및 프로젝트 수행 경험이 본 포지션의 자격 요건과 부합하여 추천합니다.`,
+            }
+        })
+
+        return {
+            answer: `작성해주신 이력서 본문 [1]의 기술 스택 및 실무 경험을 바탕으로 가장 적합한 채용 공고 **${topPosts.length}개**를 추천해 드립니다.\n\n아래 추천 공고 카드를 클릭하여 상세 요건과 혜택을 확인해 보세요!`,
+            citations: [
+                {
+                    id: 1,
+                    title: "공고 추천 기준 원문",
+                    filename,
+                    keywords: "기술 역량, 프로젝트 경험",
+                    published: "2026. 03. 29",
+                    objective: "채용 공고 매칭 출처",
+                    quote: quote1,
+                    section: "이력서 본문",
+                },
+            ],
+            recommended_jobs: topPosts,
+        }
+    }
 
     if (
         msg.includes("면접") ||
@@ -1236,7 +1369,7 @@ function generateMockQA(
     return {
         answer: `이력서 분석 결과 및 질문 주신 내용에 대한 답변입니다.
 
-작성하신 이력서 본문의 핵심 내용 [1]을 참고했을 때, 실무에서의 구체적인 성과 지표와 문제 해결 프로세스를 보강하시면 더욱 강력한 지원서가 될 것입니다. 추가적인 면접 대비 팁이나 개선 조언이 필요하시면 편하게 질문해 주세요!`,
+작성하신 이력서 본문의 핵심 내용 [1]을 참고했을 때, 실무에서의 구체적인 성과 지표와 문제 해결 프로세스를 보강하시면 더욱 강력한 지원서가 될 것입니다. 추가적인 면접 대비 팁이나 공고 추천이 필요하시면 편하게 질문해 주세요!`,
         citations: [
             {
                 id: 1,

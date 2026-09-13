@@ -30,7 +30,8 @@ import {
 } from "react-icons/fa"
 import { useNavigate } from "react-router"
 import Header from "../organisms/Header"
-import { REGIONS, type Post, type Region } from "../../data/mockPosts"
+import { type Post } from "../../data/mockPosts"
+import { getRegionsWithCounts, type Region } from "../../data/regions"
 import { useEffect } from "react"
 
 // ────────────────────────────────────────────────
@@ -186,23 +187,25 @@ function JobCard({
 // Region Filter Panel (2-column region list)
 // ────────────────────────────────────────────────
 function RegionFilterPanel({
+    regions,
     selectedRegion,
     selectedDistricts,
     onSelectRegion,
     onToggleDistrict,
 }: {
+    regions: Region[]
     selectedRegion: string
     selectedDistricts: string[]
     onSelectRegion: (r: string) => void
     onToggleDistrict: (d: string) => void
 }) {
     const [regionSearch, setRegionSearch] = useState("")
-    const region = REGIONS.find((r) => r.name === selectedRegion)
+    const region = regions.find((r) => r.name === selectedRegion)
 
     // Split regions into 2 columns
-    const half = Math.ceil(REGIONS.length / 2)
-    const col1 = REGIONS.slice(0, half)
-    const col2 = REGIONS.slice(half)
+    const half = Math.ceil(regions.length / 2)
+    const col1 = regions.slice(0, half)
+    const col2 = regions.slice(half)
 
     const formatCount = (n: number) => n.toLocaleString()
 
@@ -775,6 +778,7 @@ function JobFilterPanel({
 const PostTemplate: React.FC = () => {
     const navigate = useNavigate()
     const [posts, setPosts] = useState<Post[]>([])
+    const regions = useMemo(() => getRegionsWithCounts(posts), [posts])
     const [recommendedJobs, setRecommendedJobs] = useState<any[]>([])
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedRegion, setSelectedRegion] = useState("서울")
@@ -1120,6 +1124,7 @@ const PostTemplate: React.FC = () => {
                         {/* Region Panel */}
                         {openPanel === "region" && (
                             <RegionFilterPanel
+                                regions={regions}
                                 selectedRegion={selectedRegion}
                                 selectedDistricts={selectedDistricts}
                                 onSelectRegion={setSelectedRegion}

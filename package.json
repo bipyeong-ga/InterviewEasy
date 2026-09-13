@@ -7,7 +7,8 @@
         "build:s": "pnpm --prefix packages/server run build",
         "dev:c": "pnpm --prefix packages/client run dev",
         "dev:s": "pnpm --prefix packages/server run dev",
-        "dev:a": "cd packages/ai/project && uvicorn app.main:app --reload --port 8000"
+        "dev:a": "cd packages/ai/project && uvicorn app.main:app --reload --port 8000",
+        "seed:posts": "pnpm --prefix packages/server run seed:posts"
     },
     "keywords": [],
     "author": "",

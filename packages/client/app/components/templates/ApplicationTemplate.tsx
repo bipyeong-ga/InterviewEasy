@@ -16,11 +16,16 @@ import {
     Clipboard,
     IconButton,
     Menu,
+    Badge,
+    SimpleGrid,
+    Image,
 } from "@chakra-ui/react"
 import { useNavigate, useLocation } from "react-router"
 import { useAuth } from "../../hooks/useAuth"
 import Header from "../organisms/Header"
 import { toaster } from "../ui/toaster"
+import { IoSparklesSharp } from "react-icons/io5"
+import { FaLocationDot } from "react-icons/fa6"
 import {
     FaPlus,
     FaTrash,
@@ -497,6 +502,176 @@ const ApplicationTemplate: React.FC = () => {
             </Text>
         )
     }
+
+function RecommendedJobCard({
+    job,
+    onNavigate,
+}: {
+    job: any
+    onNavigate: (id: number) => void
+}) {
+    const techStack: string[] = Array.isArray(job.tech_stack)
+        ? job.tech_stack
+        : typeof job.tech_stack === "string"
+        ? JSON.parse(job.tech_stack || "[]")
+        : []
+
+    return (
+        <Box
+            bg="white"
+            border="1px solid"
+            borderColor="blue.100"
+            borderRadius="xl"
+            p={3.5}
+            shadow="xs"
+            _hover={{
+                shadow: "sm",
+                borderColor: "blue.300",
+                transform: "translateY(-1px)",
+            }}
+            transition="all 0.15s ease"
+            cursor="pointer"
+            onClick={() => onNavigate(job.id)}
+            position="relative"
+        >
+            <Flex justify="space-between" align="start" gap={2} mb={2}>
+                <HStack gap={2.5} align="center" flex={1} minW={0}>
+                    <Box
+                        w="36px"
+                        h="36px"
+                        borderRadius="lg"
+                        bg="gray.50"
+                        border="1px solid"
+                        borderColor="gray.100"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        overflow="hidden"
+                        p={1}
+                        flexShrink={0}
+                    >
+                        {job.company_logo ? (
+                            <Image
+                                src={job.company_logo}
+                                alt={job.company}
+                                maxH="26px"
+                                maxW="100%"
+                                objectFit="contain"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = "none"
+                                }}
+                            />
+                        ) : (
+                            <Text
+                                fontSize="xs"
+                                fontWeight="bold"
+                                color="blue.600"
+                            >
+                                {job.company?.slice(0, 2) || "채용"}
+                            </Text>
+                        )}
+                    </Box>
+                    <Box minW={0} flex={1}>
+                        <Text
+                            fontSize="2xs"
+                            fontWeight="semibold"
+                            color="gray.500"
+                            truncate
+                        >
+                            {job.company}
+                        </Text>
+                        <Text
+                            fontSize="xs"
+                            fontWeight="bold"
+                            color="gray.900"
+                            lineHeight="1.3"
+                            lineClamp={1}
+                        >
+                            {job.job_title}
+                        </Text>
+                    </Box>
+                </HStack>
+                {job.location && (
+                    <Badge
+                        colorPalette="blue"
+                        variant="subtle"
+                        size="xs"
+                        flexShrink={0}
+                        fontSize="2xs"
+                    >
+                        {job.location} {job.district || ""}
+                    </Badge>
+                )}
+            </Flex>
+
+            {/* Tech Stack */}
+            {techStack.length > 0 && (
+                <HStack gap={1} mb={2.5} wrap="wrap">
+                    {techStack.slice(0, 3).map((tech, i) => (
+                        <Badge
+                            key={i}
+                            variant="surface"
+                            colorPalette="gray"
+                            fontSize="2xs"
+                            px={1.5}
+                            py={0.2}
+                        >
+                            {tech}
+                        </Badge>
+                    ))}
+                    {techStack.length > 3 && (
+                        <Text fontSize="2xs" color="gray.400">
+                            +{techStack.length - 3}
+                        </Text>
+                    )}
+                </HStack>
+            )}
+
+            {/* AI Recommendation Reason */}
+            {job.reason && (
+                <Box
+                    bg="blue.50/70"
+                    p={2}
+                    borderRadius="md"
+                    borderLeft="3px solid"
+                    borderColor="blue.400"
+                    mb={2}
+                >
+                    <HStack align="flex-start" gap={1.5}>
+                        <Box color="blue.500" mt={0.5} flexShrink={0}>
+                            <IoSparklesSharp size={11} />
+                        </Box>
+                        <Text
+                            fontSize="2xs"
+                            color="blue.900"
+                            lineHeight="1.4"
+                            lineClamp={2}
+                        >
+                            {job.reason}
+                        </Text>
+                    </HStack>
+                </Box>
+            )}
+
+            {/* Action button */}
+            <Flex justify="flex-end" align="center">
+                <Button
+                    size="xs"
+                    colorPalette="blue"
+                    variant="subtle"
+                    h="24px"
+                    fontSize="2xs"
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        onNavigate(job.id)
+                    }}
+                >
+                    공고 상세보기 →
+                </Button>
+            </Flex>
+        </Box>
+    )
+}
 
     // Check Authentication
     useEffect(() => {
@@ -1626,6 +1801,10 @@ const ApplicationTemplate: React.FC = () => {
                                                                                 )
                                                                               : selectedResume.citations ||
                                                                                 [])
+                                                                const msgRecommendedJobs =
+                                                                    typeof msg.recommended_jobs === "string"
+                                                                        ? JSON.parse(msg.recommended_jobs || "[]")
+                                                                        : msg.recommended_jobs || []
                                                                 return (
                                                                     <Flex
                                                                         key={
@@ -1699,6 +1878,58 @@ const ApplicationTemplate: React.FC = () => {
                                                                                         handleViewSource
                                                                                     }
                                                                                 />
+                                                                                {msgRecommendedJobs.length > 0 && (
+                                                                                    <Box
+                                                                                        mt={4}
+                                                                                        pt={3.5}
+                                                                                        borderTop="1px solid"
+                                                                                        borderColor="blue.100"
+                                                                                    >
+                                                                                        <HStack gap={2} mb={3}>
+                                                                                            <Box color="blue.600">
+                                                                                                <FaBriefcase size={13} />
+                                                                                            </Box>
+                                                                                            <Text
+                                                                                                fontSize="xs"
+                                                                                                fontWeight="bold"
+                                                                                                color="blue.700"
+                                                                                            >
+                                                                                                AI 맞춤 추천 채용 공고 ({msgRecommendedJobs.length}개)
+                                                                                            </Text>
+                                                                                        </HStack>
+                                                                                        <SimpleGrid
+                                                                                            columns={{
+                                                                                                base: 1,
+                                                                                                md: msgRecommendedJobs.length === 1 ? 1 : 2,
+                                                                                            }}
+                                                                                            gap={3}
+                                                                                        >
+                                                                                            {msgRecommendedJobs.map(
+                                                                                                (
+                                                                                                    job: any,
+                                                                                                    jIdx: number,
+                                                                                                ) => (
+                                                                                                    <RecommendedJobCard
+                                                                                                        key={
+                                                                                                            job.id ||
+                                                                                                            jIdx
+                                                                                                        }
+                                                                                                        job={
+                                                                                                            job
+                                                                                                        }
+                                                                                                        onNavigate={(
+                                                                                                            id,
+                                                                                                        ) =>
+                                                                                                            navigate(
+                                                                                                                `/post/${id}`,
+                                                                                                            )
+                                                                                                        }
+                                                                                                    />
+                                                                                                ),
+                                                                                            )}
+                                                                                        </SimpleGrid>
+                                                                                    </Box>
+                                                                                )}
                                                                             </Box>
                                                                         )}
                                                                     </Flex>
