@@ -10,9 +10,6 @@ import {
     VStack,
     Input,
     Flex,
-    Dialog,
-    Portal,
-    CloseButton,
 } from "@chakra-ui/react"
 import Header from "../organisms/Header"
 import { motion, AnimatePresence } from "motion/react"
@@ -58,7 +55,6 @@ const MockInterviewTemplate: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const { isLoggedIn, loading } = useAuth()
-    const [isModeModalOpen, setIsModeModalOpen] = useState(false)
 
     const [step, setStep] = useState(0)
     const [selectedJobs, setSelectedJobs] = useState<string[]>([])
@@ -75,8 +71,8 @@ const MockInterviewTemplate: React.FC = () => {
                 const token = localStorage.getItem("token")
                 const resp = await fetch("/api/resumes", {
                     headers: {
-                        ...(token ? { Authorization: `Bearer ${token}` } : {})
-                    }
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
                 })
                 if (resp.ok) {
                     const data = await resp.json()
@@ -91,7 +87,9 @@ const MockInterviewTemplate: React.FC = () => {
 
     useEffect(() => {
         if (!loading && !isLoggedIn) {
-            const redirectPath = encodeURIComponent(location.pathname + location.search)
+            const redirectPath = encodeURIComponent(
+                location.pathname + location.search,
+            )
             navigate(`/login?redirect=${redirectPath}`)
         }
     }, [loading, isLoggedIn, navigate, location])
@@ -136,13 +134,16 @@ const MockInterviewTemplate: React.FC = () => {
             // 2. 파일 업로드
             const formData = new FormData()
             formData.append("file", file)
-            const uploadResp = await fetch(`/api/resumes/${newResume.id}/upload`, {
-                method: "POST",
-                headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            const uploadResp = await fetch(
+                `/api/resumes/${newResume.id}/upload`,
+                {
+                    method: "POST",
+                    headers: {
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: formData,
                 },
-                body: formData,
-            })
+            )
 
             if (!uploadResp.ok) throw new Error("파일 업로드에 실패했습니다.")
             const updatedResume = await uploadResp.json()
@@ -353,7 +354,9 @@ const MockInterviewTemplate: React.FC = () => {
 
     const canStartInterview = cameraOk && micOk && !checkingPermissions
 
-    const isStep0Valid = selectedJobs.length > 0 && (!selectedJobs.includes("기타") || customJob.trim() !== "")
+    const isStep0Valid =
+        selectedJobs.length > 0 &&
+        (!selectedJobs.includes("기타") || customJob.trim() !== "")
     const isNextDisabled = step === 0 && !isStep0Valid
 
     if (loading) {
@@ -419,8 +422,8 @@ const MockInterviewTemplate: React.FC = () => {
                                                         isCurrent
                                                             ? "white"
                                                             : active
-                                                                ? "blue.600"
-                                                                : "gray.400"
+                                                              ? "blue.600"
+                                                              : "gray.400"
                                                     }
                                                     fontWeight="bold"
                                                     fontSize="xs"
@@ -564,7 +567,12 @@ const MockInterviewTemplate: React.FC = () => {
                                     >
                                         {/* Step 1: Job Selection */}
                                         {step === 0 && (
-                                            <VStack gap={3} py={1} w="fit-content" mx="auto">
+                                            <VStack
+                                                gap={3}
+                                                py={1}
+                                                w="fit-content"
+                                                mx="auto"
+                                            >
                                                 <Flex
                                                     gap={2.5}
                                                     flexWrap="wrap"
@@ -669,16 +677,28 @@ const MockInterviewTemplate: React.FC = () => {
                                                         )
                                                     })}
                                                 </Flex>
-                                                {selectedJobs.includes("기타") && (
+                                                {selectedJobs.includes(
+                                                    "기타",
+                                                ) && (
                                                     <Box mt={2} w="full">
                                                         <Input
                                                             placeholder="원하시는 직무를 직접 입력해주세요"
                                                             value={customJob}
-                                                            onChange={(e) => setCustomJob(e.target.value)}
+                                                            onChange={(e) =>
+                                                                setCustomJob(
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
                                                             h="44px"
                                                             borderRadius="lg"
                                                             borderColor="gray.200"
-                                                            _focus={{ borderColor: "blue.600", boxShadow: "0 0 0 1px blue.600" }}
+                                                            _focus={{
+                                                                borderColor:
+                                                                    "blue.600",
+                                                                boxShadow:
+                                                                    "0 0 0 1px blue.600",
+                                                            }}
                                                             fontSize="14px"
                                                             bg="white"
                                                         />
@@ -695,15 +715,27 @@ const MockInterviewTemplate: React.FC = () => {
                                                 align="stretch"
                                             >
                                                 {resumes.length === 0 ? (
-                                                    <Box p={4} textAlign="center">
-                                                        <Text fontSize="14px" color="gray.500">
-                                                            등록된 이력서/자소서가 없습니다.
+                                                    <Box
+                                                        p={4}
+                                                        textAlign="center"
+                                                    >
+                                                        <Text
+                                                            fontSize="14px"
+                                                            color="gray.500"
+                                                        >
+                                                            등록된
+                                                            이력서/자소서가
+                                                            없습니다.
                                                         </Text>
                                                         <Button
                                                             mt={3}
                                                             size="sm"
                                                             variant="outline"
-                                                            onClick={() => navigate("/analyze-application")}
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    "/analyze-application",
+                                                                )
+                                                            }
                                                         >
                                                             이력서 등록하러 가기
                                                         </Button>
@@ -747,7 +779,9 @@ const MockInterviewTemplate: React.FC = () => {
                                                                         border="1px solid gray.200"
                                                                     >
                                                                         <FileText
-                                                                            size={18}
+                                                                            size={
+                                                                                18
+                                                                            }
                                                                             color={
                                                                                 isSelected
                                                                                     ? "blue.600"
@@ -757,27 +791,36 @@ const MockInterviewTemplate: React.FC = () => {
                                                                     </Center>
                                                                     <VStack
                                                                         align="flex-start"
-                                                                        gap={0.5}
+                                                                        gap={
+                                                                            0.5
+                                                                        }
                                                                     >
                                                                         <Text
                                                                             fontSize="14px"
                                                                             fontWeight="700"
                                                                             color="gray.900"
                                                                         >
-                                                                            {doc.title}
+                                                                            {
+                                                                                doc.title
+                                                                            }
                                                                         </Text>
                                                                         <Text
                                                                             fontSize="11px"
                                                                             color="gray.400"
                                                                             fontWeight="500"
                                                                         >
-                                                                            최근수정일: {new Date(doc.created_at).toLocaleDateString()}
+                                                                            최근수정일:{" "}
+                                                                            {new Date(
+                                                                                doc.created_at,
+                                                                            ).toLocaleDateString()}
                                                                         </Text>
                                                                     </VStack>
                                                                 </HStack>
                                                                 {isSelected && (
                                                                     <CheckCircle2
-                                                                        size={18}
+                                                                        size={
+                                                                            18
+                                                                        }
                                                                         color="blue.600"
                                                                     />
                                                                 )}
@@ -792,24 +835,51 @@ const MockInterviewTemplate: React.FC = () => {
                                                     style={{ display: "none" }}
                                                     accept=".pdf,image/*,.doc,.docx"
                                                     onChange={(e) => {
-                                                        if (e.target.files && e.target.files.length > 0) {
-                                                            handleFileDrop(e.target.files[0])
+                                                        if (
+                                                            e.target.files &&
+                                                            e.target.files
+                                                                .length > 0
+                                                        ) {
+                                                            handleFileDrop(
+                                                                e.target
+                                                                    .files[0],
+                                                            )
                                                         }
-                                                        if (fileInputRef.current) fileInputRef.current.value = "";
+                                                        if (
+                                                            fileInputRef.current
+                                                        )
+                                                            fileInputRef.current.value =
+                                                                ""
                                                     }}
                                                 />
                                                 <Center
                                                     border="2px dashed"
-                                                    borderColor={isDragActive ? "blue.600" : "gray.300"}
-                                                    bg={isDragActive ? "blue.50" : "transparent"}
-                                                    opacity={isUploading ? 0.6 : 1}
-                                                    pointerEvents={isUploading ? "none" : "auto"}
+                                                    borderColor={
+                                                        isDragActive
+                                                            ? "blue.600"
+                                                            : "gray.300"
+                                                    }
+                                                    bg={
+                                                        isDragActive
+                                                            ? "blue.50"
+                                                            : "transparent"
+                                                    }
+                                                    opacity={
+                                                        isUploading ? 0.6 : 1
+                                                    }
+                                                    pointerEvents={
+                                                        isUploading
+                                                            ? "none"
+                                                            : "auto"
+                                                    }
                                                     borderRadius="14px"
                                                     py="24px"
                                                     flexDirection="column"
                                                     gap={1}
                                                     cursor="pointer"
-                                                    onClick={() => fileInputRef.current?.click()}
+                                                    onClick={() =>
+                                                        fileInputRef.current?.click()
+                                                    }
                                                     onDragOver={onDragOver}
                                                     onDragLeave={onDragLeave}
                                                     onDrop={onDrop}
@@ -821,14 +891,24 @@ const MockInterviewTemplate: React.FC = () => {
                                                 >
                                                     <UploadCloud
                                                         size={24}
-                                                        color={isDragActive ? "blue.600" : "gray.400"}
+                                                        color={
+                                                            isDragActive
+                                                                ? "blue.600"
+                                                                : "gray.400"
+                                                        }
                                                     />
                                                     <Text
                                                         fontSize="13px"
                                                         fontWeight="700"
-                                                        color={isDragActive ? "blue.600" : "gray.600"}
+                                                        color={
+                                                            isDragActive
+                                                                ? "blue.600"
+                                                                : "gray.600"
+                                                        }
                                                     >
-                                                        {isUploading ? "업로드 중..." : "클릭 또는 파일 드롭"}
+                                                        {isUploading
+                                                            ? "업로드 중..."
+                                                            : "클릭 또는 파일 드롭"}
                                                     </Text>
                                                     <Text
                                                         fontSize="11px"
@@ -1442,16 +1522,39 @@ const MockInterviewTemplate: React.FC = () => {
                                             cursor: "not-allowed",
                                             transform: "none",
                                         }}
-                                        onClick={() =>
-                                            canStartInterview &&
-                                            setIsModeModalOpen(true)
-                                        }
+                                        onClick={() => {
+                                            if (!canStartInterview) return
+
+                                            const selectedResumeData =
+                                                resumes.find(
+                                                    (r) =>
+                                                        r.id.toString() ===
+                                                        selectedResume,
+                                                )
+                                            const resumeContent =
+                                                selectedResumeData
+                                                    ? selectedResumeData.raw_text ||
+                                                      selectedResumeData.content
+                                                    : ""
+
+                                            const state = {
+                                                selectedJobs,
+                                                customJob,
+                                                selectedResume,
+                                                resumeContent,
+                                                interviewType,
+                                                targetCompany,
+                                                questionCount,
+                                            }
+
+                                            navigate("/interview", { state })
+                                        }}
                                     >
                                         {canStartInterview
                                             ? "면접 시작하기"
                                             : checkingPermissions
-                                                ? "권한 확인 중..."
-                                                : "권한 허용 후 시작하기"}
+                                              ? "권한 확인 중..."
+                                              : "권한 허용 후 시작하기"}
                                     </Button>
                                 ) : (
                                     <Button
@@ -1462,9 +1565,17 @@ const MockInterviewTemplate: React.FC = () => {
                                         bg="blue.600"
                                         color="white"
                                         fontWeight="800"
-                                        _hover={{ bg: isNextDisabled ? "gray.400" : "blue.700" }}
+                                        _hover={{
+                                            bg: isNextDisabled
+                                                ? "gray.400"
+                                                : "blue.700",
+                                        }}
                                         disabled={isNextDisabled}
-                                        _disabled={{ bg: "gray.400", cursor: "not-allowed", opacity: 1 }}
+                                        _disabled={{
+                                            bg: "gray.400",
+                                            cursor: "not-allowed",
+                                            opacity: 1,
+                                        }}
                                         onClick={handleNext}
                                     >
                                         다음
@@ -1479,103 +1590,6 @@ const MockInterviewTemplate: React.FC = () => {
                     </VStack>
                 </Box>
             </Center>
-
-            {/* 모드 선택 모달 */}
-            <Dialog.Root
-                size="md"
-                placement="center"
-                motionPreset="slide-in-bottom"
-                open={isModeModalOpen}
-                onOpenChange={(e) => setIsModeModalOpen(e.open)}
-            >
-                <Portal>
-                    <Dialog.Backdrop backdropFilter="blur(4px)" bg="blackAlpha.300" />
-                    <Dialog.Positioner>
-                        <Dialog.Content borderRadius="xl" p={2}>
-                            <Dialog.Header>
-                                <Dialog.Title fontSize="xl" fontWeight="bold" textAlign="center">
-                                    면접 난이도 선택
-                                </Dialog.Title>
-                                <Dialog.CloseTrigger asChild>
-                                    <CloseButton size="md" position="absolute" top="2" right="2" />
-                                </Dialog.CloseTrigger>
-                            </Dialog.Header>
-                            <Dialog.Body>
-                                <VStack gap={4} mt={4}>
-                                    <Box
-                                        w="100%"
-                                        p={5}
-                                        borderWidth="1px"
-                                        borderRadius="lg"
-                                        cursor="pointer"
-                                        _hover={{ borderColor: "blue.600", bg: "blue.50", transform: "translateY(-2px)", shadow: "md" }}
-                                        onClick={() => {
-                                            setIsModeModalOpen(false);
-                                            
-                                            // Get the full resume text if one was selected
-                                            const selectedResumeData = resumes.find(r => r.id.toString() === selectedResume);
-                                            const resumeContent = selectedResumeData ? (selectedResumeData.raw_text || selectedResumeData.content) : "";
-
-                                            const state = {
-                                                selectedJobs,
-                                                customJob,
-                                                selectedResume,
-                                                resumeContent,
-                                                interviewType,
-                                                targetCompany,
-                                                questionCount
-                                            };
-
-                                            navigate("/interview?mode=EASY", { state });
-                                        }}
-                                        transition="all 0.2s"
-                                    >
-                                        <Text fontWeight="800" fontSize="lg" color="blue.600">EASY 모드</Text>
-                                        <Text fontSize="sm" color="gray.600" mt={1}>기본적인 질문 위주로 평이한 난이도의 면접이 진행됩니다.</Text>
-                                    </Box>
-
-                                    <Box
-                                        w="100%"
-                                        p={5}
-                                        borderWidth="1px"
-                                        borderRadius="lg"
-                                        cursor="pointer"
-                                        _hover={{ borderColor: "red.500", bg: "red.50", transform: "translateY(-2px)", shadow: "md" }}
-                                        onClick={() => {
-                                            setIsModeModalOpen(false);
-                                            
-                                            // Get the full resume text if one was selected
-                                            const selectedResumeData = resumes.find(r => r.id.toString() === selectedResume);
-                                            const resumeContent = selectedResumeData ? (selectedResumeData.raw_text || selectedResumeData.content) : "";
-
-                                            const state = {
-                                                selectedJobs,
-                                                customJob,
-                                                selectedResume,
-                                                resumeContent,
-                                                interviewType,
-                                                targetCompany,
-                                                questionCount
-                                            };
-
-                                            navigate("/interview?mode=HARD", { state });
-                                        }}
-                                        transition="all 0.2s"
-                                    >
-                                        <Text fontWeight="800" fontSize="lg" color="red.600">HARD 모드</Text>
-                                        <Text fontSize="sm" color="gray.600" mt={1}>꼬리 질문과 심층적인 질문 위주로 압박 면접이 진행됩니다.</Text>
-                                    </Box>
-                                </VStack>
-                            </Dialog.Body>
-                            <Dialog.Footer justifyContent="center" mt={4}>
-                                <Text fontSize="xs" color="gray.400">
-                                    선택한 난이도에 따라 AI 면접관의 질문 방식이 변경됩니다.
-                                </Text>
-                            </Dialog.Footer>
-                        </Dialog.Content>
-                    </Dialog.Positioner>
-                </Portal>
-            </Dialog.Root>
         </Box>
     )
 }

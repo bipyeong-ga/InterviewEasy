@@ -49,7 +49,8 @@ function SessionReplay({ session }: { session: InterviewSessionSummary }) {
                     <video
                         ref={videoRef}
                         controls
-                        src={`/api/interview-sessions/${session.id}/video`}
+                        playsInline
+                        src={`/api/interview-sessions/${session.id}/video?token=${typeof window !== "undefined" ? localStorage.getItem("token") || "" : ""}`}
                         style={{ width: "100%", display: "block" }}
                     />
                 </Box>

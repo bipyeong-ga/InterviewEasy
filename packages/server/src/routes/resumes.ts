@@ -1,5 +1,5 @@
 import { Router } from "express"
-import type { Request, Response } from "express"
+import type { Request, Response as ExpressResponse } from "express"
 import pool from "../db"
 import { authMiddleware } from "../middleware/auth"
 import multer from "multer"
@@ -11,12 +11,12 @@ const router = Router()
 router.use(authMiddleware)
 
 // 1. Get all resumes for the current user
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const result = await pool.query(
-            "SELECT id, title, content, raw_text, summary, improvements, recommended_jobs, pdf_name, created_at, updated_at FROM resumes WHERE user_id = $1 ORDER BY order_index ASC, id ASC",
-            [userId]
+            "SELECT id, title, content, raw_text, summary, improvements, recommended_jobs, citations, pdf_name, created_at, updated_at FROM resumes WHERE user_id = $1 ORDER BY order_index ASC, id ASC",
+            [userId],
         )
         res.json(result.rows)
     } catch (error) {
@@ -26,14 +26,14 @@ router.get("/", async (req: Request, res: Response) => {
 })
 
 // 2. Get a single resume
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const resumeId = parseInt(req.params.id as string, 10)
 
         const result = await pool.query(
             "SELECT * FROM resumes WHERE id = $1 AND user_id = $2",
-            [resumeId, userId]
+            [resumeId, userId],
         )
 
         if (result.rows.length === 0) {
@@ -47,11 +47,13 @@ router.get("/:id", async (req: Request, res: Response) => {
     }
 })
 
-// 3. Reorder resumes
-router.put("/reorder", async (req: Request, res: Response) => {
+// 3. Reorder resumes (must be before /:id PUT route to avoid conflict)
+router.put("/reorder", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
-        const { order } = req.body as { order: { id: number; orderIndex: number }[] }
+        const { order } = req.body as {
+            order: { id: number; orderIndex: number }[]
+        }
 
         if (!Array.isArray(order)) {
             return res.status(400).json({ error: "Invalid order payload" })
@@ -64,7 +66,7 @@ router.put("/reorder", async (req: Request, res: Response) => {
             for (const item of order) {
                 await client.query(
                     "UPDATE resumes SET order_index = $1 WHERE id = $2 AND user_id = $3",
-                    [item.orderIndex, item.id, userId]
+                    [item.orderIndex, item.id, userId],
                 )
             }
             await client.query("COMMIT")
@@ -81,27 +83,27 @@ router.put("/reorder", async (req: Request, res: Response) => {
     }
 })
 
-// 4. Create a new resume (limit to 10 max)
-router.post("/", async (req: Request, res: Response) => {
+// 4. Create a new empty resume
+router.post("/", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
 
         // Check if the user already has 10 resumes
         const countResult = await pool.query(
             "SELECT COUNT(*) FROM resumes WHERE user_id = $1",
-            [userId]
+            [userId],
         )
         const count = parseInt(countResult.rows[0].count)
         if (count >= 10) {
             return res.status(400).json({
-                error: "자기소개서는 유저당 최대 10개까지만 생성할 수 있습니다."
+                error: "자기소개서는 유저당 최대 10개까지만 생성할 수 있습니다.",
             })
         }
 
         // Find the next available number (e.g. 자기소개서 01, 자기소개서 02) to avoid duplicates
         const existingResumes = await pool.query(
             "SELECT title FROM resumes WHERE user_id = $1",
-            [userId]
+            [userId],
         )
         const existingTitles = existingResumes.rows.map((r: any) => r.title)
         let nextNum = 1
@@ -117,7 +119,7 @@ router.post("/", async (req: Request, res: Response) => {
         // Insert new resume
         const result = await pool.query(
             "INSERT INTO resumes (user_id, title, content) VALUES ($1, $2, '') RETURNING *",
-            [userId, title]
+            [userId, title],
         )
 
         res.status(201).json(result.rows[0])
@@ -127,8 +129,8 @@ router.post("/", async (req: Request, res: Response) => {
     }
 })
 
-// 4. Update resume (title and/or content)
-router.put("/:id", async (req: Request, res: Response) => {
+// 5. Update a resume
+router.put("/:id", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const resumeId = parseInt(req.params.id as string, 10)
@@ -137,7 +139,7 @@ router.put("/:id", async (req: Request, res: Response) => {
         // Verify ownership first
         const checkResult = await pool.query(
             "SELECT id FROM resumes WHERE id = $1 AND user_id = $2",
-            [resumeId, userId]
+            [resumeId, userId],
         )
         if (checkResult.rows.length === 0) {
             return res.status(404).json({ error: "Resume not found" })
@@ -145,7 +147,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 
         const updateResult = await pool.query(
             "UPDATE resumes SET title = COALESCE($1, title), content = COALESCE($2, content), updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *",
-            [title, content, resumeId]
+            [title, content, resumeId],
         )
 
         res.json(updateResult.rows[0])
@@ -156,29 +158,32 @@ router.put("/:id", async (req: Request, res: Response) => {
 })
 
 // 5. Delete resume
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const resumeId = parseInt(req.params.id as string, 10)
 
         const deleteResult = await pool.query(
             "DELETE FROM resumes WHERE id = $1 AND user_id = $2 RETURNING *",
-            [resumeId, userId]
+            [resumeId, userId],
         )
 
         if (deleteResult.rows.length === 0) {
             return res.status(404).json({ error: "Resume not found" })
         }
 
-        res.json({ message: "Resume deleted successfully", deleted: deleteResult.rows[0] })
+        res.json({
+            message: "Resume deleted successfully",
+            deleted: deleteResult.rows[0],
+        })
     } catch (error) {
         console.error("Failed to delete resume:", error)
         res.status(500).json({ error: "Internal server error" })
     }
 })
 
-// 6. Generate content with AI
-router.post("/:id/ai", async (req: Request, res: Response) => {
+// AI Generation & Improvement
+router.post("/:id/ai", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const resumeId = parseInt(req.params.id as string, 10)
@@ -191,7 +196,7 @@ router.post("/:id/ai", async (req: Request, res: Response) => {
         // Verify ownership and get current content
         const resumeResult = await pool.query(
             "SELECT content, title FROM resumes WHERE id = $1 AND user_id = $2",
-            [resumeId, userId]
+            [resumeId, userId],
         )
         if (resumeResult.rows.length === 0) {
             return res.status(404).json({ error: "Resume not found" })
@@ -242,16 +247,19 @@ ${prompt}
                                 },
                             ],
                         }),
-                    }
+                    },
                 )
 
                 if (!response.ok) {
                     const errBody = await response.text()
-                    throw new Error(`Gemini API error: ${response.status} - ${errBody}`)
+                    throw new Error(
+                        `Gemini API error: ${response.status} - ${errBody}`,
+                    )
                 }
 
                 const data = (await response.json()) as any
-                generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || ""
+                generatedText =
+                    data.candidates?.[0]?.content?.parts?.[0]?.text || ""
                 generatedText = generatedText.trim()
             } catch (apiError) {
                 console.error("Error calling Gemini API:", apiError)
@@ -265,7 +273,7 @@ ${prompt}
         // Update database with generated content
         const updateResult = await pool.query(
             "UPDATE resumes SET content = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *",
-            [generatedText, resumeId]
+            [generatedText, resumeId],
         )
 
         res.json(updateResult.rows[0])
@@ -314,11 +322,16 @@ function generateFallbackResume(prompt: string): string {
 // Multer configuration for memory storage
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 })
 
 // OpenAI API call helper
-async function callOpenAI(systemPrompt: string, userPrompt: string, isJson: boolean = false, previousMessages: any[] = []) {
+async function callOpenAI(
+    systemPrompt: string,
+    userPrompt: string,
+    isJson: boolean = false,
+    previousMessages: any[] = [],
+) {
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
         throw new Error("OPENAI_API_KEY is not configured in the environment")
@@ -326,24 +339,24 @@ async function callOpenAI(systemPrompt: string, userPrompt: string, isJson: bool
 
     const messages = [
         { role: "system", content: systemPrompt },
-        ...previousMessages.map(msg => ({
+        ...previousMessages.map((msg) => ({
             role: msg.sender === "user" ? "user" : "assistant",
-            content: msg.message
+            content: msg.message,
         })),
-        { role: "user", content: userPrompt }
+        { role: "user", content: userPrompt },
     ]
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
+            Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
             model: "gpt-4o-mini",
             messages,
-            ...(isJson ? { response_format: { type: "json_object" } } : {})
-        })
+            ...(isJson ? { response_format: { type: "json_object" } } : {}),
+        }),
     })
 
     if (!response.ok) {
@@ -356,69 +369,102 @@ async function callOpenAI(systemPrompt: string, userPrompt: string, isJson: bool
 }
 
 // 7. Upload PDF Resume and extract text & analyze
-router.post("/:id/upload", upload.single("file"), async (req: Request, res: Response) => {
-    try {
-        const userId = req.user?.id
-        const resumeId = parseInt(req.params.id as string, 10)
-
-        if (!req.file) {
-            return res.status(400).json({ error: "PDF 파일을 업로드해주세요." })
-        }
-
-        // Verify ownership
-        const checkResult = await pool.query(
-            "SELECT id FROM resumes WHERE id = $1 AND user_id = $2",
-            [resumeId, userId]
-        )
-        if (checkResult.rows.length === 0) {
-            return res.status(404).json({ error: "Resume not found" })
-        }
-
-        // Parse PDF
-        let extractedText = ""
-        let parser: any = null
+router.post(
+    "/:id/upload",
+    upload.single("file"),
+    async (req: Request, res: ExpressResponse) => {
         try {
-            parser = new PDFParse({ data: req.file.buffer })
-            const textResult = await parser.getText()
-            extractedText = textResult.text || ""
-        } catch (pdfErr) {
-            console.error("PDF parsing error:", pdfErr)
-            return res.status(400).json({ error: "PDF 파일을 해석하는 데 실패했습니다." })
-        } finally {
-            if (parser) {
-                try {
-                    await parser.destroy()
-                } catch (destroyErr) {
-                    console.error("Failed to destroy parser:", destroyErr)
+            const userId = req.user?.id
+            const resumeId = parseInt(req.params.id as string, 10)
+
+            if (!req.file) {
+                return res
+                    .status(400)
+                    .json({ error: "PDF 파일을 업로드해주세요." })
+            }
+
+            // Verify ownership
+            const checkResult = await pool.query(
+                "SELECT id FROM resumes WHERE id = $1 AND user_id = $2",
+                [resumeId, userId],
+            )
+            if (checkResult.rows.length === 0) {
+                return res.status(404).json({ error: "Resume not found" })
+            }
+
+            // Parse PDF
+            let extractedText = ""
+            let parser: any = null
+            try {
+                parser = new PDFParse({ data: req.file.buffer })
+                const textResult = await parser.getText()
+                extractedText = textResult.text || ""
+            } catch (pdfErr) {
+                console.error("PDF parsing error:", pdfErr)
+                return res
+                    .status(400)
+                    .json({ error: "PDF 파일을 해석하는 데 실패했습니다." })
+            } finally {
+                if (parser) {
+                    try {
+                        await parser.destroy()
+                    } catch (destroyErr) {
+                        console.error("Failed to destroy parser:", destroyErr)
+                    }
                 }
             }
-        }
 
-        if (!extractedText.trim()) {
-            return res.status(400).json({ error: "PDF 파일에서 텍스트를 추출하지 못했습니다. 파일에 텍스트가 포함되어 있는지 확인하세요." })
-        }
+            if (!extractedText.trim()) {
+                return res.status(400).json({
+                    error: "PDF 파일에서 텍스트를 추출하지 못했습니다. 파일에 텍스트가 포함되어 있는지 확인하세요.",
+                })
+            }
 
-        const apiKey = process.env.OPENAI_API_KEY
-        if (!apiKey || apiKey.trim() === "") {
-            return res.status(400).json({
-                error: "OPENAI_API_KEY가 설정되지 않았습니다. packages/server/.env 파일에 OpenAI API 키를 입력하고 서버를 재시작해 주세요."
-            })
-        }
+            const apiKey = process.env.OPENAI_API_KEY
+            if (!apiKey || apiKey.trim() === "") {
+                return res.status(400).json({
+                    error: "OPENAI_API_KEY가 설정되지 않았습니다. packages/server/.env 파일에 OpenAI API 키를 입력하고 서버를 재시작해 주세요.",
+                })
+            }
 
-        let summary = ""
-        let improvements = ""
-        let recommendedJobs = "[]"
+            let summary = ""
+            let improvements = ""
+            let recommendedJobs = "[]"
+            let citations = "[]"
 
-        try {
-            const postsResult = await pool.query("SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100")
-            const postsList = postsResult.rows.map(p => `- [${p.company}] ${p.job_title} (기술스택: ${p.tech_stack.join(", ")})`).join("\n")
+            const originalName = Buffer.from(
+                req.file.originalname,
+                "latin1",
+            ).toString("utf8")
 
-            const systemPrompt = `
+            if (apiKey && apiKey.trim() !== "") {
+                try {
+                    const postsResult = await pool.query(
+                        "SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100",
+                    )
+                    const postsList = postsResult.rows
+                        .map(
+                            (p) =>
+                                `- [${p.company}] ${p.job_title} (기술스택: ${p.tech_stack.join(", ")})`,
+                        )
+                        .join("\n")
+
+                    const systemPrompt = `
 너는 대한민국 최고의 개발자 채용 및 커리어 컨설턴트 AI이다.
-제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 세 가지를 제공해라.
-1. 이력서 요약(summary): 인재의 핵심 강점, 주요 스택, 프로젝트 요약을 전문성 있게 작성.
-2. 개선할 점(improvements): 면접에서 아쉬울 수 있는 부분이나 보강이 필요한 내용(수치화, 근거 부족 등)을 지적하고 구체적 개선 조언 제공.
-3. 추천 공고(recommended_jobs): 반드시 아래의 [실제 채용 공고 목록] 안에서만 이 이력서를 가진 지원자에게 가장 적합한 공고를 3~5개 골라 추천해라. (반드시 목록에 있는 job_title과 company를 그대로 써야 하며, 목록에 없는 회사는 절대 지어내지 마라. 추천 이유도 함께 포함.)
+제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 항목들을 제공해라.
+
+[CRITICAL: 참조(Citations) 및 인용문(Quote) 생성 원칙 - 매우 중요]
+1. 인용할 문장(quote)은 반드시 아래 제공된 [이력서 본문]에 실제로 한 글자도 틀리지 않고 정확히 존재하는 실제 문장(Exact Substring)이어야 한다.
+2. 절대로 원본에 없는 문장을 임의로 지어내거나, 요약하거나, 문맥을 바꾸어 가짜로 인용하지 마라.
+3. 분석 절차:
+   - 1단계: 먼저 이력서 본문에서 강점, 프로젝트, 개선이 필요한 근거가 되는 실제 문장들을 검색하여 citations 배열의 quote로 발췌한다.
+   - 2단계: 추출한 실제 인용구를 기반으로 요약(summary), 개선할 점(improvements)을 작성하고 각 글머리 끝에 [1], [2] 등의 참조 번호를 연결한다.
+
+[항목별 작성 가이드]
+1. 이력서 요약(summary): 인재의 핵심 강점, 주요 스택, 프로젝트 요약을 전문성 있게 작성. (각 항목 끝에 참조한 원본 문장의 번호 [1], [2] 등을 표기할 것)
+2. 개선할 점(improvements): 면접에서 아쉬울 수 있는 부분이나 보강이 필요한 내용(수치화, 근거 부족 등)을 지적하고 구체적 개선 조언 제공. (참조한 원본 문장의 번호 [3], [4] 등을 표기할 것)
+3. 추천 공고(recommended_jobs): 반드시 아래의 [실제 채용 공고 목록] 안에서만 이 이력서를 가진 지원자에게 가장 적합한 공고를 3~5개 골라 추천해라.
+4. 참조 출처(citations): 본문에서 [1], [2], [3] 등으로 인용한 원본 텍스트의 상세 정보를 담은 배열.
 
 [실제 채용 공고 목록]
 ${postsList}
@@ -426,49 +472,254 @@ ${postsList}
 [규칙]
 - 반드시 한국어로 대답해라.
 - summary, improvements 응답은 반드시 마크다운 글머리 기호(각 줄이 "-"로 시작) 목록 형태로 작성해라.
+- citations의 quote는 본문에 존재하는 실제 문자열을 그대로 복사해서 넣어라.
 - 반드시 다음 구조의 JSON 형태로만 응답해라. 다른 서론/설명은 절대 포함하지 마라.
+
 JSON 구조:
 {
-  "summary": "- **핵심 스택:** ...\\n- **경험 요약:** ...\\n- **인재 강점:** ...",
-  "improvements": "- **수치 보강:** ...\\n- **트러블슈팅 세분화:** ...\\n- **성과 연결:** ...",
+  "summary": "- **보유 역량 및 스택:** ... [1]\\n- **프로젝트 성과:** ... [2]",
+  "improvements": "- **정량적 성과 보강:** ... [3]\\n- **문제 해결 디테일:** ... [4]",
   "recommended_jobs": [
     { "job_title": "프론트엔드 개발자 (React)", "company": "네이버웹툰", "reason": "React 및 성능 최적화 경험이 돋보임" }
+  ],
+  "citations": [
+    {
+      "id": 1,
+      "title": "핵심 기술 역량",
+      "filename": "${originalName}",
+      "keywords": "기술 스택, 핵심 역량",
+      "published": "2026. 03. 29",
+      "objective": "요약 1번 항목의 근거 원문",
+      "quote": "이력서 원본에 존재하는 실제 문장",
+      "section": "이력서 본문"
+    }
   ]
 }
 `
-            const responseText = await callOpenAI(systemPrompt, extractedText, true)
-            const parsedResponse = JSON.parse(responseText)
-            summary = parsedResponse.summary || ""
-            improvements = parsedResponse.improvements || ""
-            recommendedJobs = JSON.stringify(parsedResponse.recommended_jobs || [])
-        } catch (openaiErr: any) {
-            console.error("OpenAI analysis failed:", openaiErr)
-            return res.status(500).json({
-                error: `OpenAI 분석에 실패했습니다: ${openaiErr.message || openaiErr}`
-            })
-        }
+                    const responseText = await callOpenAI(
+                        systemPrompt,
+                        extractedText,
+                        true,
+                    )
+                    const parsedResponse = JSON.parse(responseText)
+                    summary = parsedResponse.summary || ""
+                    improvements = parsedResponse.improvements || ""
+                    recommendedJobs = JSON.stringify(
+                        parsedResponse.recommended_jobs || [],
+                    )
+                    const analysisResult = await analyzeResumeText(
+                        extractedText,
+                        originalName,
+                        apiKey,
+                    )
+                    summary = analysisResult.summary
+                    improvements = analysisResult.improvements
+                    recommendedJobs = analysisResult.recommendedJobs
+                    citations = analysisResult.citations
+                } catch (openaiErr: any) {
+                    console.error("OpenAI analysis failed:", openaiErr)
+                    const fallback = generateMockPDFAnalysis(
+                        extractedText,
+                        originalName,
+                    )
+                    summary = fallback.summary
+                    improvements = fallback.improvements
+                    citations = JSON.stringify(fallback.citations)
+                }
+            } else {
+                const fallback = generateMockPDFAnalysis(
+                    extractedText,
+                    originalName,
+                )
+                summary = fallback.summary
+                improvements = fallback.improvements
+                citations = JSON.stringify(fallback.citations)
+            }
 
-        // Update database and clear previous chat history
-        await pool.query(
-            "DELETE FROM resume_messages WHERE resume_id = $1",
-            [resumeId]
+            // Update database and clear previous chat history
+            await pool.query(
+                "DELETE FROM resume_messages WHERE resume_id = $1",
+                [resumeId],
+            )
+
+            const updateResult = await pool.query(
+                "UPDATE resumes SET raw_text = $1, summary = $2, improvements = $3, recommended_jobs = $4, citations = $5, pdf_file = $6, pdf_name = $7, updated_at = CURRENT_TIMESTAMP WHERE id = $8 RETURNING *",
+                [
+                    extractedText,
+                    summary,
+                    improvements,
+                    recommendedJobs,
+                    citations,
+                    req.file.buffer,
+                    originalName,
+                    resumeId,
+                ],
+            )
+
+            res.json(updateResult.rows[0])
+        } catch (error) {
+            console.error("Failed to process PDF upload:", error)
+            res.status(500).json({ error: "PDF 분석 중 오류가 발생했습니다." })
+        }
+    },
+)
+
+// 7-1. Re-analyze existing resume text with AI
+router.post("/:id/reanalyze", async (req: Request, res: ExpressResponse) => {
+    try {
+        const userId = req.user?.id
+        const resumeId = parseInt(req.params.id as string, 10)
+
+        const resumeResult = await pool.query(
+            "SELECT raw_text, pdf_name FROM resumes WHERE id = $1 AND user_id = $2",
+            [resumeId, userId],
         )
 
-        const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8')
+        if (resumeResult.rows.length === 0) {
+            return res.status(404).json({ error: "Resume not found" })
+        }
+
+        const rawText = resumeResult.rows[0].raw_text
+        const pdfName = resumeResult.rows[0].pdf_name || "자소서 원본"
+
+        if (!rawText || !rawText.trim()) {
+            return res.status(400).json({ error: "이력서 원본 텍스트가 없습니다. 먼저 PDF를 업로드해주세요." })
+        }
+
+        const apiKey = process.env.OPENAI_API_KEY
+        let summary = ""
+        let improvements = ""
+        let recommendedJobs = "[]"
+        let citations = "[]"
+
+        if (apiKey && apiKey.trim() !== "") {
+            try {
+                const result = await analyzeResumeText(rawText, pdfName, apiKey)
+                summary = result.summary
+                improvements = result.improvements
+                recommendedJobs = result.recommendedJobs
+                citations = result.citations
+            } catch (err) {
+                console.error("Re-analysis failed, fallback to mock:", err)
+                const fallback = generateMockPDFAnalysis(rawText, pdfName)
+                summary = fallback.summary
+                improvements = fallback.improvements
+                citations = JSON.stringify(fallback.citations)
+            }
+        } else {
+            const fallback = generateMockPDFAnalysis(rawText, pdfName)
+            summary = fallback.summary
+            improvements = fallback.improvements
+            citations = JSON.stringify(fallback.citations)
+        }
+
         const updateResult = await pool.query(
-            "UPDATE resumes SET raw_text = $1, summary = $2, improvements = $3, recommended_jobs = $4, pdf_file = $5, pdf_name = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING *",
-            [extractedText, summary, improvements, recommendedJobs, req.file.buffer, originalName, resumeId]
+            "UPDATE resumes SET summary = $1, improvements = $2, recommended_jobs = $3, citations = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *",
+            [summary, improvements, recommendedJobs, citations, resumeId],
         )
 
         res.json(updateResult.rows[0])
     } catch (error) {
-        console.error("PDF upload/analysis failed:", error)
-        res.status(500).json({ error: "Internal server error" })
+        console.error("Failed to re-analyze resume:", error)
+        res.status(500).json({ error: "재분석 중 오류가 발생했습니다." })
     }
 })
 
-// 8. Get chat message history
-router.get("/:id/messages", async (req: Request, res: Response) => {
+// Helper: Common analysis runner with validation & retry
+async function analyzeResumeText(
+    extractedText: string,
+    originalName: string,
+    apiKey: string,
+) {
+    const postsResult = await pool.query(
+        "SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100",
+    )
+    const postsList = postsResult.rows
+        .map(
+            (p) =>
+                `- [${p.company}] ${p.job_title} (기술스택: ${p.tech_stack.join(", ")})`,
+        )
+        .join("\n")
+
+    const systemPrompt = `
+너는 대한민국 최고의 개발자 채용 및 커리어 컨설턴트 AI이다.
+제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 항목들을 제공해라.
+
+[CRITICAL: 참조(Citations) 및 인용문(Quote) 생성 원칙 - 매우 중요]
+1. 인용할 문장(quote)은 반드시 아래 제공된 [이력서 본문]에 실제로 한 글자도 틀리지 않고 정확히 존재하는 실제 문장(Exact Substring)이어야 한다.
+2. 절대로 원본에 없는 문장을 임의로 지어내거나, 요약하거나, 문맥을 바꾸어 가짜로 인용하지 마라.
+3. [동일 내용 동일 번호 원칙]: 여러 항목(요약 및 개선점)에서 **동일한 원본 문장을 참조할 때는 반드시 동일한 참조 번호(예: 둘 다 [1])를 재사용**해라. 절대로 같은 문장에 다른 번호를 붙이지 마라.
+4. 분석 절차:
+   - 1단계: 먼저 이력서 본문에서 핵심 강점, 프로젝트, 개선 근거가 되는 실존 문장들을 찾아 citations 배열에 quote로 등록한다. (중복 문장은 1개의 citation으로 등록)
+   - 2단계: 등록한 고유 인용구의 id([1], [2]...)를 바탕으로 summary와 improvements의 각 항목 끝에 표기한다.
+
+[항목별 작성 가이드]
+1. 이력서 요약(summary): 인재의 핵심 강점, 주요 스택, 프로젝트 요약을 전문성 있게 작성. (참조한 원본 문장의 번호 [1], [2] 등을 표기)
+2. 개선할 점(improvements): 면접에서 아쉬울 수 있는 부분이나 보강이 필요한 내용(수치화, 근거 부족 등)을 지적하고 구체적 개선 조언 제공. (참조한 원본 문장의 번호 [1], [2] 등을 표기하되 같은 문장이면 동일 번호 재사용)
+3. 추천 공고(recommended_jobs): 반드시 아래의 [실제 채용 공고 목록] 안에서만 이 이력서를 가진 지원자에게 가장 적합한 공고를 3~5개 골라 추천해라.
+4. 참조 출처(citations): 본문에서 인용한 고유한 원본 텍스트 상세 정보를 담은 배열.
+
+[실제 채용 공고 목록]
+${postsList}
+
+[규칙]
+- 반드시 한국어로 대답해라.
+- summary, improvements 응답은 반드시 마크다운 글머리 기호(각 줄이 "-"로 시작) 목록 형태로 작성해라.
+- citations의 quote는 본문에 존재하는 실제 문자열을 그대로 복사해서 넣어라.
+- 반드시 다음 구조의 JSON 형태로만 응답해라. 다른 서론/설명은 절대 포함하지 마라.
+
+JSON 구조:
+{
+  "summary": "- **보유 역량 및 스택:** ... [1]\\n- **프로젝트 성과:** ... [2]",
+  "improvements": "- **정량적 성과 보강:** ... [1]\\n- **문제 해결 디테일:** ... [3]",
+  "recommended_jobs": [
+    { "job_title": "프론트엔드 개발자 (React)", "company": "네이버웹툰", "reason": "React 및 성능 최적화 경험이 돋보임" }
+  ],
+  "citations": [
+    {
+      "id": 1,
+      "title": "핵심 기술 역량",
+      "filename": "${originalName}",
+      "keywords": "기술 스택, 핵심 역량",
+      "published": "2026. 03. 29",
+      "objective": "요약 1번 항목의 근거 원문",
+      "quote": "이력서 원본에 존재하는 실제 문장",
+      "section": "이력서 본문"
+    }
+  ]
+}
+`
+    const responseText = await callOpenAI(
+        systemPrompt,
+        extractedText,
+        true,
+    )
+    const parsedResponse = JSON.parse(responseText)
+    const rawSummary = parsedResponse.summary || ""
+    const rawImprovements = parsedResponse.improvements || ""
+    const recommendedJobs = JSON.stringify(
+        parsedResponse.recommended_jobs || [],
+    )
+    const rawCitations = parsedResponse.citations || []
+
+    const { summary, improvements, citations } = deduplicateAndRemapCitations(
+        rawSummary,
+        rawImprovements,
+        rawCitations,
+        extractedText,
+        originalName,
+    )
+
+    return {
+        summary,
+        improvements,
+        recommendedJobs,
+        citations: JSON.stringify(citations),
+    }
+}
+
+// 8. Get messages for a resume
+router.get("/:id/messages", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const resumeId = parseInt(req.params.id as string, 10)
@@ -476,25 +727,25 @@ router.get("/:id/messages", async (req: Request, res: Response) => {
         // Verify ownership
         const checkResult = await pool.query(
             "SELECT id FROM resumes WHERE id = $1 AND user_id = $2",
-            [resumeId, userId]
+            [resumeId, userId],
         )
         if (checkResult.rows.length === 0) {
             return res.status(404).json({ error: "Resume not found" })
         }
 
-        const messagesResult = await pool.query(
-            "SELECT id, sender, message, created_at FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
-            [resumeId]
+        const result = await pool.query(
+            "SELECT id, resume_id, sender, message, citations, created_at FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
+            [resumeId],
         )
-        res.json(messagesResult.rows)
+        res.json(result.rows)
     } catch (error) {
         console.error("Failed to fetch messages:", error)
         res.status(500).json({ error: "Internal server error" })
     }
 })
 
-// 9. Send a message to AI and get a response
-router.post("/:id/messages", async (req: Request, res: Response) => {
+// 9. Send a message to AI assistant
+router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
         const resumeId = parseInt(req.params.id as string, 10)
@@ -506,62 +757,103 @@ router.post("/:id/messages", async (req: Request, res: Response) => {
 
         // Verify ownership and get resume context
         const resumeResult = await pool.query(
-            "SELECT raw_text, title FROM resumes WHERE id = $1 AND user_id = $2",
-            [resumeId, userId]
+            "SELECT raw_text, title, pdf_name, citations FROM resumes WHERE id = $1 AND user_id = $2",
+            [resumeId, userId],
         )
         if (resumeResult.rows.length === 0) {
             return res.status(404).json({ error: "Resume not found" })
         }
 
         const rawText = resumeResult.rows[0].raw_text || ""
+        const pdfName = resumeResult.rows[0].pdf_name || "자소서 원본"
 
         // Fetch previous chat history
         const historyResult = await pool.query(
             "SELECT sender, message FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
-            [resumeId]
+            [resumeId],
         )
         const history = historyResult.rows
 
         // Save User Message
         const userMsgResult = await pool.query(
             "INSERT INTO resume_messages (resume_id, sender, message) VALUES ($1, 'user', $2) RETURNING *",
-            [resumeId, message]
+            [resumeId, message],
         )
 
         const apiKey = process.env.OPENAI_API_KEY
-        if (!apiKey || apiKey.trim() === "") {
-            return res.status(400).json({
-                error: "OPENAI_API_KEY가 설정되지 않았습니다. packages/server/.env 파일에 OpenAI API 키를 입력하고 서버를 재시작해 주세요."
-            })
-        }
-
         let aiResponseText = ""
-        try {
-            const systemPrompt = `
+        let messageCitations: any[] = []
+
+        if (apiKey && apiKey.trim() !== "") {
+            try {
+                const systemPrompt = `
 너는 사용자의 이력서/자기소개서 기반 질의응답을 성심성의껏 도와주는 전문 취업 코칭 AI 어시스턴트이다.
-아래에 제공된 사용자의 이력서 텍스트 내용을 완벽히 파악하고, 이 내용에 기반하여 친절하고 구체적으로 사용자의 질문에 한국어로 대답해라.
-질문자가 면접 준비, 강점 질문, 프로젝트 질문, 기술 스택 연관성 등을 물어보면 적극적으로 조언해라.
+아래에 제공된 [이력서 본문]에 철저히 기반하여 사실에 입각해 친절하고 구체적으로 사용자의 질문에 한국어로 대답해라.
+
+[CRITICAL: 참조(Citations) 및 인용문(Quote) 생성 원칙 - 매우 중요]
+1. citations의 quote는 반드시 아래 [이력서 본문]에 실제로 존재하는 문장을 한 글자도 바꾸지 않고 그대로(Exact Substring) 복사하여 작성해야 한다.
+2. 본문에 없는 내용을 지어내어 인용하거나 요약/변형한 가짜 quote를 만드는 것은 엄격히 금지된다.
+3. 동일한 문장을 인용할 때는 동일한 참조 번호(예: [1])를 재사용해라.
+4. 먼저 질문과 관련된 원본 문장을 quote로 발췌하여 citations에 등록하고, 답변(answer) 작성 시 해당 참조 번호 [1], [2]를 문장 뒤에 명시해라.
+
+JSON 형식으로 응답해라:
+{
+  "answer": "답변 내용 (참조 번호 [1], [2] 포함)",
+  "citations": [
+    {
+      "id": 1,
+      "title": "관련 원본 내용",
+      "filename": "${pdfName}",
+      "keywords": "키워드1, 키워드2",
+      "published": "2026. 03. 29",
+      "objective": "답변의 근거가 되는 원문 발췌",
+      "quote": "이력서 본문에 존재하는 실제 문장",
+      "section": "이력서 본문"
+    }
+  ]
+}
 
 [이력서 본문]
 ${rawText}
 `
-            aiResponseText = await callOpenAI(systemPrompt, message, false, history)
-        } catch (openaiErr: any) {
-            console.error("OpenAI Q&A failed:", openaiErr)
-            return res.status(500).json({
-                error: `OpenAI 응답 생성에 실패했습니다: ${openaiErr.message || openaiErr}`
-            })
+                const rawJson = await callOpenAI(
+                    systemPrompt,
+                    message,
+                    true,
+                    history,
+                )
+                const parsed = JSON.parse(rawJson)
+                const rawAnswer = parsed.answer || ""
+                const rawCits = parsed.citations || []
+                const remapped = deduplicateAndRemapMessage(
+                    rawAnswer,
+                    rawCits,
+                    rawText,
+                    pdfName,
+                )
+                aiResponseText = remapped.answer
+                messageCitations = remapped.citations
+            } catch (openaiErr: any) {
+                console.error("OpenAI Q&A failed:", openaiErr)
+                const mock = generateMockQA(message, rawText, pdfName)
+                aiResponseText = mock.answer
+                messageCitations = mock.citations
+            }
+        } else {
+            const mock = generateMockQA(message, rawText, pdfName)
+            aiResponseText = mock.answer
+            messageCitations = mock.citations
         }
 
         // Save Assistant Message
         const aiMsgResult = await pool.query(
-            "INSERT INTO resume_messages (resume_id, sender, message) VALUES ($1, 'assistant', $2) RETURNING *",
-            [resumeId, aiResponseText]
+            "INSERT INTO resume_messages (resume_id, sender, message, citations) VALUES ($1, 'assistant', $2, $3) RETURNING *",
+            [resumeId, aiResponseText, JSON.stringify(messageCitations)],
         )
 
         res.json({
             userMessage: userMsgResult.rows[0],
-            assistantMessage: aiMsgResult.rows[0]
+            assistantMessage: aiMsgResult.rows[0],
         })
     } catch (error) {
         console.error("Q&A failed:", error)
@@ -569,44 +861,395 @@ ${rawText}
     }
 })
 
-// Helper mock functions
-function generateMockPDFAnalysis(text: string) {
+// Helper: Extract valid sentences from raw text
+function extractCleanSentences(sourceText: string): string[] {
+    if (!sourceText) return []
+    const lines = sourceText
+        .split(/[\r\n]+/)
+        .map((l) => l.trim())
+        .filter((l) => l.length >= 8)
+
+    const sentences: string[] = []
+    for (const line of lines) {
+        const parts = line
+            .split(/(?<=[.?!])\s+/)
+            .map((s) => s.trim())
+            .filter((s) => s.length >= 8)
+        if (parts.length > 0) {
+            sentences.push(...parts)
+        } else if (line.length >= 8) {
+            sentences.push(line)
+        }
+    }
+    return sentences
+}
+
+// Helper: Validate and align citations with actual source text
+function validateAndAlignCitations(
+    citations: any[],
+    sourceText: string,
+    filename: string = "자소서 원본",
+): any[] {
+    if (!Array.isArray(citations) || citations.length === 0 || !sourceText) {
+        return citations || []
+    }
+
+    const sentences = extractCleanSentences(sourceText)
+
+    return citations.map((cit, index) => {
+        const id = cit.id || index + 1
+        let quote = (cit.quote || "").trim()
+
+        // 1. Exact match
+        if (quote && sourceText.includes(quote)) {
+            return {
+                ...cit,
+                id,
+                filename: cit.filename || filename,
+                published: cit.published || "2026. 03. 29",
+            }
+        }
+
+        // 2. Match with normalized whitespace
+        const normalizedSource = sourceText.replace(/\s+/g, " ")
+        const normalizedQuote = quote.replace(/\s+/g, " ")
+        if (normalizedQuote && normalizedSource.includes(normalizedQuote)) {
+            // Find in actual sourceText to get verbatim substring
+            for (const s of sentences) {
+                if (s.replace(/\s+/g, " ").includes(normalizedQuote)) {
+                    quote = s
+                    break
+                }
+            }
+            return {
+                ...cit,
+                id,
+                quote,
+                filename: cit.filename || filename,
+                published: cit.published || "2026. 03. 29",
+            }
+        }
+
+        // 3. Search best matching real sentence using keywords
+        const searchWords = `${quote} ${cit.keywords || ""} ${cit.title || ""}`
+            .replace(/[^\w가-힣\s]/g, " ")
+            .split(/\s+/)
+            .filter((w) => w.length >= 2)
+
+        let bestSentence = ""
+        let maxMatchCount = 0
+
+        for (const sentence of sentences) {
+            let matchScore = 0
+            for (const word of searchWords) {
+                if (sentence.includes(word)) {
+                    matchScore += word.length
+                }
+            }
+            if (matchScore > maxMatchCount) {
+                maxMatchCount = matchScore
+                bestSentence = sentence
+            }
+        }
+
+        if (bestSentence && maxMatchCount > 2) {
+            quote = bestSentence
+        } else if (sentences.length > 0) {
+            // Fallback to real sentence from sourceText
+            quote = sentences[index % sentences.length]
+        }
+
+        return {
+            ...cit,
+            id,
+            quote,
+            filename: cit.filename || filename,
+            published: cit.published || "2026. 03. 29",
+        }
+    })
+}
+
+// Helper: Deduplicate citations by quote and remap [oldId] tags to unified newId
+function deduplicateAndRemapCitations(
+    summary: string,
+    improvements: string,
+    rawCitations: any[],
+    sourceText: string,
+    filename: string,
+): { summary: string; improvements: string; citations: any[] } {
+    const validated = validateAndAlignCitations(rawCitations, sourceText, filename)
+
+    const uniqueMap = new Map<string, any>()
+    const oldIdToNewId = new Map<number, number>()
+    let nextId = 1
+
+    for (const cit of validated) {
+        const quoteKey = (cit.quote || "").trim().toLowerCase().replace(/\s+/g, " ")
+        if (!quoteKey) continue
+
+        if (uniqueMap.has(quoteKey)) {
+            const existing = uniqueMap.get(quoteKey)!
+            oldIdToNewId.set(cit.id, existing.id)
+        } else {
+            const newCit = {
+                ...cit,
+                id: nextId,
+            }
+            uniqueMap.set(quoteKey, newCit)
+            oldIdToNewId.set(cit.id, nextId)
+            nextId++
+        }
+    }
+
+    const finalCitations = Array.from(uniqueMap.values())
+
+    const remapString = (str: string) => {
+        if (!str) return ""
+        return str.replace(/\[(\d+)\]/g, (match, p1) => {
+            const oldId = parseInt(p1, 10)
+            const mapped = oldIdToNewId.get(oldId)
+            return mapped !== undefined ? `[${mapped}]` : match
+        })
+    }
+
     return {
-        summary: `- **보유 기술:** React, TypeScript, Express, PostgreSQL, Docker\n- **주요 경력 요약:** RESTful API 및 DB 설계 최적화. 클라이언트 렌더링 성능 지연 제거 경험.\n- **핵심 역량:** 프론트와 백엔드를 모두 다루며 마이크로서비스 간 도메인 이관 및 인프라 분산에 관심이 큼.`,
-        improvements: `- **정량적 수치 보강:** 성과가 수치적으로 나타나지 않음. 로딩 개선율(%) 등을 추가하면 좋음.\n- **장애 극복 디테일:** 에러 복구에 있어 Error Boundary 및 Fallback 설계 배경을 구체화할 필요 있음.\n- **협업 성과 추가:** 코드 리뷰 및 문서화 활동이 팀 생산성에 미친 영향을 기술하면 더 강력해짐.`
+        summary: remapString(summary),
+        improvements: remapString(improvements),
+        citations: finalCitations,
     }
 }
 
-function generateMockQA(userMessage: string, resumeText: string): string {
+// Helper: Deduplicate citations for single message and remap [oldId] tags
+function deduplicateAndRemapMessage(
+    answer: string,
+    rawCitations: any[],
+    sourceText: string,
+    filename: string,
+): { answer: string; citations: any[] } {
+    const validated = validateAndAlignCitations(rawCitations, sourceText, filename)
+
+    const uniqueMap = new Map<string, any>()
+    const oldIdToNewId = new Map<number, number>()
+    let nextId = 1
+
+    for (const cit of validated) {
+        const quoteKey = (cit.quote || "").trim().toLowerCase().replace(/\s+/g, " ")
+        if (!quoteKey) continue
+
+        if (uniqueMap.has(quoteKey)) {
+            const existing = uniqueMap.get(quoteKey)!
+            oldIdToNewId.set(cit.id, existing.id)
+        } else {
+            const newCit = {
+                ...cit,
+                id: nextId,
+            }
+            uniqueMap.set(quoteKey, newCit)
+            oldIdToNewId.set(cit.id, nextId)
+            nextId++
+        }
+    }
+
+    const finalCitations = Array.from(uniqueMap.values())
+
+    const finalAnswer = answer.replace(/\[(\d+)\]/g, (match, p1) => {
+        const oldId = parseInt(p1, 10)
+        const mapped = oldIdToNewId.get(oldId)
+        return mapped !== undefined ? `[${mapped}]` : match
+    })
+
+    return {
+        answer: finalAnswer,
+        citations: finalCitations,
+    }
+}
+
+// Helper mock functions: Dynamically extract real sentences from sourceText
+function generateMockPDFAnalysis(
+    text: string,
+    filename: string = "eplasty16e15.pdf",
+) {
+    const sentences = extractCleanSentences(text)
+    const quote1 =
+        sentences[0] ||
+        "웹 애플리케이션의 렌더링 성능 지연을 신속히 감지하고 개선합니다."
+    const quote2 =
+        sentences[Math.min(1, sentences.length - 1)] ||
+        "무분별한 상태 관리 코드와 비효율적인 구버전 라이브러리 사용을 근절합니다."
+    const quote3 =
+        sentences[Math.min(2, sentences.length - 1)] ||
+        "예기치 못한 프론트엔드 에러 발생 시 앱이 완전히 멈추지 않도록 Error Boundary를 설계합니다."
+
+    return {
+        summary: `- **보유 역량 및 경험 요약:** 본문에 기술된 프로젝트 및 문제 해결 경험을 토대로 높은 기술적 이해도를 보여줍니다. [1]
+- **주요 업무 및 성과:** 사용자 관점의 서비스 개선과 코드 품질 향상에 주도적으로 기여했습니다. [2]
+- **인재 강점:** 시스템 안정성과 효율적인 아키텍처 설계를 지향하며 협업 능력을 갖추고 있습니다. [3]`,
+        improvements: `- **정량적 성과 지표 보강:** 서술된 프로젝트 성과에 구체적인 수치(개선율, 처리 시간 등)를 추가하면 설득력이 더욱 높아집니다. [1]
+- **트러블슈팅 세부 과정 명시:** 발생했던 문제 상황과 이를 해결하기 위한 기술적 의사결정 과정을 단계별로 서술하세요. [2]
+- **팀 협업 및 기여도 구체화:** 협업 과정에서 본인이 주도한 역할과 동료들에게 미친 긍정적 영향을 강조해보세요. [3]`,
+        citations: [
+            {
+                id: 1,
+                title: "핵심 역량 및 경험 발췌",
+                filename,
+                keywords: "핵심 역량, 기술 경험",
+                published: "2026. 03. 29",
+                objective: "이력서 요약 1번 항목의 근거 원문",
+                quote: quote1,
+                section: "이력서 본문",
+            },
+            {
+                id: 2,
+                title: "주요 성과 및 개선 경험",
+                filename,
+                keywords: "프로젝트 성과, 최적화",
+                published: "2026. 03. 29",
+                objective: "이력서 요약 2번 항목의 근거 원문",
+                quote: quote2,
+                section: "이력서 본문",
+            },
+            {
+                id: 3,
+                title: "문제 해결 및 안정성",
+                filename,
+                keywords: "트러블슈팅, 아키텍처",
+                published: "2026. 03. 29",
+                objective: "이력서 요약 3번 항목의 근거 원문",
+                quote: quote3,
+                section: "이력서 본문",
+            },
+        ],
+    }
+}
+
+function generateMockQA(
+    userMessage: string,
+    resumeText: string,
+    filename: string = "자소서 원본",
+): { answer: string; citations: any[] } {
+    const sentences = extractCleanSentences(resumeText)
+    const quote1 =
+        sentences[0] ||
+        "웹 애플리케이션의 렌더링 성능 지연을 신속히 감지하고 개선합니다."
+    const quote2 =
+        sentences[Math.min(1, sentences.length - 1)] ||
+        "무분별한 상태 관리 코드와 비효율적인 구버전 라이브러리 사용을 근절합니다."
+    const quote3 =
+        sentences[Math.min(2, sentences.length - 1)] ||
+        "예기치 못한 프론트엔드 에러 발생 시 앱이 완전히 멈추지 않도록 Error Boundary를 설계합니다."
+
     const msg = userMessage.toLowerCase()
-    
-    // Quick disclaimer about API key at the top
-    const disclaimer = "[안내: OPENAI_API_KEY가 등록되지 않아 모조(Mock) 엔진으로 답변 중입니다.]\n\n"
-    
-    if (msg.includes("면접") || msg.includes("질문") || msg.includes("면접관")) {
-        return disclaimer + `작성해주신 이력서를 기반으로 면접관이 던질 확률이 높은 대표적인 예상 질문 3가지입니다.
 
-1. **"다양한 상태 관리 라이브러리 중 이를 선택하여 리팩토링한 구체적 기준이 무엇인가요?"**
-   - 이력서 내 '레거시의 편견과 기술 부채 제거' 부분과 연관된 질문입니다. 기존 상태 코드의 한계와 마이그레이션 도중 만난 트러블슈팅 사례를 수치와 함께 답변하시면 좋습니다.
+    if (
+        msg.includes("면접") ||
+        msg.includes("질문") ||
+        msg.includes("면접관")
+    ) {
+        return {
+            answer: `작성해주신 이력서를 기반으로 면접관이 던질 확률이 높은 대표적인 예상 질문 3가지입니다.
 
-2. **"컴포넌트 결합도를 낮추기 위해 어떤 모듈화 설계를 하셨나요?"**
-   - 진입점 최적화 및 Entry Point 설계 항목에서 유도되는 기술적 심층 질문입니다. API 호출 계층과 UI 계층의 의존 관계 분리 과정을 상세히 풀어내세요.
+1. **"해당 경험을 수행하시면서 직면했던 가장 큰 기술적 난제와 해결 방법은 무엇이었나요?"** [1]
+   - 본문에 기술된 주요 프로젝트 내용과 연관된 질문입니다. 구체적인 해결 과정과 배운 점을 답변하시면 좋습니다.
 
-3. **"Error Boundary와 Fallback UI를 설계할 때 장애 시나리오는 어떻게 잡으셨나요?"**
-   - 시스템 복구 기능 회복과 관련된 질문으로, 사용자 이탈을 방지하기 위해 마련한 UX 대안과 예외 처리의 꼼꼼함을 보여주기 좋은 기회입니다.`
+2. **"기존 구조나 레거시 코드를 개선할 때 어떤 기준으로 우선순위를 정하셨나요?"** [2]
+   - 성과 개선 및 아키텍처 의사결정 과정에 대한 질문으로, 본인만의 명확한 기술 기준을 어필하세요.
+
+3. **"예외 상황이나 장애 발생 시 어떤 대비책을 마련하셨나요?"** [3]
+   - 시스템 안정성과 에러 핸들링 경험에 대한 질문으로, 사용자 경험을 지키기 위한 노력을 강조하세요.`,
+            citations: [
+                {
+                    id: 1,
+                    title: "면접 예상 질문 1번 근거",
+                    filename,
+                    keywords: "핵심 프로젝트, 기술 경험",
+                    published: "2026. 03. 29",
+                    objective: "면접 예상 질문 1번 출처",
+                    quote: quote1,
+                    section: "이력서 본문",
+                },
+                {
+                    id: 2,
+                    title: "면접 예상 질문 2번 근거",
+                    filename,
+                    keywords: "성과 개선, 우선순위",
+                    published: "2026. 03. 29",
+                    objective: "면접 예상 질문 2번 출처",
+                    quote: quote2,
+                    section: "이력서 본문",
+                },
+                {
+                    id: 3,
+                    title: "면접 예상 질문 3번 근거",
+                    filename,
+                    keywords: "안정성, 예외 처리",
+                    published: "2026. 03. 29",
+                    objective: "면접 예상 질문 3번 출처",
+                    quote: quote3,
+                    section: "이력서 본문",
+                },
+            ],
+        }
     }
-    
+
     if (msg.includes("강점") || msg.includes("역량") || msg.includes("어필")) {
-        return disclaimer + `이력서 텍스트를 분석했을 때 인사담당자에게 가장 매력적으로 다가갈 수 있는 핵심 강점은 **'아키텍처의 안정성과 리팩토링을 통한 성능 극대화'**입니다.
+        return {
+            answer: `이력서 텍스트를 분석했을 때 인사담당자에게 가장 매력적으로 다가갈 수 있는 핵심 강점은 **'실제 문제 해결 중심의 실무 추진력과 기술적 주도성'**입니다. [1]
 
-- 복잡한 비즈니스 로직을 효율적으로 통합하여 결합도를 낮추려는 노력이 잘 보입니다.
-- 레거시 코드를 단순 유지보수하는 것에 그치지 않고 최신 패러다임에 맞춰 능동적으로 구조화하는 주도성이 강점입니다.
-- 장애 복구와 모니터링 관점(Error Boundary, 재활 관점의 디버깅)이 돋보입니다. 면접에서도 이를 '시스템 가용성을 책임지는 신뢰도' 관점으로 어필해보세요.`
+- 서술된 경험 전반에서 능동적으로 문제를 파악하고 대안을 찾으려는 노력이 돋보입니다. [1]
+- 본문에 기록된 프로젝트 개선 내역을 바탕으로 실질적인 서비스 기여도를 증명할 수 있습니다. [2]
+- 시스템 가용성과 안정성을 고려하는 탄탄한 엔지니어링 마인드가 강점입니다. [3]`,
+            citations: [
+                {
+                    id: 1,
+                    title: "핵심 강점 분석 근거",
+                    filename,
+                    keywords: "문제 해결, 실무 역량",
+                    published: "2026. 03. 29",
+                    objective: "핵심 강점 1번 출처",
+                    quote: quote1,
+                    section: "이력서 본문",
+                },
+                {
+                    id: 2,
+                    title: "서비스 기여도 근거",
+                    filename,
+                    keywords: "프로젝트 기여, 개선 경험",
+                    published: "2026. 03. 29",
+                    objective: "핵심 강점 2번 출처",
+                    quote: quote2,
+                    section: "이력서 본문",
+                },
+                {
+                    id: 3,
+                    title: "엔지니어링 마인드 근거",
+                    filename,
+                    keywords: "안정성, 엔지니어링",
+                    published: "2026. 03. 29",
+                    objective: "핵심 강점 3번 출처",
+                    quote: quote3,
+                    section: "이력서 본문",
+                },
+            ],
+        }
     }
-    
-    return disclaimer + `이력서 분석 결과 및 질문 주신 "${userMessage}"에 대해 분석한 결과입니다.
 
-이력서 내의 기술 역량과 직무 프로젝트 경험을 고려할 때, 제안하신 방향에 대해서는 현재 이력서에 작성된 내용 중 **'진입점 최적화 및 시스템 결합도 완화'** 파트의 모듈성 설계 내역을 보완하는 것이 도움이 됩니다. 추가적으로 궁금하신 면접 팁이나 성과 수치화 방안이 있으시다면 언제든 질문해 주세요!`
+    return {
+        answer: `이력서 분석 결과 및 질문 주신 내용에 대한 답변입니다.
+
+작성하신 이력서 본문의 핵심 내용 [1]을 참고했을 때, 실무에서의 구체적인 성과 지표와 문제 해결 프로세스를 보강하시면 더욱 강력한 지원서가 될 것입니다. 추가적인 면접 대비 팁이나 개선 조언이 필요하시면 편하게 질문해 주세요!`,
+        citations: [
+            {
+                id: 1,
+                title: "질의응답 근거 원문",
+                filename,
+                keywords: "이력서 내용, 핵심 역량",
+                published: "2026. 03. 29",
+                objective: "질의응답 참조",
+                quote: quote1,
+                section: "이력서 본문",
+            },
+        ],
+    }
 }
 
 export default router

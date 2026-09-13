@@ -21,7 +21,29 @@ import { useNavigate, useLocation } from "react-router"
 import { useAuth } from "../../hooks/useAuth"
 import Header from "../organisms/Header"
 import { toaster } from "../ui/toaster"
-import { FaPlus, FaTrash, FaArrowRight, FaFileAlt, FaCheck, FaTimes, FaCloudUploadAlt, FaEdit, FaCode, FaHtml5, FaCss3, FaJs, FaPython, FaTerminal, FaDatabase, FaFileCode, FaEllipsisV, FaHeart, FaRegHeart } from "react-icons/fa"
+import {
+    FaPlus,
+    FaTrash,
+    FaArrowRight,
+    FaFileAlt,
+    FaCheck,
+    FaTimes,
+    FaCloudUploadAlt,
+    FaEdit,
+    FaCode,
+    FaHtml5,
+    FaCss3,
+    FaJs,
+    FaPython,
+    FaTerminal,
+    FaDatabase,
+    FaFileCode,
+    FaEllipsisV,
+    FaHeart,
+    FaRegHeart,
+    FaSyncAlt,
+    FaBriefcase,
+} from "react-icons/fa"
 import ReactMarkdown from "react-markdown"
 import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
@@ -35,7 +57,22 @@ const shikiAdapter = createShikiAdapter<HighlighterGeneric<any, any>>({
     async load() {
         const { createHighlighter } = await import("shiki")
         return createHighlighter({
-            langs: ["tsx", "scss", "html", "bash", "json", "python", "javascript", "typescript", "css", "sql", "xml", "js", "ts", "sh"],
+            langs: [
+                "tsx",
+                "scss",
+                "html",
+                "bash",
+                "json",
+                "python",
+                "javascript",
+                "typescript",
+                "css",
+                "sql",
+                "xml",
+                "js",
+                "ts",
+                "sh",
+            ],
             themes: ["github-dark"],
         })
     },
@@ -76,22 +113,73 @@ const SpaceInvaderIcon = () => (
     </Box>
 )
 
+import { CitationPopover } from "../molecules/CitationPopover"
+import type { CitationItem } from "../molecules/CitationPopover"
+
 // Markdown rendering component supporting KaTeX and CodeBlock
 interface MarkdownRendererProps {
     content: string
+    citations?: CitationItem[]
+    onViewSource?: (citation: CitationItem) => void
 }
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
+    content,
+    citations = [],
+    onViewSource,
+}) => {
     const preprocessedContent = React.useMemo(() => {
         if (!content) return ""
         // Convert \\[ ... \\] or \[ ... \] to $$ ... $$
-        let processed = content.replace(/\\+\[([\s\S]*?)\\+\]/g, (_, math) => `$$${math}$$`)
+        let processed = content.replace(
+            /\\+\[([\s\S]*?)\\+\]/g,
+            (_, math) => `$$${math}$$`,
+        )
         // Convert \\( ... \\) or \( ... \) to $ ... $
-        processed = processed.replace(/\\+\(([\s\S]*?)\\+\)/g, (_, math) => `$${math}$`)
+        processed = processed.replace(
+            /\\+\(([\s\S]*?)\\+\)/g,
+            (_, math) => `$${math}$`,
+        )
+
+        // Convert [1], [2], [1, 2] to markdown links for citations
+        processed = processed.replace(
+            /(?<![!\[])\[(\d+(?:\s*,\s*\d+)*)\](?!\()/g,
+            (match, ids) => {
+                const cleanIds = ids.replace(/\s+/g, "")
+                return `[${match}](#cite:${cleanIds})`
+            },
+        )
+
         return processed
     }, [content])
 
     const components = {
+        a({ href, children, ...props }: any) {
+            if (href && href.startsWith("#cite:")) {
+                const idsStr = href.replace("#cite:", "")
+                const ids = idsStr
+                    .split(",")
+                    .map((n: string) => parseInt(n.trim(), 10))
+                    .filter((n: number) => !isNaN(n))
+                return (
+                    <CitationPopover
+                        citationIds={ids}
+                        allCitations={citations}
+                        onViewSource={onViewSource}
+                    />
+                )
+            }
+            return (
+                <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    {...props}
+                >
+                    {children}
+                </a>
+            )
+        },
         code({ node, className, children, ...props }: any) {
             const match = /language-(\w+)/.exec(className || "")
             const language = match ? match[1] : ""
@@ -128,22 +216,51 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                 const langConfig = getLanguageIcon(language)
 
                 return (
-                    <CodeBlock.Root maxW="100%" size="sm" mt={3} mb={3} code={codeText} language={language}>
-                        <CodeBlock.Header display="flex" justifyContent="space-between" alignItems="center">
+                    <CodeBlock.Root
+                        maxW="100%"
+                        size="sm"
+                        mt={3}
+                        mb={3}
+                        code={codeText}
+                        language={language}
+                    >
+                        <CodeBlock.Header
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="center"
+                        >
                             <CodeBlock.Title>
-                                <Icon as={langConfig.icon} color={langConfig.color} mr={2} />
+                                <Icon
+                                    as={langConfig.icon}
+                                    color={langConfig.color}
+                                    mr={2}
+                                />
                                 {language}
                             </CodeBlock.Title>
                             <Clipboard.Root value={codeText}>
                                 <Clipboard.Trigger asChild>
-                                    <IconButton aria-label="코드 복사" variant="ghost" size="xs" color="gray.400" _hover={{ color: "white", bg: "whiteAlpha.200" }} minW="8" h="8">
+                                    <IconButton
+                                        aria-label="코드 복사"
+                                        variant="ghost"
+                                        size="xs"
+                                        color="gray.400"
+                                        _hover={{
+                                            color: "white",
+                                            bg: "whiteAlpha.200",
+                                        }}
+                                        minW="8"
+                                        h="8"
+                                    >
                                         <Clipboard.Indicator />
                                     </IconButton>
                                 </Clipboard.Trigger>
                             </Clipboard.Root>
                         </CodeBlock.Header>
                         <CodeBlock.Content>
-                            <CodeBlock.Code fontFamily="'JetBrains Mono', Consolas, monospace" fontSize="sm">
+                            <CodeBlock.Code
+                                fontFamily="'JetBrains Mono', Consolas, monospace"
+                                fontSize="sm"
+                            >
                                 <CodeBlock.CodeText />
                             </CodeBlock.Code>
                         </CodeBlock.Content>
@@ -152,11 +269,21 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             }
 
             return (
-                <Code fontFamily="'JetBrains Mono', Consolas, monospace" bg="gray.100" color="blue.700" px={1.5} py={0.5} borderRadius="md" fontSize="xs" fontWeight="semibold" {...props}>
+                <Code
+                    fontFamily="'JetBrains Mono', Consolas, monospace"
+                    bg="gray.100"
+                    color="blue.700"
+                    px={1.5}
+                    py={0.5}
+                    borderRadius="md"
+                    fontSize="xs"
+                    fontWeight="semibold"
+                    {...props}
+                >
                     {children}
                 </Code>
             )
-        }
+        },
     }
 
     return (
@@ -177,7 +304,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 const handleJsonResponse = async (resp: Response) => {
     const contentType = resp.headers.get("content-type")
     if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("서버로부터 올바른 응답(JSON)을 받지 못했습니다. 백엔드 서버(Port 3000)가 정상적으로 실행 중인지 확인해 주세요.")
+        throw new Error(
+            "서버로부터 올바른 응답(JSON)을 받지 못했습니다. 백엔드 서버(Port 3000)가 정상적으로 실행 중인지 확인해 주세요.",
+        )
     }
     return resp.json()
 }
@@ -191,6 +320,7 @@ const ApplicationTemplate: React.FC = () => {
     const [selectedResume, setSelectedResume] = useState<any | null>(null)
     const [isFetchingResumes, setIsFetchingResumes] = useState(true)
     const [isUploading, setIsUploading] = useState(false)
+    const [isReanalyzing, setIsReanalyzing] = useState(false)
     const [isGenerating, setIsGenerating] = useState(false)
     const [prompt, setPrompt] = useState("")
 
@@ -199,7 +329,174 @@ const ApplicationTemplate: React.FC = () => {
 
     const [messages, setMessages] = useState<any[]>([])
     const [likedJobs, setLikedJobs] = useState<any[]>([])
+    const [highlightedText, setHighlightedText] = useState<string | null>(null)
+    const highlightTimerRef = useRef<any>(null)
     const chatEndRef = useRef<HTMLDivElement>(null)
+
+    const handleViewSource = (citation: any) => {
+        if (!citation) return
+        const targetQuote =
+            citation.quote ||
+            citation.keywords ||
+            citation.title ||
+            citation.objective
+        if (targetQuote) {
+            setHighlightedText(targetQuote)
+            if (highlightTimerRef.current)
+                clearTimeout(highlightTimerRef.current)
+
+            const doScroll = () => {
+                const el = document.getElementById("source-highlight-target")
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" })
+                    const container =
+                        document.getElementById("raw-text-container")
+                    if (container) {
+                        const elRect = el.getBoundingClientRect()
+                        const containerRect = container.getBoundingClientRect()
+                        const offset =
+                            elRect.top -
+                            containerRect.top +
+                            container.scrollTop -
+                            container.clientHeight / 2 +
+                            elRect.height / 2
+                        container.scrollTo({
+                            top: Math.max(0, offset),
+                            behavior: "smooth",
+                        })
+                    }
+                }
+            }
+
+            setTimeout(doScroll, 50)
+            setTimeout(doScroll, 200)
+
+            highlightTimerRef.current = setTimeout(() => {
+                setHighlightedText(null)
+            }, 8000)
+        }
+    }
+
+    const renderRawTextWithHighlight = (
+        rawText: string,
+        highlight: string | null,
+    ) => {
+        if (!rawText) return null
+        if (!highlight || highlight.trim().length === 0) {
+            return (
+                <Text
+                    fontSize="sm"
+                    color="gray.700"
+                    whiteSpace="pre-wrap"
+                    lineHeight="1.7"
+                >
+                    {rawText}
+                </Text>
+            )
+        }
+
+        const trimmed = highlight.trim()
+        const lowerRaw = rawText.toLowerCase()
+        let matchStart = -1
+        let matchEnd = -1
+
+        // 1. Direct slice matching (try varying lengths)
+        const sampleLengths = [trimmed.length, 60, 40, 25, 15]
+        for (const len of sampleLengths) {
+            if (len <= trimmed.length) {
+                const query = trimmed.slice(0, len).toLowerCase()
+                const idx = lowerRaw.indexOf(query)
+                if (idx !== -1) {
+                    matchStart = idx
+                    matchEnd =
+                        idx + Math.min(rawText.length - idx, trimmed.length)
+                    break
+                }
+            }
+        }
+
+        // 2. Whitespace-flexible regex matching
+        if (matchStart === -1) {
+            const escaped = trimmed
+                .slice(0, 30)
+                .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+                .replace(/\s+/g, "\\s+")
+            try {
+                const regex = new RegExp(escaped, "i")
+                const match = regex.exec(rawText)
+                if (match) {
+                    matchStart = match.index
+                    matchEnd = match.index + match[0].length
+                }
+            } catch (e) {
+                // Ignore regex syntax errors
+            }
+        }
+
+        // 3. Keyword token matching
+        if (matchStart === -1) {
+            const words = trimmed
+                .replace(/[^\w가-힣\s]/g, " ")
+                .split(/\s+/)
+                .filter((w) => w.length >= 2)
+
+            for (const word of words) {
+                const idx = lowerRaw.indexOf(word.toLowerCase())
+                if (idx !== -1) {
+                    matchStart = idx
+                    matchEnd = idx + word.length
+                    break
+                }
+            }
+        }
+
+        if (matchStart === -1) {
+            return (
+                <Text
+                    fontSize="sm"
+                    color="gray.700"
+                    whiteSpace="pre-wrap"
+                    lineHeight="1.7"
+                >
+                    {rawText}
+                </Text>
+            )
+        }
+
+        const before = rawText.slice(0, matchStart)
+        const matchedStr = rawText.slice(matchStart, matchEnd)
+        const after = rawText.slice(matchEnd)
+
+        return (
+            <Text
+                fontSize="sm"
+                color="gray.700"
+                whiteSpace="pre-wrap"
+                lineHeight="1.7"
+            >
+                {before}
+                <Box
+                    as="mark"
+                    id="source-highlight-target"
+                    bg="#FDE047"
+                    color="gray.950"
+                    px={2}
+                    py={1}
+                    borderRadius="md"
+                    fontWeight="bold"
+                    border="2px solid"
+                    borderColor="#EAB308"
+                    shadow="lg"
+                    display="inline"
+                    outline="3px solid rgba(234, 179, 8, 0.4)"
+                    transition="all 0.3s ease"
+                >
+                    {matchedStr}
+                </Box>
+                {after}
+            </Text>
+        )
+    }
 
     // Check Authentication
     useEffect(() => {
@@ -263,16 +560,24 @@ const ApplicationTemplate: React.FC = () => {
                     job_title: job.job_title,
                     company: job.company,
                     reason: job.reason,
-                    link: job.link
-                })
+                    link: job.link,
+                }),
             })
 
             if (resp.ok) {
                 if (isLiked) {
-                    setLikedJobs(prev => prev.filter(j => !(j.job_title === job.job_title && j.company === job.company)))
+                    setLikedJobs((prev) =>
+                        prev.filter(
+                            (j) =>
+                                !(
+                                    j.job_title === job.job_title &&
+                                    j.company === job.company
+                                ),
+                        ),
+                    )
                 } else {
                     const data = await handleJsonResponse(resp)
-                    setLikedJobs(prev => [data.likedJob, ...prev])
+                    setLikedJobs((prev) => [data.likedJob, ...prev])
                 }
             }
         } catch (err) {
@@ -300,7 +605,9 @@ const ApplicationTemplate: React.FC = () => {
 
             if (data.length > 0) {
                 // Keep selected resume if it still exists
-                const currentSelected = selectedResume ? data.find((r: any) => r.id === selectedResume.id) : null
+                const currentSelected = selectedResume
+                    ? data.find((r: any) => r.id === selectedResume.id)
+                    : null
                 setSelectedResume(currentSelected || data[0])
             } else {
                 setSelectedResume(null)
@@ -330,7 +637,7 @@ const ApplicationTemplate: React.FC = () => {
         // Persist
         const orderPayload = items.map((item, index) => ({
             id: item.id,
-            orderIndex: index
+            orderIndex: index,
         }))
 
         try {
@@ -341,7 +648,7 @@ const ApplicationTemplate: React.FC = () => {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
-                body: JSON.stringify({ order: orderPayload })
+                body: JSON.stringify({ order: orderPayload }),
             })
         } catch (e) {
             console.error("Failed to save reorder", e)
@@ -373,7 +680,9 @@ const ApplicationTemplate: React.FC = () => {
 
             if (!resp.ok) {
                 const errData = await handleJsonResponse(resp)
-                throw new Error(errData.error || "자기소개서 생성에 실패했습니다.")
+                throw new Error(
+                    errData.error || "자기소개서 생성에 실패했습니다.",
+                )
             }
 
             const newResume = await handleJsonResponse(resp)
@@ -413,7 +722,9 @@ const ApplicationTemplate: React.FC = () => {
             }
 
             const updated = await handleJsonResponse(resp)
-            setResumes((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
+            setResumes((prev) =>
+                prev.map((r) => (r.id === updated.id ? updated : r)),
+            )
             setSelectedResume(updated)
             setIsEditingTitle(false)
         } catch (err: any) {
@@ -470,21 +781,30 @@ const ApplicationTemplate: React.FC = () => {
 
         try {
             const token = localStorage.getItem("token")
-            const resp = await fetch(`/api/resumes/${selectedResume.id}/upload`, {
-                method: "POST",
-                headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            const resp = await fetch(
+                `/api/resumes/${selectedResume.id}/upload`,
+                {
+                    method: "POST",
+                    headers: {
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: formData,
                 },
-                body: formData,
-            })
+            )
 
             if (!resp.ok) {
                 const errData = await handleJsonResponse(resp)
-                throw new Error(errData.error || "PDF 파일 분석에 실패했습니다.")
+                throw new Error(
+                    errData.error || "PDF 파일 분석에 실패했습니다.",
+                )
             }
 
             const updatedResume = await handleJsonResponse(resp)
-            setResumes((prev) => prev.map((r) => (r.id === updatedResume.id ? updatedResume : r)))
+            setResumes((prev) =>
+                prev.map((r) =>
+                    r.id === updatedResume.id ? updatedResume : r,
+                ),
+            )
             setSelectedResume(updatedResume)
             setMessages([])
             toaster.create({
@@ -500,6 +820,51 @@ const ApplicationTemplate: React.FC = () => {
             })
         } finally {
             setIsUploading(false)
+        }
+    }
+
+    const handleReanalyze = async () => {
+        if (!selectedResume || isReanalyzing) return
+
+        setIsReanalyzing(true)
+        try {
+            const token = localStorage.getItem("token")
+            const resp = await fetch(
+                `/api/resumes/${selectedResume.id}/reanalyze`,
+                {
+                    method: "POST",
+                    headers: {
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                },
+            )
+
+            if (!resp.ok) {
+                const errData = await handleJsonResponse(resp)
+                throw new Error(errData.error || "AI 재분석에 실패했습니다.")
+            }
+
+            const updatedResume = await handleJsonResponse(resp)
+            setResumes((prev) =>
+                prev.map((r) =>
+                    r.id === updatedResume.id ? updatedResume : r,
+                ),
+            )
+            setSelectedResume(updatedResume)
+            toaster.create({
+                title: "재분석 완료",
+                description:
+                    "PDF 원본 대조를 마친 정밀 참조 분석이 갱신되었습니다.",
+                type: "success",
+            })
+        } catch (err: any) {
+            toaster.create({
+                title: "재분석 실패",
+                description: err.message,
+                type: "error",
+            })
+        } finally {
+            setIsReanalyzing(false)
         }
     }
 
@@ -523,11 +888,14 @@ const ApplicationTemplate: React.FC = () => {
         }
     }
 
-    const handleSendPromptOrChat = async () => {
-        if (!prompt.trim() || !selectedResume) return
+    const handleSendPromptOrChat = async (customMsg?: string) => {
+        const textToSend = (customMsg !== undefined ? customMsg : prompt).trim()
+        if (!textToSend || !selectedResume) return
 
-        const userMsgText = prompt.trim()
-        setPrompt("")
+        const userMsgText = textToSend
+        if (customMsg === undefined) {
+            setPrompt("")
+        }
 
         // Optimistically append user message
         const tempUserMsg = { sender: "user", message: userMsgText }
@@ -536,14 +904,17 @@ const ApplicationTemplate: React.FC = () => {
 
         try {
             const token = localStorage.getItem("token")
-            const resp = await fetch(`/api/resumes/${selectedResume.id}/messages`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            const resp = await fetch(
+                `/api/resumes/${selectedResume.id}/messages`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: JSON.stringify({ message: userMsgText }),
                 },
-                body: JSON.stringify({ message: userMsgText }),
-            })
+            )
 
             if (!resp.ok) {
                 throw new Error("AI 응답을 생성하는 중에 오류가 발생했습니다.")
@@ -573,7 +944,15 @@ const ApplicationTemplate: React.FC = () => {
     }
 
     return (
-        <Box h={{ base: "auto", md: "100vh" }} minH="100vh" w="100vw" overflow="hidden" bg="#F3F7FA" display="flex" flexDirection="column">
+        <Box
+            h={{ base: "auto", md: "100vh" }}
+            minH="100vh"
+            w="100vw"
+            overflow="hidden"
+            bg="#F3F7FA"
+            display="flex"
+            flexDirection="column"
+        >
             <Header />
             <Flex
                 h={{ base: "auto", md: "calc(100vh - 72px)" }}
@@ -605,7 +984,11 @@ const ApplicationTemplate: React.FC = () => {
                         color="gray.400"
                         bg="transparent"
                         borderRadius="full"
-                        _hover={{ bg: "gray.50", borderColor: "gray.300", color: "gray.600" }}
+                        _hover={{
+                            bg: "gray.50",
+                            borderColor: "gray.300",
+                            color: "gray.600",
+                        }}
                         fontWeight="medium"
                         fontSize="xs"
                         h="40px"
@@ -614,15 +997,33 @@ const ApplicationTemplate: React.FC = () => {
                         + 문서 추가
                     </Button>
 
-                    <VStack flex={1} overflowY="auto" align="stretch" gap={1.5} pr={1}>
+                    <VStack
+                        flex={1}
+                        overflowY="auto"
+                        align="stretch"
+                        gap={1.5}
+                        pr={1}
+                    >
                         {isFetchingResumes ? (
                             <Flex justify="center" align="center" py={8}>
                                 <Spinner size="sm" color="blue.600" />
                             </Flex>
                         ) : resumes.length === 0 ? (
-                            <Flex direction="column" align="center" justify="center" py={12} textAlign="center">
-                                <Text fontSize="2xs" color="gray.400" lineHeight="1.6">
-                                    추가된 자소서가 없습니다.<br />위의 버튼을 눌러 새 문서를 만들어보세요!
+                            <Flex
+                                direction="column"
+                                align="center"
+                                justify="center"
+                                py={12}
+                                textAlign="center"
+                            >
+                                <Text
+                                    fontSize="2xs"
+                                    color="gray.400"
+                                    lineHeight="1.6"
+                                >
+                                    추가된 자소서가 없습니다.
+                                    <br />
+                                    위의 버튼을 눌러 새 문서를 만들어보세요!
                                 </Text>
                             </Flex>
                         ) : (
@@ -637,73 +1038,176 @@ const ApplicationTemplate: React.FC = () => {
                                             {...provided.droppableProps}
                                         >
                                             {resumes.map((resume, index) => {
-                                                const isSelected = selectedResume?.id === resume.id
+                                                const isSelected =
+                                                    selectedResume?.id ===
+                                                    resume.id
                                                 return (
-                                                    <Draggable key={resume.id.toString()} draggableId={resume.id.toString()} index={index}>
-                                                        {(provided, snapshot) => (
+                                                    <Draggable
+                                                        key={resume.id.toString()}
+                                                        draggableId={resume.id.toString()}
+                                                        index={index}
+                                                    >
+                                                        {(
+                                                            provided,
+                                                            snapshot,
+                                                        ) => (
                                                             <HStack
-                                                                ref={provided.innerRef}
+                                                                ref={
+                                                                    provided.innerRef
+                                                                }
                                                                 {...provided.draggableProps}
                                                                 {...provided.dragHandleProps}
                                                                 p={3.5}
-                                                                bg={isSelected ? "#EBF3FF" : (snapshot.isDragging ? "gray.50" : "transparent")}
+                                                                bg={
+                                                                    isSelected
+                                                                        ? "#EBF3FF"
+                                                                        : snapshot.isDragging
+                                                                          ? "gray.50"
+                                                                          : "transparent"
+                                                                }
                                                                 borderRadius="xl"
-                                                                _hover={{ bg: isSelected ? "#EBF3FF" : "gray.50" }}
+                                                                _hover={{
+                                                                    bg: isSelected
+                                                                        ? "#EBF3FF"
+                                                                        : "gray.50",
+                                                                }}
                                                                 cursor="pointer"
                                                                 onClick={() => {
-                                                                    setSelectedResume(resume)
-                                                                    setMessages([])
+                                                                    setSelectedResume(
+                                                                        resume,
+                                                                    )
+                                                                    setMessages(
+                                                                        [],
+                                                                    )
                                                                 }}
                                                                 justifyContent="space-between"
                                                                 transition="all 0.2s"
                                                                 data-group
                                                             >
-                                                                <HStack gap={3} overflow="hidden" flex={1}>
-                                                                    <Box color={isSelected ? "blue.600" : "gray.400"} mt="2px">
-                                                                        <FaFileAlt size={12} />
+                                                                <HStack
+                                                                    gap={3}
+                                                                    overflow="hidden"
+                                                                    flex={1}
+                                                                >
+                                                                    <Box
+                                                                        color={
+                                                                            isSelected
+                                                                                ? "blue.600"
+                                                                                : "gray.400"
+                                                                        }
+                                                                        mt="2px"
+                                                                    >
+                                                                        <FaFileAlt
+                                                                            size={
+                                                                                12
+                                                                            }
+                                                                        />
                                                                     </Box>
                                                                     <Text
                                                                         fontSize="sm"
-                                                                        fontWeight={isSelected ? "semibold" : "medium"}
-                                                                        color={isSelected ? "blue.600" : "gray.600"}
+                                                                        fontWeight={
+                                                                            isSelected
+                                                                                ? "semibold"
+                                                                                : "medium"
+                                                                        }
+                                                                        color={
+                                                                            isSelected
+                                                                                ? "blue.600"
+                                                                                : "gray.600"
+                                                                        }
                                                                         truncate
                                                                         w="100%"
                                                                     >
-                                                                        {resume.title}
+                                                                        {
+                                                                            resume.title
+                                                                        }
                                                                     </Text>
                                                                 </HStack>
                                                                 {isSelected && (
-                                                                    <HStack gap={1}>
+                                                                    <HStack
+                                                                        gap={1}
+                                                                    >
                                                                         <Menu.Root>
-                                                                            <Menu.Trigger asChild>
+                                                                            <Menu.Trigger
+                                                                                asChild
+                                                                            >
                                                                                 <Button
                                                                                     variant="ghost"
                                                                                     size="2xs"
-                                                                                    p={1}
+                                                                                    p={
+                                                                                        1
+                                                                                    }
                                                                                     borderRadius="md"
                                                                                     color="gray.400"
-                                                                                    _hover={{ color: "gray.600", bg: "gray.100" }}
-                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                    _hover={{
+                                                                                        color: "gray.600",
+                                                                                        bg: "gray.100",
+                                                                                    }}
+                                                                                    onClick={(
+                                                                                        e,
+                                                                                    ) =>
+                                                                                        e.stopPropagation()
+                                                                                    }
                                                                                 >
-                                                                                    <FaEllipsisV size={10} />
+                                                                                    <FaEllipsisV
+                                                                                        size={
+                                                                                            10
+                                                                                        }
+                                                                                    />
                                                                                 </Button>
                                                                             </Menu.Trigger>
                                                                             <Menu.Positioner>
-                                                                                <Menu.Content minW="auto" py={1} px={1} borderRadius="md" shadow="sm" border="1px solid" borderColor="gray.100" bg="white" zIndex={10}>
+                                                                                <Menu.Content
+                                                                                    minW="auto"
+                                                                                    py={
+                                                                                        1
+                                                                                    }
+                                                                                    px={
+                                                                                        1
+                                                                                    }
+                                                                                    borderRadius="md"
+                                                                                    shadow="sm"
+                                                                                    border="1px solid"
+                                                                                    borderColor="gray.100"
+                                                                                    bg="white"
+                                                                                    zIndex={
+                                                                                        10
+                                                                                    }
+                                                                                >
                                                                                     <Menu.Item
                                                                                         value="delete"
                                                                                         color="red.600"
-                                                                                        px={2}
-                                                                                        py={1.5}
+                                                                                        px={
+                                                                                            2
+                                                                                        }
+                                                                                        py={
+                                                                                            1.5
+                                                                                        }
                                                                                         fontSize="xs"
                                                                                         cursor="pointer"
-                                                                                        _hover={{ bg: "red.50", color: "red.700" }}
-                                                                                        onClick={(e) => {
+                                                                                        _hover={{
+                                                                                            bg: "red.50",
+                                                                                            color: "red.700",
+                                                                                        }}
+                                                                                        onClick={(
+                                                                                            e,
+                                                                                        ) => {
                                                                                             e.stopPropagation()
-                                                                                            handleDeleteResume(resume.id, e)
+                                                                                            handleDeleteResume(
+                                                                                                resume.id,
+                                                                                                e,
+                                                                                            )
                                                                                         }}
                                                                                     >
-                                                                                        <FaTrash size={10} style={{ marginRight: '6px' }} />
+                                                                                        <FaTrash
+                                                                                            size={
+                                                                                                10
+                                                                                            }
+                                                                                            style={{
+                                                                                                marginRight:
+                                                                                                    "6px",
+                                                                                            }}
+                                                                                        />
                                                                                         삭제
                                                                                     </Menu.Item>
                                                                                 </Menu.Content>
@@ -742,19 +1246,37 @@ const ApplicationTemplate: React.FC = () => {
                     {selectedResume ? (
                         <>
                             {/* Document Title Header */}
-                            <Flex justify="space-between" align="start" borderBottom="1px solid" borderColor="gray.100" pb={5} mb={6}>
+                            <Flex
+                                justify="space-between"
+                                align="start"
+                                borderBottom="1px solid"
+                                borderColor="gray.100"
+                                pb={5}
+                                mb={6}
+                            >
                                 <VStack align="start" gap={3}>
                                     <Box>
                                         {isEditingTitle ? (
                                             <HStack maxW="400px">
                                                 <Input
                                                     value={editTitleText}
-                                                    onChange={(e) => setEditTitleText(e.target.value)}
+                                                    onChange={(e) =>
+                                                        setEditTitleText(
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     onKeyDown={(e) => {
-                                                        if (e.key === "Enter") handleSaveTitle()
-                                                        if (e.key === "Escape") {
-                                                            setIsEditingTitle(false)
-                                                            setEditTitleText(selectedResume.title)
+                                                        if (e.key === "Enter")
+                                                            handleSaveTitle()
+                                                        if (
+                                                            e.key === "Escape"
+                                                        ) {
+                                                            setIsEditingTitle(
+                                                                false,
+                                                            )
+                                                            setEditTitleText(
+                                                                selectedResume.title,
+                                                            )
                                                         }
                                                     }}
                                                     fontSize="xl"
@@ -765,10 +1287,26 @@ const ApplicationTemplate: React.FC = () => {
                                                     py={1}
                                                     variant="flushed"
                                                 />
-                                                <Button onClick={handleSaveTitle} size="sm" bg="blue.500" color="white" borderRadius="md" p={2}>
+                                                <Button
+                                                    onClick={handleSaveTitle}
+                                                    size="sm"
+                                                    bg="blue.500"
+                                                    color="white"
+                                                    borderRadius="md"
+                                                    p={2}
+                                                >
                                                     <FaCheck size={10} />
                                                 </Button>
-                                                <Button onClick={() => setIsEditingTitle(false)} size="sm" variant="outline" borderColor="gray.200" borderRadius="md" p={2}>
+                                                <Button
+                                                    onClick={() =>
+                                                        setIsEditingTitle(false)
+                                                    }
+                                                    size="sm"
+                                                    variant="outline"
+                                                    borderColor="gray.200"
+                                                    borderRadius="md"
+                                                    p={2}
+                                                >
                                                     <FaTimes size={10} />
                                                 </Button>
                                             </HStack>
@@ -778,24 +1316,50 @@ const ApplicationTemplate: React.FC = () => {
                                                 fontWeight="bold"
                                                 color="gray.900"
                                                 cursor="pointer"
-                                                _hover={{ textDecoration: "underline" }}
+                                                _hover={{
+                                                    textDecoration: "underline",
+                                                }}
                                                 onClick={() => {
                                                     setIsEditingTitle(true)
-                                                    setEditTitleText(selectedResume.title)
+                                                    setEditTitleText(
+                                                        selectedResume.title,
+                                                    )
                                                 }}
                                             >
                                                 {selectedResume.title}
                                             </Heading>
                                         )}
-                                        <HStack gap={2} mt={1.5} wrap="wrap" alignItems="center">
-                                            <Text fontSize="xs" color="gray.400">
-                                                {formatDate(selectedResume.updated_at)}
+                                        <HStack
+                                            gap={2}
+                                            mt={1.5}
+                                            wrap="wrap"
+                                            alignItems="center"
+                                        >
+                                            <Text
+                                                fontSize="xs"
+                                                color="gray.400"
+                                            >
+                                                {formatDate(
+                                                    selectedResume.updated_at,
+                                                )}
                                             </Text>
                                             {selectedResume.pdf_name && (
                                                 <>
-                                                    <Text fontSize="2xs" color="gray.300">•</Text>
-                                                    <Text fontSize="xs" color="gray.500" fontWeight="medium">
-                                                        첨부파일: {selectedResume.pdf_name}
+                                                    <Text
+                                                        fontSize="2xs"
+                                                        color="gray.300"
+                                                    >
+                                                        •
+                                                    </Text>
+                                                    <Text
+                                                        fontSize="xs"
+                                                        color="gray.500"
+                                                        fontWeight="medium"
+                                                    >
+                                                        첨부파일:{" "}
+                                                        {
+                                                            selectedResume.pdf_name
+                                                        }
                                                     </Text>
                                                 </>
                                             )}
@@ -804,17 +1368,51 @@ const ApplicationTemplate: React.FC = () => {
                                 </VStack>
 
                                 {selectedResume.raw_text && (
-                                    <Button
-                                        variant="outline"
-                                        size="xs"
-                                        color="gray.500"
-                                        borderColor="gray.200"
-                                        borderRadius="lg"
-                                        _hover={{ color: "blue.600", bg: "blue.50/30", borderColor: "blue.200" }}
-                                        onClick={() => document.getElementById("pdf-file-input-re")?.click()}
-                                    >
-                                        이력서 변경 (PDF)
-                                    </Button>
+                                    <HStack gap={2}>
+                                        <Button
+                                            variant="outline"
+                                            size="xs"
+                                            color="blue.600"
+                                            borderColor="blue.200"
+                                            borderRadius="lg"
+                                            bg="blue.50/40"
+                                            _hover={{
+                                                color: "blue.700",
+                                                bg: "blue.100/50",
+                                                borderColor: "blue.300",
+                                            }}
+                                            loading={isReanalyzing}
+                                            onClick={handleReanalyze}
+                                        >
+                                            <HStack gap={1.5}>
+                                                <FaSyncAlt size={10} />
+                                                <Text>
+                                                    AI 분석 & 참조 다시 실행
+                                                </Text>
+                                            </HStack>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="xs"
+                                            color="gray.500"
+                                            borderColor="gray.200"
+                                            borderRadius="lg"
+                                            _hover={{
+                                                color: "blue.600",
+                                                bg: "blue.50/30",
+                                                borderColor: "blue.200",
+                                            }}
+                                            onClick={() =>
+                                                document
+                                                    .getElementById(
+                                                        "pdf-file-input-re",
+                                                    )
+                                                    ?.click()
+                                            }
+                                        >
+                                            이력서 변경 (PDF)
+                                        </Button>
+                                    </HStack>
                                 )}
                                 <input
                                     id="pdf-file-input-re"
@@ -827,172 +1425,509 @@ const ApplicationTemplate: React.FC = () => {
 
                             {/* Main Content Area */}
                             {selectedResume.raw_text ? (
-                                <Flex flex={1} gap={5} overflow="hidden" direction={{ base: "column", lg: "row" }}>
+                                <Flex
+                                    flex={1}
+                                    gap={5}
+                                    overflow="hidden"
+                                    direction={{ base: "column", lg: "row" }}
+                                >
                                     {/* 원본 자소서·이력서 텍스트 */}
                                     <Box
+                                        id="raw-text-container"
                                         flex="1"
                                         minW={0}
                                         maxH={{ base: "260px", lg: "none" }}
                                         h={{ base: "auto", lg: "100%" }}
                                         overflowY="auto"
                                         border="1px solid"
-                                        borderColor="gray.100"
+                                        borderColor={
+                                            highlightedText
+                                                ? "blue.200"
+                                                : "gray.100"
+                                        }
                                         borderRadius="xl"
-                                        bg="gray.50"
+                                        bg={
+                                            highlightedText
+                                                ? "blue.50/20"
+                                                : "gray.50"
+                                        }
                                         p={4}
+                                        transition="all 0.3s ease"
                                     >
-                                        <Heading fontSize="xs" fontWeight="bold" color="gray.500" mb={3} textTransform="uppercase" letterSpacing="wider">
-                                            원본 문서
-                                        </Heading>
-                                        <Text fontSize="sm" color="gray.700" whiteSpace="pre-wrap" lineHeight="1.7">
-                                            {selectedResume.raw_text}
-                                        </Text>
+                                        <Flex
+                                            justify="space-between"
+                                            align="center"
+                                            mb={3}
+                                        >
+                                            <Heading
+                                                fontSize="xs"
+                                                fontWeight="bold"
+                                                color="gray.500"
+                                                textTransform="uppercase"
+                                                letterSpacing="wider"
+                                            >
+                                                원본 문서
+                                            </Heading>
+                                            {highlightedText && (
+                                                <Text
+                                                    fontSize="2xs"
+                                                    color="blue.600"
+                                                    fontWeight="bold"
+                                                >
+                                                    [참조 위치로 이동됨]
+                                                </Text>
+                                            )}
+                                        </Flex>
+                                        {renderRawTextWithHighlight(
+                                            selectedResume.raw_text,
+                                            highlightedText,
+                                        )}
                                     </Box>
 
                                     {/* AI 피드백 & 대화 */}
-                                    <Box flex="1" minW={0} h={{ base: "auto", lg: "100%" }} display="flex" flexDirection="column" overflow="hidden">
-                                    {/* Unified Scrolling View */}
-                                    <Box flex={1} overflowY="auto" pr={2} mb={4} position="relative">
-                                        {isUploading && (
-                                            <Flex position="absolute" inset={0} bg="white/80" align="center" justify="center" zIndex={10} backdropFilter="blur(2px)">
-                                                <VStack gap={3}>
-                                                    <Spinner size="lg" color="blue.600" />
-                                                    <Text fontSize="sm" fontWeight="medium" color="blue.700">
-                                                        새 이력서 PDF를 업로드하고 분석하고 있습니다...
-                                                    </Text>
-                                                </VStack>
-                                            </Flex>
-                                        )}
-
-                                        <VStack align="stretch" gap={8}>
-                                            {/* Analysis Content */}
-                                            <VStack align="stretch" gap={6}>
-                                                <Box>
-                                                    <MarkdownRenderer content={selectedResume.summary} />
-                                                </Box>
-                                                <Box borderTop="1px solid" borderColor="gray.100" pt={6}>
-                                                    <Heading fontSize="sm" fontWeight="bold" color="blue.600" mb={4}>
-                                                        개선할 부분 & 피드백
-                                                    </Heading>
-                                                    <MarkdownRenderer content={selectedResume.improvements} />
-                                                </Box>
-
-                                            </VStack>
-
-                                            {/* Chat Conversation Logs */}
-                                            {messages.length > 0 && (
-                                                <VStack align="stretch" gap={6} borderTop="1px solid" borderColor="gray.100" pt={6}>
-                                                    <Heading fontSize="xs" fontWeight="bold" color="blue.600" mb={2} textTransform="uppercase" letterSpacing="wider">
-                                                        AI 피드백 대화 내역
-                                                    </Heading>
-                                                    {messages.map((msg, idx) => {
-                                                        const isUser = msg.sender === "user"
-                                                        return (
-                                                            <Flex key={idx} justify={isUser ? "flex-end" : "flex-start"} gap={3} align="start">
-                                                                {!isUser && (
-                                                                    <Box bg="blue.50" p={2} borderRadius="lg" color="blue.600" mt={1.5}>
-                                                                        <FaFileAlt size={10} />
-                                                                    </Box>
-                                                                )}
-                                                                {isUser ? (
-                                                                    <Box
-                                                                        bg="blue.600"
-                                                                        color="white"
-                                                                        p={3.5}
-                                                                        borderRadius="2xl"
-                                                                        borderTopRightRadius="none"
-                                                                        maxW="80%"
-                                                                    >
-                                                                        <Text fontSize="sm" lineHeight="1.6" whiteSpace="pre-line">
-                                                                            {msg.message}
-                                                                        </Text>
-                                                                    </Box>
-                                                                ) : (
-                                                                    <Box flex={1} pt={1}>
-                                                                        <MarkdownRenderer content={msg.message} />
-                                                                    </Box>
-                                                                )}
-                                                            </Flex>
-                                                        )
-                                                    })}
-                                                </VStack>
-                                            )}
-
-                                            {isGenerating && (
-                                                <Flex gap={3} align="start" pt={4}>
-                                                    <Box bg="blue.50" p={2} borderRadius="lg" color="blue.600" mt={1.5}>
-                                                        <FaFileAlt size={10} />
-                                                    </Box>
-                                                    <Box pt={2.5}>
-                                                        <Spinner size="xs" color="blue.600" />
-                                                    </Box>
+                                    <Box
+                                        flex="1"
+                                        minW={0}
+                                        h={{ base: "auto", lg: "100%" }}
+                                        display="flex"
+                                        flexDirection="column"
+                                        overflow="hidden"
+                                    >
+                                        {/* Unified Scrolling View */}
+                                        <Box
+                                            flex={1}
+                                            overflowY="auto"
+                                            pr={2}
+                                            mb={4}
+                                            position="relative"
+                                        >
+                                            {(isUploading || isReanalyzing) && (
+                                                <Flex
+                                                    position="absolute"
+                                                    inset={0}
+                                                    bg="white/80"
+                                                    align="center"
+                                                    justify="center"
+                                                    zIndex={10}
+                                                    backdropFilter="blur(2px)"
+                                                >
+                                                    <VStack gap={3}>
+                                                        <Spinner
+                                                            size="lg"
+                                                            color="blue.600"
+                                                        />
+                                                        <Text
+                                                            fontSize="sm"
+                                                            fontWeight="medium"
+                                                            color="blue.700"
+                                                        >
+                                                            {isUploading
+                                                                ? "새 이력서 PDF를 업로드하고 분석하고 있습니다..."
+                                                                : "PDF 원본 대조를 거쳐 AI 분석 및 정밀 참조를 다시 실행하고 있습니다..."}
+                                                        </Text>
+                                                    </VStack>
                                                 </Flex>
                                             )}
-                                            <div ref={chatEndRef} />
-                                        </VStack>
-                                    </Box>
 
-                                    {/* Prompt/Chat Input Box */}
-                                    <Box mt="auto" pt={2}>
-                                        <Flex
-                                            position="relative"
-                                            align="center"
-                                            border="1px solid"
-                                            borderColor="gray.200"
-                                            borderRadius="2xl"
-                                            p={1.5}
-                                            bg="white"
-                                            shadow="sm"
-                                            _focusWithin={{
-                                                borderColor: "blue.400",
-                                                boxShadow: "0 0 0 1px blue.600",
-                                            }}
-                                        >
-                                            <Input
-                                                value={prompt}
-                                                onChange={(e) => setPrompt(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter" && !isGenerating) {
+                                            <VStack align="stretch" gap={8}>
+                                                {/* Analysis Content */}
+                                                <VStack align="stretch" gap={6}>
+                                                    <Box>
+                                                        <MarkdownRenderer
+                                                            content={
+                                                                selectedResume.summary
+                                                            }
+                                                            citations={
+                                                                typeof selectedResume.citations ===
+                                                                "string"
+                                                                    ? JSON.parse(
+                                                                          selectedResume.citations ||
+                                                                              "[]",
+                                                                      )
+                                                                    : selectedResume.citations ||
+                                                                      []
+                                                            }
+                                                            onViewSource={
+                                                                handleViewSource
+                                                            }
+                                                        />
+                                                    </Box>
+                                                    <Box
+                                                        borderTop="1px solid"
+                                                        borderColor="gray.100"
+                                                        pt={6}
+                                                    >
+                                                        <Heading
+                                                            fontSize="sm"
+                                                            fontWeight="bold"
+                                                            color="blue.600"
+                                                            mb={4}
+                                                        >
+                                                            개선할 부분 & 피드백
+                                                        </Heading>
+                                                        <MarkdownRenderer
+                                                            content={
+                                                                selectedResume.improvements
+                                                            }
+                                                            citations={
+                                                                typeof selectedResume.citations ===
+                                                                "string"
+                                                                    ? JSON.parse(
+                                                                          selectedResume.citations ||
+                                                                              "[]",
+                                                                      )
+                                                                    : selectedResume.citations ||
+                                                                      []
+                                                            }
+                                                            onViewSource={
+                                                                handleViewSource
+                                                            }
+                                                        />
+                                                    </Box>
+                                                </VStack>
+
+                                                {/* Chat Conversation Logs */}
+                                                {messages.length > 0 && (
+                                                    <VStack
+                                                        align="stretch"
+                                                        gap={6}
+                                                        borderTop="1px solid"
+                                                        borderColor="gray.100"
+                                                        pt={6}
+                                                    >
+                                                        <Heading
+                                                            fontSize="xs"
+                                                            fontWeight="bold"
+                                                            color="blue.600"
+                                                            mb={2}
+                                                            textTransform="uppercase"
+                                                            letterSpacing="wider"
+                                                        >
+                                                            AI 피드백 대화 내역
+                                                        </Heading>
+                                                        {messages.map(
+                                                            (msg, idx) => {
+                                                                const isUser =
+                                                                    msg.sender ===
+                                                                    "user"
+                                                                const msgCitations =
+                                                                    typeof msg.citations ===
+                                                                    "string"
+                                                                        ? JSON.parse(
+                                                                              msg.citations ||
+                                                                                  "[]",
+                                                                          )
+                                                                        : msg.citations ||
+                                                                          (typeof selectedResume.citations ===
+                                                                          "string"
+                                                                              ? JSON.parse(
+                                                                                    selectedResume.citations ||
+                                                                                        "[]",
+                                                                                )
+                                                                              : selectedResume.citations ||
+                                                                                [])
+                                                                return (
+                                                                    <Flex
+                                                                        key={
+                                                                            idx
+                                                                        }
+                                                                        justify={
+                                                                            isUser
+                                                                                ? "flex-end"
+                                                                                : "flex-start"
+                                                                        }
+                                                                        gap={3}
+                                                                        align="start"
+                                                                    >
+                                                                        {!isUser && (
+                                                                            <Box
+                                                                                bg="blue.50"
+                                                                                p={
+                                                                                    2
+                                                                                }
+                                                                                borderRadius="lg"
+                                                                                color="blue.600"
+                                                                                mt={
+                                                                                    1.5
+                                                                                }
+                                                                            >
+                                                                                <FaFileAlt
+                                                                                    size={
+                                                                                        10
+                                                                                    }
+                                                                                />
+                                                                            </Box>
+                                                                        )}
+                                                                        {isUser ? (
+                                                                            <Box
+                                                                                bg="blue.600"
+                                                                                color="white"
+                                                                                p={
+                                                                                    3.5
+                                                                                }
+                                                                                borderRadius="2xl"
+                                                                                borderTopRightRadius="none"
+                                                                                maxW="80%"
+                                                                            >
+                                                                                <Text
+                                                                                    fontSize="sm"
+                                                                                    lineHeight="1.6"
+                                                                                    whiteSpace="pre-line"
+                                                                                >
+                                                                                    {
+                                                                                        msg.message
+                                                                                    }
+                                                                                </Text>
+                                                                            </Box>
+                                                                        ) : (
+                                                                            <Box
+                                                                                flex={
+                                                                                    1
+                                                                                }
+                                                                                pt={
+                                                                                    1
+                                                                                }
+                                                                            >
+                                                                                <MarkdownRenderer
+                                                                                    content={
+                                                                                        msg.message
+                                                                                    }
+                                                                                    citations={
+                                                                                        msgCitations
+                                                                                    }
+                                                                                    onViewSource={
+                                                                                        handleViewSource
+                                                                                    }
+                                                                                />
+                                                                            </Box>
+                                                                        )}
+                                                                    </Flex>
+                                                                )
+                                                            },
+                                                        )}
+                                                    </VStack>
+                                                )}
+
+                                                {isGenerating && (
+                                                    <Flex
+                                                        gap={3}
+                                                        align="start"
+                                                        pt={4}
+                                                    >
+                                                        <Box
+                                                            bg="blue.50"
+                                                            p={2}
+                                                            borderRadius="lg"
+                                                            color="blue.600"
+                                                            mt={1.5}
+                                                        >
+                                                            <FaFileAlt
+                                                                size={10}
+                                                            />
+                                                        </Box>
+                                                        <Box pt={2.5}>
+                                                            <Spinner
+                                                                size="xs"
+                                                                color="blue.600"
+                                                            />
+                                                        </Box>
+                                                    </Flex>
+                                                )}
+                                                <div ref={chatEndRef} />
+                                            </VStack>
+                                        </Box>
+
+                                        {/* Prompt/Chat Input Box */}
+                                        <Box mt="auto" pt={2}>
+                                            {/* Quick Action Suggestion Buttons (Shown only at the beginning of chat) */}
+                                            {messages.length === 0 && (
+                                                <HStack
+                                                    gap={2}
+                                                    mb={2.5}
+                                                    wrap="wrap"
+                                                >
+                                                    <Button
+                                                        size="xs"
+                                                        variant="subtle"
+                                                        color="blue.700"
+                                                        bg="blue.50"
+                                                        border="1px solid"
+                                                        borderColor="blue.200"
+                                                        borderRadius="full"
+                                                        px={3}
+                                                        py={1.5}
+                                                        _hover={{
+                                                            bg: "blue.100",
+                                                            borderColor:
+                                                                "blue.300",
+                                                            transform:
+                                                                "translateY(-1px)",
+                                                            shadow: "xs",
+                                                        }}
+                                                        transition="all 0.15s ease"
+                                                        disabled={
+                                                            isGenerating ||
+                                                            isUploading ||
+                                                            isReanalyzing
+                                                        }
+                                                        onClick={() =>
+                                                            handleSendPromptOrChat(
+                                                                "이력서 요약해줘",
+                                                            )
+                                                        }
+                                                    >
+                                                        <HStack gap={1.5}>
+                                                            <FaFileAlt
+                                                                size={11}
+                                                                color="#2563EB"
+                                                            />
+                                                            <Text
+                                                                fontWeight="semibold"
+                                                                fontSize="xs"
+                                                            >
+                                                                이력서 요약해줘
+                                                            </Text>
+                                                        </HStack>
+                                                    </Button>
+                                                    <Button
+                                                        size="xs"
+                                                        variant="subtle"
+                                                        color="blue.700"
+                                                        bg="blue.50"
+                                                        border="1px solid"
+                                                        borderColor="blue.200"
+                                                        borderRadius="full"
+                                                        px={3}
+                                                        py={1.5}
+                                                        _hover={{
+                                                            bg: "blue.100",
+                                                            borderColor:
+                                                                "blue.300",
+                                                            transform:
+                                                                "translateY(-1px)",
+                                                            shadow: "xs",
+                                                        }}
+                                                        transition="all 0.15s ease"
+                                                        disabled={
+                                                            isGenerating ||
+                                                            isUploading ||
+                                                            isReanalyzing
+                                                        }
+                                                        onClick={() =>
+                                                            handleSendPromptOrChat(
+                                                                "관련 공고 추천해줘",
+                                                            )
+                                                        }
+                                                    >
+                                                        <HStack gap={1.5}>
+                                                            <FaBriefcase
+                                                                size={11}
+                                                                color="#2563EB"
+                                                            />
+                                                            <Text
+                                                                fontWeight="semibold"
+                                                                fontSize="xs"
+                                                            >
+                                                                관련 공고
+                                                                추천해줘
+                                                            </Text>
+                                                        </HStack>
+                                                    </Button>
+                                                </HStack>
+                                            )}
+
+                                            <Flex
+                                                position="relative"
+                                                align="center"
+                                                border="1px solid"
+                                                borderColor="gray.200"
+                                                borderRadius="2xl"
+                                                p={1.5}
+                                                bg="white"
+                                                shadow="sm"
+                                                _focusWithin={{
+                                                    borderColor: "blue.400",
+                                                    boxShadow:
+                                                        "0 0 0 1px blue.600",
+                                                }}
+                                            >
+                                                <Input
+                                                    value={prompt}
+                                                    onChange={(e) =>
+                                                        setPrompt(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    onKeyDown={(e) => {
+                                                        if (
+                                                            e.key === "Enter" &&
+                                                            !isGenerating
+                                                        ) {
+                                                            handleSendPromptOrChat()
+                                                        }
+                                                    }}
+                                                    placeholder="무엇이든 질문하세요"
+                                                    fontSize="sm"
+                                                    border="none"
+                                                    outline="none"
+                                                    _focus={{
+                                                        outline: "none",
+                                                        boxShadow: "none",
+                                                    }}
+                                                    pl={4}
+                                                    pr={12}
+                                                    disabled={
+                                                        isGenerating ||
+                                                        isUploading
+                                                    }
+                                                />
+                                                <Button
+                                                    onClick={() =>
                                                         handleSendPromptOrChat()
                                                     }
-                                                }}
-                                                placeholder="무엇이든 질문하세요"
-                                                fontSize="sm"
-                                                border="none"
-                                                outline="none"
-                                                _focus={{ outline: "none", boxShadow: "none" }}
-                                                pl={4}
-                                                pr={12}
-                                                disabled={isGenerating || isUploading}
-                                            />
-                                            <Button
-                                                onClick={handleSendPromptOrChat}
-                                                position="absolute"
-                                                right="1.5"
-                                                w="9"
-                                                h="9"
-                                                minW="9"
-                                                p={0}
-                                                borderRadius="full"
-                                                bg="gray.100"
-                                                color="gray.600"
-                                                display="flex"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                _hover={{ bg: "blue.50", color: "blue.600" }}
-                                                _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
-                                                disabled={isGenerating || isUploading || prompt.trim() === ""}
-                                                transition="all 0.2s"
-                                            >
-                                                <FaArrowRight size={12} />
-                                            </Button>
-                                        </Flex>
-                                    </Box>
+                                                    position="absolute"
+                                                    right="1.5"
+                                                    w="9"
+                                                    h="9"
+                                                    minW="9"
+                                                    p={0}
+                                                    borderRadius="full"
+                                                    bg="gray.100"
+                                                    color="gray.600"
+                                                    display="flex"
+                                                    alignItems="center"
+                                                    justifyContent="center"
+                                                    _hover={{
+                                                        bg: "blue.50",
+                                                        color: "blue.600",
+                                                    }}
+                                                    _disabled={{
+                                                        opacity: 0.5,
+                                                        cursor: "not-allowed",
+                                                    }}
+                                                    disabled={
+                                                        isGenerating ||
+                                                        isUploading ||
+                                                        prompt.trim() === ""
+                                                    }
+                                                    transition="all 0.2s"
+                                                >
+                                                    <FaArrowRight size={12} />
+                                                </Button>
+                                            </Flex>
+                                        </Box>
                                     </Box>
                                 </Flex>
                             ) : (
                                 /* Empty state - Drag & Drop / Upload Box */
-                                <Box flex={1} display="flex" alignItems="center" justifyContent="center" h="100%" w="100%">
+                                <Box
+                                    flex={1}
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    h="100%"
+                                    w="100%"
+                                >
                                     <Flex
                                         direction="column"
                                         alignItems="center"
@@ -1005,10 +1940,20 @@ const ApplicationTemplate: React.FC = () => {
                                         p={10}
                                         bg="white"
                                         shadow="sm"
-                                        _hover={{ bg: "blue.50/5", borderColor: "blue.400", shadow: "md" }}
+                                        _hover={{
+                                            bg: "blue.50/5",
+                                            borderColor: "blue.400",
+                                            shadow: "md",
+                                        }}
                                         transition="all 0.3s ease"
                                         cursor="pointer"
-                                        onClick={() => document.getElementById("pdf-file-input")?.click()}
+                                        onClick={() =>
+                                            document
+                                                .getElementById(
+                                                    "pdf-file-input",
+                                                )
+                                                ?.click()
+                                        }
                                         position="relative"
                                     >
                                         <input
@@ -1020,9 +1965,17 @@ const ApplicationTemplate: React.FC = () => {
                                         />
                                         {isUploading ? (
                                             <VStack gap={4}>
-                                                <Spinner size="lg" color="blue.500" />
-                                                <Text fontWeight="medium" color="blue.700" fontSize="xs">
-                                                    이력서 PDF를 분석하고 요약하는 중입니다...
+                                                <Spinner
+                                                    size="lg"
+                                                    color="blue.500"
+                                                />
+                                                <Text
+                                                    fontWeight="medium"
+                                                    color="blue.700"
+                                                    fontSize="xs"
+                                                >
+                                                    이력서 PDF를 분석하고
+                                                    요약하는 중입니다...
                                                 </Text>
                                             </VStack>
                                         ) : (
@@ -1040,14 +1993,29 @@ const ApplicationTemplate: React.FC = () => {
                                                     w="14"
                                                     h="14"
                                                 >
-                                                    <FaCloudUploadAlt size={24} />
+                                                    <FaCloudUploadAlt
+                                                        size={24}
+                                                    />
                                                 </Box>
                                                 <VStack gap={1.5}>
-                                                    <Text fontWeight="semibold" fontSize="sm" color="gray.800">
+                                                    <Text
+                                                        fontWeight="semibold"
+                                                        fontSize="sm"
+                                                        color="gray.800"
+                                                    >
                                                         이력서 PDF 업로드
                                                     </Text>
-                                                    <Text fontSize="xs" color="gray.400" maxW="320px" lineHeight="1.6">
-                                                        자소서 또는 이력서 PDF 파일을 업로드하면 AI 요약, 개선점 피드백 및 실시간 챗 기능을 이용하실 수 있습니다.
+                                                    <Text
+                                                        fontSize="xs"
+                                                        color="gray.400"
+                                                        maxW="320px"
+                                                        lineHeight="1.6"
+                                                    >
+                                                        자소서 또는 이력서 PDF
+                                                        파일을 업로드하면 AI
+                                                        요약, 개선점 피드백 및
+                                                        실시간 챗 기능을
+                                                        이용하실 수 있습니다.
                                                     </Text>
                                                 </VStack>
                                                 <Button
@@ -1058,7 +2026,11 @@ const ApplicationTemplate: React.FC = () => {
                                                     color="gray.600"
                                                     px={6}
                                                     bg="white"
-                                                    _hover={{ bg: "gray.50", borderColor: "gray.300", color: "gray.800" }}
+                                                    _hover={{
+                                                        bg: "gray.50",
+                                                        borderColor: "gray.300",
+                                                        color: "gray.800",
+                                                    }}
                                                     mt={1}
                                                 >
                                                     파일 선택

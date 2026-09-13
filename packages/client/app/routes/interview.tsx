@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { useSearchParams, useLocation, useNavigate } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import type { Route } from "./+types/interview"
 import InterviewTemplate from "../components/templates/InterviewTemplate"
 
@@ -11,13 +11,8 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Interview() {
-    // URLSearchParams 대신 useLocation과 useSearchParams 사용
-    const [searchParams] = useSearchParams()
     const location = useLocation()
     const navigate = useNavigate()
-    
-    const modeParam = searchParams.get("mode")?.toUpperCase()
-    const mode = modeParam === "HARD" ? "HARD" : "EASY"
     
     // MockInterviewTemplate에서 넘어온 설정값들
     const config = location.state
@@ -33,5 +28,5 @@ export default function Interview() {
         return null // 리다이렉트 대기
     }
 
-    return <InterviewTemplate mode={mode} config={config} />
+    return <InterviewTemplate config={config} />
 }

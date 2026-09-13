@@ -56,6 +56,7 @@ const DEFAULT_COMPETENCIES: CompetencyScores = {
 }
 
 // 직무별 전문 실전 면접 질문 데이터베이스 (Node.js 내장 AI 폴백 엔진)
+// todo mockup question을 mockup + Ai 질문으로
 const FALLBACK_QUESTION_BANK: Record<string, string[]> = {
     프론트엔드: [
         "React의 가상 돔(Virtual DOM)이 실제 돔에 비해 가지는 성능상 이점과 렌더링 최적화 경험을 설명해주세요.",
@@ -125,7 +126,6 @@ export async function generateInterviewQuestionsList(params: {
     count?: number
 }): Promise<QuestionItem[]> {
     const count = params.count ?? 5
-
     if (
         !process.env.OPENAI_API_KEY ||
         process.env.OPENAI_API_KEY.includes("your_openai")
@@ -136,27 +136,51 @@ export async function generateInterviewQuestionsList(params: {
         return getSmartFallbackQuestions(params.jobs, count)
     }
 
+    console.log(params.interviewType)
+    let interviewType = "혼합면접"
+    switch (params.interviewType) {
+        case "technical":
+            interviewType = "직무 관련 기술 질문 중심"
+            break
+
+        case "personality":
+            interviewType = "가치관 · 태도(인성) 중심의 질문"
+            break
+        case "mixed":
+            interviewType =
+                "직무 관련 기술 질문과 가치관 · 태도(인성)을 균형있게"
+            break
+        default:
+            break
+    }
+
     try {
         const prompt = `
 당신은 대기업 및 유수 IT 기업의 전문 기술 및 인성 면접관입니다.
-다음 지원자 정보 및 면접 설정을 바탕으로 실전 면접 질문 ${count}개를 생성해주세요.
+다음 지원자 정보 및 면접 설정을 바탕으로 실전 맞춤형 면접 질문 ${count}개를 생성해주세요.
 
 [설정 정보]
 - 지원 직무: ${params.jobs?.join(", ") || "일반 개발"}
 - 희망 기업: ${params.company || "IT 선도기업"}
-- 면접 유형: ${params.interviewType || "종합 면접"}
+- 면접 유형: ${interviewType || "종합 면접"}
 - 이력서 및 자소서 내용:
-${params.resumeText || "신입 개발자 지원"}
+${params.resumeText || "(이력서 미등록 - 일반 직무 질문)"}
+
+[중요 지침]
+1. 지원자의 이력서/자소서 내용이 제공된 경우, 작성된 프로젝트 경험, 기술 스택, 트러블슈팅, 성과를 면밀히 분석하여 **이력서 기반 맞춤형 심층 질문**을 우선적으로 출제하세요.
+2. 질문은 면접관이 실제 면접장에서 지원자에게 직접 질문하는 자연스러운 존댓말 구어체로 작성하세요.
 
 반드시 다음 JSON 배열 형식으로만 응답해주세요 (마크다운 코드블록 없이 순수 JSON):
 [
     {
         "id": 1,
         "text": "생성된 질문 내용",
-        "category": "직무역량 / 협업경험 / 문제해결 등"
+        "category": "이력서 기반 검증 / 직무역량 / 협업경험 / 문제해결 등"
     }
 ]
 `
+
+        console.log(params.resumeText)
         const response = await client.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -214,6 +238,7 @@ const HALLUCINATIONS_SET = new Set([
     "다음 영상에서 뵙겠습니다",
     "MBC 뉴스",
     "KBS 뉴스",
+    "이 시각 세계였습니다",
     "SBS 뉴스",
     "JTBC 뉴스",
     "YTN 뉴스",
@@ -251,14 +276,6 @@ const FILLERS_SET = new Set(" ,.!?~^♥♡음어아으응엥흠엄에오ㅋㅎ-"
 const HANGUL_REGEX = /[가-힣]/
 const TRAILING_PUNCT_REGEX = /[.,!?~\s]+$/g
 
-/**
- * 블로그 아티클 기반 STT 텍스트 유효성 5단계 검사 (Clarity Gate)
- * 1. empty: 빈 텍스트
- * 2. hallucination: 끝 구두점 제거 후 정형 환각 문구 정확 일치 및 뉴스/방송 정규식 매칭
- * 3. too_short / no_hangul: 1글자 또는 한글 미포함
- * 4. fillers_only: 단순 추임새/자모만으로 구성
- * 5. repeated_char: 4글자 이상 중 단일 문자가 70% 이상 차지
- */
 export function checkClarity(text: string | null | undefined): {
     isClear: boolean
     reason: string

@@ -10,7 +10,12 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 200 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith("video/")) {
+        if (
+            file.mimetype.startsWith("video/") ||
+            file.mimetype === "application/octet-stream" ||
+            file.originalname.endsWith(".webm") ||
+            file.originalname.endsWith(".mp4")
+        ) {
             cb(null, true)
         } else {
             cb(new Error("Only video files are allowed"))
@@ -39,11 +44,20 @@ router.post(
                 return res.status(400).json({ error: "chapters/report 형식이 올바르지 않습니다." })
             }
 
+            let mimeType = req.file.mimetype
+            if (!mimeType || !mimeType.startsWith("video/")) {
+                if (req.file.originalname?.endsWith(".mp4")) {
+                    mimeType = "video/mp4"
+                } else {
+                    mimeType = "video/webm"
+                }
+            }
+
             const result = await pool.query(
                 `INSERT INTO interview_sessions (user_id, video_data, video_mime_type, chapters, report_data)
                  VALUES ($1, $2, $3, $4, $5)
                  RETURNING id, created_at`,
-                [userId, req.file.buffer, req.file.mimetype, JSON.stringify(chapters), JSON.stringify(report)],
+                [userId, req.file.buffer, mimeType, JSON.stringify(chapters), JSON.stringify(report)],
             )
 
             res.status(201).json({ id: result.rows[0].id, createdAt: result.rows[0].created_at })
@@ -109,7 +123,10 @@ router.get("/:id/video", authMiddleware, async (req: Request, res: Response) => 
         }
 
         const video: Buffer = result.rows[0].video_data
-        const mimeType = result.rows[0].video_mime_type || "video/webm"
+        let mimeType = result.rows[0].video_mime_type || "video/webm"
+        if (!mimeType.startsWith("video/")) {
+            mimeType = "video/webm"
+        }
         const total = video.length
         const range = req.headers.range
 

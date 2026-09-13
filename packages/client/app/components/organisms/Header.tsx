@@ -11,15 +11,14 @@ import {
     Button,
     VStack,
     useDisclosure,
-    CloseButton
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { FaSearch, FaBars } from "react-icons/fa";
-import { useLocation } from "react-router";
+    CloseButton,
+} from "@chakra-ui/react"
+import { useEffect, useState } from "react"
+import { FaSearch, FaBars } from "react-icons/fa"
+import { useLocation } from "react-router"
 
-import BlockLink from "../atoms/BlockLink";
-import AuthButton from "./AuthButton";
-import { ColorModeButton } from "../ui/color-mode";
+import BlockLink from "../atoms/BlockLink"
+import AuthButton from "./AuthButton"
 
 export default function Header({
     bg,
@@ -28,32 +27,56 @@ export default function Header({
     borderColor,
     ...rest
 }: {
-    bg?: string;
-    boxShadow?: string;
-    borderBottom?: string;
-    borderColor?: string;
-    [key: string]: any;
+    bg?: string
+    boxShadow?: string
+    borderBottom?: string
+    borderColor?: string
+    [key: string]: any
 }) {
-    const location = useLocation();
-    const isLandingPage = location.pathname === "/";
-    const [scrolled, setScrolled] = useState(false);
+    const location = useLocation()
+    const isLandingPage = location.pathname === "/"
+    const [scrolled, setScrolled] = useState(false)
 
     useEffect(() => {
         const handleScroll = () => {
-            setScrolled(window.scrollY > 10);
-        };
+            setScrolled(window.scrollY > 10)
+        }
 
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll)
 
         return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
-    }, []);
+            window.removeEventListener("scroll", handleScroll)
+        }
+    }, [])
 
-    const finalBg = bg !== undefined ? bg : (isLandingPage ? (scrolled ? "bg.panel" : "transparent") : "bg.panel");
-    const finalShadow = boxShadow !== undefined ? boxShadow : (isLandingPage ? (scrolled ? "sm" : "none") : "none");
-    const finalBorderBottom = borderBottom !== undefined ? borderBottom : (isLandingPage ? "none" : "1px solid");
-    const finalBorderColor = borderColor !== undefined ? borderColor : (isLandingPage ? "transparent" : "border");
+    const finalBg =
+        bg !== undefined
+            ? bg
+            : isLandingPage
+              ? scrolled
+                  ? "bg.panel"
+                  : "transparent"
+              : "bg.panel"
+    const finalShadow =
+        boxShadow !== undefined
+            ? boxShadow
+            : isLandingPage
+              ? scrolled
+                  ? "sm"
+                  : "none"
+              : "none"
+    const finalBorderBottom =
+        borderBottom !== undefined
+            ? borderBottom
+            : isLandingPage
+              ? "none"
+              : "1px solid"
+    const finalBorderColor =
+        borderColor !== undefined
+            ? borderColor
+            : isLandingPage
+              ? "transparent"
+              : "border"
 
     return (
         <Box
@@ -80,19 +103,12 @@ export default function Header({
                 {/* Logo */}
                 <Flex align="center">
                     <BlockLink to="/">
-                        <Image
-                            src="/images/logo.png"
-                            alt="Logo"
-                            h="30px"
-                        />
+                        <Image src="/images/logo.png" alt="Logo" h="30px" />
                     </BlockLink>
                 </Flex>
 
                 {/* Desktop Navigation */}
-                <HStack
-                    gap={10}
-                    display={{ base: "none", md: "flex" }}
-                >
+                <HStack gap={10} display={{ base: "none", md: "flex" }}>
                     <BlockLink to="/post">
                         <Link color="fg" fontWeight="bold">
                             채용 공고
@@ -112,10 +128,7 @@ export default function Header({
                     </BlockLink>
                 </HStack>
 
-                <Flex
-                    align="center"
-                    display={{ base: "none", lg: "flex" }}
-                >
+                <Flex align="center" display={{ base: "none", lg: "flex" }}>
                     <InputGroup startElement={<FaSearch color="blue.600" />}>
                         <Input
                             placeholder="면접 Easy"
@@ -135,18 +148,13 @@ export default function Header({
                     gap={3}
                     display={{ base: "none", md: "flex" }}
                 >
-                    <ColorModeButton />
                     <AuthButton />
                 </Flex>
 
                 {/* Mobile Hamburger */}
 
-
                 {/* Mobile Drawer */}
-                <Drawer.Root
-
-                    placement="end"
-                >
+                <Drawer.Root placement="end">
                     <Drawer.Trigger asChild>
                         <Button
                             variant={"ghost"}
@@ -164,40 +172,27 @@ export default function Header({
                             </Drawer.CloseTrigger>
 
                             <Drawer.Body>
-                                <VStack
-                                    align="stretch"
-                                    gap={5}
-                                >
+                                <VStack align="stretch" gap={5}>
                                     <BlockLink to="/post">
-                                        <Link
-                                            color="fg"
-                                            fontWeight="bold"
-                                        >
+                                        <Link color="fg" fontWeight="bold">
                                             채용 공고
                                         </Link>
                                     </BlockLink>
 
                                     <BlockLink to="/analyze-application">
-                                        <Link
-                                            color="fg"
-                                            fontWeight="bold"
-                                        >
+                                        <Link color="fg" fontWeight="bold">
                                             자소서 / 이력서
                                         </Link>
                                     </BlockLink>
 
                                     <BlockLink to="/mock-interview">
-                                        <Link
-                                            color="fg"
-                                            fontWeight="bold"
-                                        >
+                                        <Link color="fg" fontWeight="bold">
                                             모의 면접
                                         </Link>
                                     </BlockLink>
 
                                     <HStack pt={4} justify="space-between">
                                         <AuthButton />
-                                        <ColorModeButton />
                                     </HStack>
                                 </VStack>
                             </Drawer.Body>
@@ -206,6 +201,5 @@ export default function Header({
                 </Drawer.Root>
             </Flex>
         </Box>
-    );
+    )
 }
-

@@ -21,7 +21,12 @@ router.post("/questions", async (req, res, next) => {
     try {
         const { jobs, company, interviewType, resumeText, count, text } =
             req.body
-        const questionCount = count !== undefined && count !== null && count !== "" ? Number(count) : 5
+        const questionCount =
+            count !== undefined && count !== null && count !== ""
+                ? Number(count)
+                : 5
+
+        console.log(req.body)
 
         const questions = await generateInterviewQuestionsList({
             jobs: Array.isArray(jobs) ? jobs : jobs ? [jobs] : undefined,
@@ -53,7 +58,11 @@ router.post(
             // 1. 클라이언트에서 전달된 텍스트가 있으면 우선 사용
             if (req.body.answerText) {
                 answerText = req.body.answerText.trim()
-            } else if (req.file && req.file.buffer && req.file.buffer.length >= 1000) {
+            } else if (
+                req.file &&
+                req.file.buffer &&
+                req.file.buffer.length >= 1000
+            ) {
                 // 2. 오디오 버퍼가 있으면 Whisper STT 실행
                 answerText = await transcribeAudio(
                     req.file.buffer,
