@@ -12,7 +12,7 @@ import {
     Badge,
     Spinner,
 } from "@chakra-ui/react"
-import { FaCamera, FaHeart, FaFileAlt, FaPlay, FaChevronDown, FaChevronUp } from "react-icons/fa"
+import { Camera, Heart, FileText, Play, ChevronDown, ChevronUp } from "lucide-react"
 import Header from "../organisms/Header"
 import { useAuth } from "../../hooks/useAuth"
 import { useNavigate } from "react-router"
@@ -297,7 +297,7 @@ export default function ProfileTemplate() {
                                     position="absolute"
                                     bottom={0}
                                     right={0}
-                                    bg="blue.500"
+                                    bg="blue.600"
                                     color="white"
                                     w={8}
                                     h={8}
@@ -306,7 +306,7 @@ export default function ProfileTemplate() {
                                     justify="center"
                                     boxShadow="md"
                                 >
-                                    <FaCamera size={14} />
+                                    <Camera size={14} />
                                 </Flex>
                                 <input
                                     type="file"
@@ -382,7 +382,7 @@ export default function ProfileTemplate() {
                                             onClick={() => navigate("/analyze-application")}
                                         >
                                             <HStack gap={2}>
-                                                <FaFileAlt color="var(--chakra-colors-blue-500)" />
+                                                <FileText size={16} color="var(--chakra-colors-blue-500)" />
                                                 <Text fontWeight="medium" fontSize="sm">{resume.title}</Text>
                                             </HStack>
                                             <Text fontSize="xs" color="gray.500">
@@ -433,7 +433,7 @@ export default function ProfileTemplate() {
                                                             align="center"
                                                             justify="center"
                                                         >
-                                                            <FaPlay size={12} />
+                                                            <Play size={12} fill="currentColor" />
                                                         </Flex>
                                                         <Box>
                                                             <Text fontWeight="bold" fontSize="sm">
@@ -446,7 +446,7 @@ export default function ProfileTemplate() {
                                                             </Text>
                                                         </Box>
                                                     </HStack>
-                                                    {isExpanded ? <FaChevronUp color="gray" /> : <FaChevronDown color="gray" />}
+                                                    {isExpanded ? <ChevronUp size={16} color="gray" /> : <ChevronDown size={16} color="gray" />}
                                                 </Flex>
                                                 {isExpanded && (
                                                     <SessionReplay session={session} />
@@ -473,7 +473,7 @@ export default function ProfileTemplate() {
                                                     <Text fontSize="sm" color="gray.500">{post.companyName}</Text>
                                                 </Box>
                                                 <Button variant="ghost" size="sm" color="red.500" onClick={() => unbookmarkPost(post.id)}>
-                                                    <FaHeart />
+                                                    <Heart size={16} fill="currentColor" />
                                                 </Button>
                                             </Flex>
                                             <HStack gap={2} mt={3}>
@@ -502,7 +502,7 @@ export default function ProfileTemplate() {
                                                     <Text fontSize="sm" color="gray.500">{job.company}</Text>
                                                 </Box>
                                                 <Button variant="ghost" size="sm" color="red.500" onClick={() => unbookmarkJob(job.job_title, job.company)}>
-                                                    <FaHeart />
+                                                    <Heart size={16} fill="currentColor" />
                                                 </Button>
                                             </Flex>
                                             {job.reason && (

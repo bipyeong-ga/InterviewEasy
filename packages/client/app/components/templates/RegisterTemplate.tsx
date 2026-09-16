@@ -354,7 +354,15 @@ const RegisterTemplate: React.FC = () => {
                                 </HStack>
                             </VStack>
 
-                            <Button type="submit" bg="blue.500" color="white">
+                            <Button
+                                type="submit"
+                                h="54px"
+                                bg="blue.600"
+                                color="white"
+                                _hover={{ bg: "blue.700" }}
+                                borderRadius="14px"
+                                fontSize="16px"
+                            >
                                 회원가입
                             </Button>
                         </VStack>

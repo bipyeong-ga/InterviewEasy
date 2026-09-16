@@ -33,6 +33,7 @@ import {
     X,
     Circle,
     ChevronDown,
+    Lightbulb,
 } from "lucide-react"
 import { toaster } from "../ui/toaster"
 
@@ -60,8 +61,6 @@ interface CompetencyScores {
     logicalStructure: number
     jobExpertise: number
     specificity: number
-    delivery: number
-    confidence: number
 }
 
 interface ReportData {
@@ -136,8 +135,6 @@ const DEFAULT_COMPETENCIES: CompetencyScores = {
     logicalStructure: 70,
     jobExpertise: 70,
     specificity: 70,
-    delivery: 70,
-    confidence: 70,
 }
 
 const RADAR_AXES: { key: keyof CompetencyScores; label: string }[] = [
@@ -145,8 +142,6 @@ const RADAR_AXES: { key: keyof CompetencyScores; label: string }[] = [
     { key: "logicalStructure", label: "논리적 구조" },
     { key: "jobExpertise", label: "직무 전문성" },
     { key: "specificity", label: "답변 구체성" },
-    { key: "delivery", label: "전달력" },
-    { key: "confidence", label: "자신감" },
 ]
 
 function radarPoint(
@@ -168,6 +163,49 @@ function scoreLabel(score: number): string {
     if (score >= 70) return "양호"
     if (score >= 60) return "보통"
     return "노력 필요"
+}
+
+function StatTile({
+    label,
+    value,
+    unit,
+    sub,
+}: {
+    label: string
+    value: string | number
+    unit?: string
+    sub?: string
+}) {
+    return (
+        <Box
+            flex={1}
+            minW="140px"
+            bg="white"
+            border="1px solid"
+            borderColor="gray.200"
+            borderRadius="xl"
+            p={4}
+        >
+            <Text fontSize="12.5px" color="gray.500" mb={1.5}>
+                {label}
+            </Text>
+            <HStack gap={1} align="baseline">
+                <Text fontFamily="mono" fontSize="22px" fontWeight="700" color="gray.900">
+                    {value}
+                </Text>
+                {unit && (
+                    <Text fontSize="12.5px" color="gray.400" fontWeight="600">
+                        {unit}
+                    </Text>
+                )}
+            </HStack>
+            {sub && (
+                <Text fontSize="11.5px" color="blue.600" fontWeight="600" mt={0.5}>
+                    {sub}
+                </Text>
+            )}
+        </Box>
+    )
 }
 
 const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
@@ -1001,14 +1039,12 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                 border="1px solid"
                                 borderColor="gray.200"
                             >
-                                <Text
-                                    fontSize="13px"
-                                    fontWeight="700"
-                                    color="blue.600"
-                                    mb={2}
-                                >
-                                    💡 면접 진행 안내
-                                </Text>
+                                <HStack gap={1.5} mb={2} color="blue.600">
+                                    <Lightbulb size={14} />
+                                    <Text fontSize="13px" fontWeight="700">
+                                        면접 진행 안내
+                                    </Text>
+                                </HStack>
                                 <VStack
                                     align="start"
                                     gap={1.5}
@@ -1886,17 +1922,6 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                         gap={4}
                     >
                         <VStack align="start" gap={1}>
-                            <Badge
-                                bg="blue.50"
-                                color="blue.600"
-                                px={3}
-                                py={1}
-                                borderRadius="full"
-                                fontSize="13px"
-                                fontWeight="700"
-                            >
-                                모의면접 분석 리포트
-                            </Badge>
                             <Text
                                 fontSize={{ base: "24px", md: "30px" }}
                                 fontWeight="800"
@@ -1966,6 +1991,31 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                         </HStack>
                     </Flex>
 
+                    {/* 핵심 지표 요약 */}
+                    <Flex gap={4} mb={8} wrap="wrap">
+                        <StatTile
+                            label="종합 점수"
+                            value={reportData.overallScore}
+                            unit="/ 100"
+                            sub={scoreLabel(reportData.overallScore)}
+                        />
+                        <StatTile
+                            label="답변한 질문"
+                            value={reportData.questionEvaluations.length}
+                            unit="개"
+                        />
+                        <StatTile
+                            label="주요 강점"
+                            value={reportData.strengths.length}
+                            unit="개"
+                        />
+                        <StatTile
+                            label="평균 답변 길이"
+                            value={deliveryMetrics ? deliveryMetrics.avgAnswerSec : "—"}
+                            unit={deliveryMetrics ? "초" : undefined}
+                        />
+                    </Flex>
+
                     {/* 면접 영상 다시보기 */}
                     <Card.Root
                         bg="white"
@@ -1987,13 +2037,12 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                     </Text>
                                 </HStack>
                             ) : sessionId ? (
-                                <Text
-                                    fontSize="12px"
-                                    color="green.600"
-                                    fontWeight="600"
-                                >
-                                    ✓ 마이페이지 저장 완료
-                                </Text>
+                                <HStack gap={1} color="green.600">
+                                    <CheckCircle2 size={13} />
+                                    <Text fontSize="12px" fontWeight="600">
+                                        마이페이지 저장 완료
+                                    </Text>
+                                </HStack>
                             ) : null}
                         </Flex>
 
@@ -2581,12 +2630,9 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                             <VStack align="start" gap={2}>
                                 {reportData.strengths.map((st, i) => (
                                     <HStack key={i} align="start" gap={2}>
-                                        <Text
-                                            color="emerald.600"
-                                            fontWeight="700"
-                                        >
-                                            ✓
-                                        </Text>
+                                        <Box color="emerald.600" mt="2px" flexShrink={0}>
+                                            <CheckCircle2 size={15} />
+                                        </Box>
                                         <Text fontSize="14px" color="gray.700">
                                             {st}
                                         </Text>
@@ -2777,15 +2823,15 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                                     {!isFailed && (
                                                         <>
                                                             <Box w="100%">
-                                                                <Text
-                                                                    fontSize="13px"
-                                                                    fontWeight="700"
-                                                                    color="blue.600"
-                                                                    mb={1}
-                                                                >
-                                                                    💡 AI 평가
-                                                                    및 피드백
-                                                                </Text>
+                                                                <HStack gap={1.5} mb={1} color="blue.600">
+                                                                    <Lightbulb size={13} />
+                                                                    <Text
+                                                                        fontSize="13px"
+                                                                        fontWeight="700"
+                                                                    >
+                                                                        AI 평가 및 피드백
+                                                                    </Text>
+                                                                </HStack>
                                                                 <Text
                                                                     fontSize="13px"
                                                                     color="gray.700"
@@ -2806,16 +2852,15 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                                                     border="1px solid"
                                                                     borderColor="blue.100"
                                                                 >
-                                                                    <Text
-                                                                        fontSize="12px"
-                                                                        fontWeight="700"
-                                                                        color="blue.700"
-                                                                        mb={1}
-                                                                    >
-                                                                        ✨ 모범
-                                                                        답변
-                                                                        가이드
-                                                                    </Text>
+                                                                    <HStack gap={1.5} mb={1} color="blue.700">
+                                                                        <Sparkles size={12} />
+                                                                        <Text
+                                                                            fontSize="12px"
+                                                                            fontWeight="700"
+                                                                        >
+                                                                            모범 답변 가이드
+                                                                        </Text>
+                                                                    </HStack>
                                                                     <Text
                                                                         fontSize="13px"
                                                                         color="gray.700"

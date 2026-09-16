@@ -13,9 +13,10 @@ import {
     useDisclosure,
     CloseButton,
 } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
-import { FaSearch, FaBars } from "react-icons/fa"
-import { useLocation } from "react-router"
+import { useState } from "react"
+import { Search, Menu } from "lucide-react"
+import { useLocation, useNavigate } from "react-router"
+import { useScroll, useMotionValueEvent } from "motion/react"
 
 import BlockLink from "../atoms/BlockLink"
 import AuthButton from "./AuthButton"
@@ -34,20 +35,22 @@ export default function Header({
     [key: string]: any
 }) {
     const location = useLocation()
+    const navigate = useNavigate()
     const isLandingPage = location.pathname === "/"
     const [scrolled, setScrolled] = useState(false)
+    const [headerSearch, setHeaderSearch] = useState("")
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 10)
-        }
+    const submitHeaderSearch = () => {
+        const q = headerSearch.trim()
+        navigate(q ? `/post?q=${encodeURIComponent(q)}` : "/post")
+    }
 
-        window.addEventListener("scroll", handleScroll)
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll)
-        }
-    }, [])
+    // Motion's useScroll batches scroll reads via rAF instead of an unbatched
+    // window scroll listener, so this stays off the banned-pattern list.
+    const { scrollY } = useScroll()
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        setScrolled(latest > 10)
+    })
 
     const finalBg =
         bg !== undefined
@@ -129,15 +132,36 @@ export default function Header({
                 </HStack>
 
                 <Flex align="center" display={{ base: "none", lg: "flex" }}>
-                    <InputGroup startElement={<FaSearch color="blue.600" />}>
+                    <InputGroup
+                        startElementProps={{ pointerEvents: "auto" }}
+                        startElement={
+                            <IconButton
+                                aria-label="검색"
+                                onClick={submitHeaderSearch}
+                                variant="plain"
+                                color="blue.600"
+                                size="xs"
+                                minW="auto"
+                                h="auto"
+                                p={0}
+                            >
+                                <Search size={16} />
+                            </IconButton>
+                        }
+                    >
                         <Input
-                            placeholder="면접 Easy"
+                            placeholder="회사명, 직무, 기술 스택 검색"
                             minW="360px"
                             borderRadius="md"
                             borderColor="blue.600"
                             borderWidth={1.5}
                             px={4}
                             _placeholder={{ color: "gray.400" }}
+                            value={headerSearch}
+                            onChange={(e) => setHeaderSearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") submitHeaderSearch()
+                            }}
                         />
                     </InputGroup>
                 </Flex>
@@ -160,7 +184,7 @@ export default function Header({
                             variant={"ghost"}
                             display={{ base: "flex", md: "none" }}
                         >
-                            <FaBars />
+                            <Menu size={20} />
                         </Button>
                     </Drawer.Trigger>
                     <Drawer.Backdrop />

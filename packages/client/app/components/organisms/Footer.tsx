@@ -12,7 +12,6 @@ import {
     Spacer,
 } from "@chakra-ui/react"
 import { Link } from "react-router"
-import { FaXTwitter, FaGithub, FaYoutube } from "react-icons/fa6"
 
 import BlockLink from "../atoms/BlockLink"
 
@@ -218,7 +217,7 @@ export function Footer() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="gray.600"
-                                _hover={{ color: "#667eea" }}
+                                _hover={{ color: "blue.600" }}
                                 transition="color 0.2s"
                                 title={label}
                             >
@@ -243,7 +242,7 @@ export function Footer() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 color="gray.600"
-                                _hover={{ color: "#667eea" }}
+                                _hover={{ color: "blue.600" }}
                                 transition="color 0.2s"
                                 title={label}
                             >

@@ -24,31 +24,25 @@ import { useNavigate, useLocation } from "react-router"
 import { useAuth } from "../../hooks/useAuth"
 import Header from "../organisms/Header"
 import { toaster } from "../ui/toaster"
-import { IoSparklesSharp } from "react-icons/io5"
-import { FaLocationDot } from "react-icons/fa6"
 import {
-    FaPlus,
-    FaTrash,
-    FaArrowRight,
-    FaFileAlt,
-    FaCheck,
-    FaTimes,
-    FaCloudUploadAlt,
-    FaEdit,
-    FaCode,
-    FaHtml5,
-    FaCss3,
-    FaJs,
-    FaPython,
-    FaTerminal,
-    FaDatabase,
-    FaFileCode,
-    FaEllipsisV,
-    FaHeart,
-    FaRegHeart,
-    FaSyncAlt,
-    FaBriefcase,
-} from "react-icons/fa"
+    Trash2,
+    ArrowRight,
+    FileText,
+    Check,
+    X,
+    UploadCloud,
+    Code2,
+    Palette,
+    Braces,
+    FileCode,
+    Terminal,
+    Database,
+    File,
+    MoreVertical,
+    RefreshCw,
+    Briefcase,
+    Sparkles,
+} from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import remarkMath from "remark-math"
 import rehypeKatex from "rehype-katex"
@@ -195,27 +189,27 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                     switch (lang.toLowerCase()) {
                         case "html":
                         case "xml":
-                            return { icon: FaHtml5, color: "orange.400" }
+                            return { icon: Code2, color: "orange.400" }
                         case "css":
                         case "scss":
-                            return { icon: FaCss3, color: "blue.400" }
+                            return { icon: Palette, color: "blue.400" }
                         case "javascript":
                         case "js":
                         case "json":
-                            return { icon: FaJs, color: "yellow.400" }
+                            return { icon: Braces, color: "yellow.400" }
                         case "typescript":
                         case "ts":
                         case "tsx":
-                            return { icon: FaCode, color: "blue.500" }
+                            return { icon: Code2, color: "blue.500" }
                         case "python":
-                            return { icon: FaPython, color: "blue.300" }
+                            return { icon: FileCode, color: "blue.300" }
                         case "bash":
                         case "sh":
-                            return { icon: FaTerminal, color: "gray.300" }
+                            return { icon: Terminal, color: "gray.300" }
                         case "sql":
-                            return { icon: FaDatabase, color: "blue.200" }
+                            return { icon: Database, color: "blue.200" }
                         default:
-                            return { icon: FaFileCode, color: "gray.400" }
+                            return { icon: File, color: "gray.400" }
                     }
                 }
                 const langConfig = getLanguageIcon(language)
@@ -483,14 +477,14 @@ const ApplicationTemplate: React.FC = () => {
                 <Box
                     as="mark"
                     id="source-highlight-target"
-                    bg="#FDE047"
+                    bg="yellow.300"
                     color="gray.950"
                     px={2}
                     py={1}
                     borderRadius="md"
                     fontWeight="bold"
                     border="2px solid"
-                    borderColor="#EAB308"
+                    borderColor="yellow.500"
                     shadow="lg"
                     display="inline"
                     outline="3px solid rgba(234, 179, 8, 0.4)"
@@ -639,7 +633,7 @@ function RecommendedJobCard({
                 >
                     <HStack align="flex-start" gap={1.5}>
                         <Box color="blue.500" mt={0.5} flexShrink={0}>
-                            <IoSparklesSharp size={11} />
+                            <Sparkles size={11} />
                         </Box>
                         <Text
                             fontSize="2xs"
@@ -1124,7 +1118,7 @@ function RecommendedJobCard({
             minH="100vh"
             w="100vw"
             overflow="hidden"
-            bg="#F3F7FA"
+            bg="gray.50"
             display="flex"
             flexDirection="column"
         >
@@ -1235,7 +1229,7 @@ function RecommendedJobCard({
                                                                 p={3.5}
                                                                 bg={
                                                                     isSelected
-                                                                        ? "#EBF3FF"
+                                                                        ? "blue.50"
                                                                         : snapshot.isDragging
                                                                           ? "gray.50"
                                                                           : "transparent"
@@ -1243,7 +1237,7 @@ function RecommendedJobCard({
                                                                 borderRadius="xl"
                                                                 _hover={{
                                                                     bg: isSelected
-                                                                        ? "#EBF3FF"
+                                                                        ? "blue.50"
                                                                         : "gray.50",
                                                                 }}
                                                                 cursor="pointer"
@@ -1272,7 +1266,7 @@ function RecommendedJobCard({
                                                                         }
                                                                         mt="2px"
                                                                     >
-                                                                        <FaFileAlt
+                                                                        <FileText
                                                                             size={
                                                                                 12
                                                                             }
@@ -1324,7 +1318,7 @@ function RecommendedJobCard({
                                                                                         e.stopPropagation()
                                                                                     }
                                                                                 >
-                                                                                    <FaEllipsisV
+                                                                                    <MoreVertical
                                                                                         size={
                                                                                             10
                                                                                         }
@@ -1374,7 +1368,7 @@ function RecommendedJobCard({
                                                                                             )
                                                                                         }}
                                                                                     >
-                                                                                        <FaTrash
+                                                                                        <Trash2
                                                                                             size={
                                                                                                 10
                                                                                             }
@@ -1465,12 +1459,13 @@ function RecommendedJobCard({
                                                 <Button
                                                     onClick={handleSaveTitle}
                                                     size="sm"
-                                                    bg="blue.500"
+                                                    bg="blue.600"
+                                                    _hover={{ bg: "blue.700" }}
                                                     color="white"
                                                     borderRadius="md"
                                                     p={2}
                                                 >
-                                                    <FaCheck size={10} />
+                                                    <Check size={10} />
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1482,7 +1477,7 @@ function RecommendedJobCard({
                                                     borderRadius="md"
                                                     p={2}
                                                 >
-                                                    <FaTimes size={10} />
+                                                    <X size={10} />
                                                 </Button>
                                             </HStack>
                                         ) : (
@@ -1560,7 +1555,7 @@ function RecommendedJobCard({
                                             onClick={handleReanalyze}
                                         >
                                             <HStack gap={1.5}>
-                                                <FaSyncAlt size={10} />
+                                                <RefreshCw size={10} />
                                                 <Text>
                                                     AI 분석 & 참조 다시 실행
                                                 </Text>
@@ -1830,7 +1825,7 @@ function RecommendedJobCard({
                                                                                     1.5
                                                                                 }
                                                                             >
-                                                                                <FaFileAlt
+                                                                                <FileText
                                                                                     size={
                                                                                         10
                                                                                     }
@@ -1887,7 +1882,7 @@ function RecommendedJobCard({
                                                                                     >
                                                                                         <HStack gap={2} mb={3}>
                                                                                             <Box color="blue.600">
-                                                                                                <FaBriefcase size={13} />
+                                                                                                <Briefcase size={13} />
                                                                                             </Box>
                                                                                             <Text
                                                                                                 fontSize="xs"
@@ -1952,7 +1947,7 @@ function RecommendedJobCard({
                                                             color="blue.600"
                                                             mt={1.5}
                                                         >
-                                                            <FaFileAlt
+                                                            <FileText
                                                                 size={10}
                                                             />
                                                         </Box>
@@ -2008,9 +2003,9 @@ function RecommendedJobCard({
                                                         }
                                                     >
                                                         <HStack gap={1.5}>
-                                                            <FaFileAlt
+                                                            <FileText
                                                                 size={11}
-                                                                color="#2563EB"
+                                                                color="var(--chakra-colors-blue-600)"
                                                             />
                                                             <Text
                                                                 fontWeight="semibold"
@@ -2051,9 +2046,9 @@ function RecommendedJobCard({
                                                         }
                                                     >
                                                         <HStack gap={1.5}>
-                                                            <FaBriefcase
+                                                            <Briefcase
                                                                 size={11}
-                                                                color="#2563EB"
+                                                                color="var(--chakra-colors-blue-600)"
                                                             />
                                                             <Text
                                                                 fontWeight="semibold"
@@ -2143,7 +2138,7 @@ function RecommendedJobCard({
                                                     }
                                                     transition="all 0.2s"
                                                 >
-                                                    <FaArrowRight size={12} />
+                                                    <ArrowRight size={12} />
                                                 </Button>
                                             </Flex>
                                         </Box>
@@ -2224,7 +2219,7 @@ function RecommendedJobCard({
                                                     w="14"
                                                     h="14"
                                                 >
-                                                    <FaCloudUploadAlt
+                                                    <UploadCloud
                                                         size={24}
                                                     />
                                                 </Box>

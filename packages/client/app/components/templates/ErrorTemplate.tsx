@@ -2,7 +2,7 @@ import { Box, VStack, Text, Image, Button } from "@chakra-ui/react"
 import { motion } from "motion/react"
 import React from "react"
 import BlockLink from "../atoms/BlockLink"
-import { FaAngleLeft } from "react-icons/fa"
+import { ChevronLeft } from "lucide-react"
 
 const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
@@ -98,8 +98,8 @@ const ErrorTemplate: React.FC<{
                         history.back()
                     }}
                 >
-                    <FaAngleLeft />
-                    Go Back
+                    <ChevronLeft size={16} />
+                    이전으로
                 </MotionButton>
             </MotionVStack>
         </MotionBox>

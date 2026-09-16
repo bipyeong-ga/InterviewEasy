@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
     Box,
     Flex,
@@ -7,92 +7,115 @@ import {
     Text,
     Badge,
     Button,
+    IconButton,
     SimpleGrid,
     Image,
 } from "@chakra-ui/react"
-import {
-    FaArrowLeft,
-    FaHeart,
-    FaRegHeart,
-    FaMapMarkerAlt,
-    FaBriefcase,
-    FaMoneyBillWave,
-    FaClock,
-    FaUser,
-    FaCode,
-    FaCheckCircle,
-} from "react-icons/fa"
-import { FaLocationDot } from "react-icons/fa6";
+import { ArrowLeft, Heart, Share2, SearchX } from "lucide-react"
 
 import { useNavigate, useParams } from "react-router"
 import Header from "../organisms/Header"
+import { toaster } from "../ui/toaster"
 import { type Post } from "../../data/mockPosts"
-import { useEffect } from "react"
 
 // ────────────────────────────────────────────────
-// Info Badge Row
+// Structured info grid (label / value pairs, no decorative icons)
 // ────────────────────────────────────────────────
-function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function InfoGrid({
+    rows,
+}: {
+    rows: { label: string; value: string; accent?: boolean }[]
+}) {
     return (
-        <Flex align="center" gap={3} py={3} borderBottom="1px solid" borderColor="border.muted">
-            <Box color="blue.500" minW="16px">{icon}</Box>
-            <Text fontSize="sm" color="gray.500" minW="80px">{label}</Text>
-            <Text fontSize="sm" fontWeight="medium" color="gray.800">{value}</Text>
-        </Flex>
+        <SimpleGrid columns={2} gapX={8} gapY={3}>
+            {rows.map((r) => (
+                <Flex
+                    key={r.label}
+                    justify="space-between"
+                    borderBottom="1px solid"
+                    borderColor="gray.100"
+                    pb={2}
+                >
+                    <Text fontSize="sm" color="gray.500">
+                        {r.label}
+                    </Text>
+                    <Text
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        color={r.accent ? "red.500" : "gray.800"}
+                    >
+                        {r.value}
+                    </Text>
+                </Flex>
+            ))}
+        </SimpleGrid>
     )
 }
 
 // ────────────────────────────────────────────────
-// Section Block
+// Content section: plain heading + hairline divider (no accent bar)
 // ────────────────────────────────────────────────
-function SectionBlock({ title, items }: { title: string; items: string[] }) {
+function ContentSection({
+    title,
+    children,
+}: {
+    title: string
+    children: React.ReactNode
+}) {
     return (
-        <Box mb={8}>
-            <Flex align="center" gap={2} mb={4}>
-                <Box w="4px" h="20px" bg="blue.500" borderRadius="full" />
-                <Text fontSize="lg" fontWeight="bold" color="gray.800">{title}</Text>
-            </Flex>
-            <VStack align="stretch" gap={2} pl={4}>
-                {items.map((item, idx) => (
-                    <Flex key={idx} align="flex-start" gap={2}>
-                        <Box mt="6px" color="blue.400" flexShrink={0}>
-                            <FaCheckCircle size={12} />
-                        </Box>
-                        <Text fontSize="sm" color="gray.700" lineHeight="1.7">{item}</Text>
-                    </Flex>
-                ))}
-            </VStack>
+        <Box pt={6} mt={6} borderTop="1px solid" borderColor="gray.100">
+            <Text fontSize="md" fontWeight="bold" color="gray.900" mb={3}>
+                {title}
+            </Text>
+            {children}
         </Box>
+    )
+}
+
+function BulletList({ items }: { items: string[] }) {
+    return (
+        <VStack align="stretch" gap={2}>
+            {items.map((item, idx) => (
+                <HStack key={idx} align="flex-start" gap={2.5}>
+                    <Text color="gray.300" fontSize="sm" lineHeight="1.75">
+                        –
+                    </Text>
+                    <Text fontSize="sm" color="gray.700" lineHeight="1.75">
+                        {item}
+                    </Text>
+                </HStack>
+            ))}
+        </VStack>
     )
 }
 
 // ────────────────────────────────────────────────
 // Company Logo
 // ────────────────────────────────────────────────
-function CompanyLogo({ post }: { post: Post }) {
+function CompanyLogo({ post, size }: { post: Post; size: string }) {
     const colors = ["#1a1a1a", "#0066CC", "#FF4500", "#E8001D", "#00B900", "#6B3FA0"]
     const fallbackBg = colors[post.id % colors.length]
     const displayName = post.companyName.replace("(주) ", "").replace("코리아", "")
 
     return (
         <Box
-            w="100%"
-            h="120px"
-            bg="bg.subtle"
+            w={size}
+            h={size}
+            bg="gray.50"
             border="1px solid"
-            borderColor="border.muted"
-            borderRadius="xl"
+            borderColor="gray.200"
+            borderRadius="md"
             display="flex"
             alignItems="center"
             justifyContent="center"
-            mb={4}
             overflow="hidden"
-            p={3}
+            p={1.5}
+            flexShrink={0}
         >
             <Image
                 src={post.companyLogo}
                 alt={post.companyName}
-                maxH="90px"
+                maxH="100%"
                 maxW="100%"
                 objectFit="contain"
                 onError={(e) => {
@@ -105,9 +128,9 @@ function CompanyLogo({ post }: { post: Post }) {
                         fallback.style.cssText = `
                             width:100%;height:100%;display:flex;
                             align-items:center;justify-content:center;
-                            background:${fallbackBg};border-radius:12px;
+                            background:${fallbackBg};border-radius:6px;
                         `
-                        fallback.innerHTML = `<span style="font-weight:900;font-size:24px;color:white;letter-spacing:-1px">${displayName.slice(0, 8)}</span>`
+                        fallback.innerHTML = `<span style="font-weight:900;font-size:13px;color:white;letter-spacing:-0.5px">${displayName.slice(0, 4)}</span>`
                         parent.appendChild(fallback)
                     }
                 }}
@@ -123,50 +146,38 @@ function RelatedJobCard({ post }: { post: Post }) {
     const navigate = useNavigate()
     return (
         <Box
-            bg="bg.panel"
+            bg="white"
             border="1px solid"
             borderColor="gray.200"
-            borderRadius="xl"
-            p={4}
+            borderRadius="md"
+            p={3.5}
             cursor="pointer"
-            transition="all 0.2s"
-            _hover={{ boxShadow: "md", transform: "translateY(-1px)" }}
+            transition="border-color 0.15s"
+            _hover={{ borderColor: "blue.300" }}
             onClick={() => navigate(`/post/${post.id}`)}
         >
-            <Box
-                w="100%"
-                h="56px"
-                bg="bg.subtle"
-                borderRadius="lg"
-                mb={3}
-                display="flex"
-                alignItems="center"
-                px={3}
-                border="1px solid"
-                borderColor="border.muted"
-            >
-                <Text fontWeight="800" fontSize="16px" color="gray.700">
-                    {post.companyName.replace("(주) ", "").slice(0, 6)}
-                </Text>
-            </Box>
-            <Text
-                fontWeight="bold"
-                fontSize="sm"
-                color="gray.800"
-                mb={1}
-                style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                }}
-            >
-                {post.title}
-            </Text>
-            <Text fontSize="xs" color="gray.500" mb={2}>{post.companyName}</Text>
-            <Badge colorPalette="blue" variant="subtle" fontSize="2xs" borderRadius="full" px={2}>
-                {post.jobCategory}
-            </Badge>
+            <HStack gap={3} align="flex-start">
+                <CompanyLogo post={post} size="36px" />
+                <Box minW={0} flex={1}>
+                    <Text
+                        fontWeight="bold"
+                        fontSize="sm"
+                        color="gray.800"
+                        mb={0.5}
+                        style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                        }}
+                    >
+                        {post.title}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                        {post.companyName}
+                    </Text>
+                </Box>
+            </HStack>
         </Box>
     )
 }
@@ -190,7 +201,7 @@ const PostDetailTemplate: React.FC = () => {
             try {
                 const token = localStorage.getItem("token")
                 const headers = { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
-                
+
                 const resp = await fetch(`/api/posts/${id}`, { headers })
                 if (resp.ok) {
                     const d = await resp.json()
@@ -212,7 +223,7 @@ const PostDetailTemplate: React.FC = () => {
                         requirements: d.requirements,
                         preferredRequirements: d.preferred_requirements,
                         benefits: d.benefits,
-                        bookmarked: d.bookmarked
+                        bookmarked: d.bookmarked,
                     }
                     setPost(formattedPost)
                     setBookmarked(formattedPost.bookmarked)
@@ -238,11 +249,18 @@ const PostDetailTemplate: React.FC = () => {
                             requirements: d.requirements,
                             preferredRequirements: d.preferred_requirements,
                             benefits: d.benefits,
-                            bookmarked: d.bookmarked
+                            bookmarked: d.bookmarked,
                         }))
-                        setRelatedPosts(formattedAll.filter(
-                            (p: any) => p.id !== formattedPost.id && (p.jobCategory === formattedPost.jobCategory || p.location === formattedPost.location)
-                        ).slice(0, 3))
+                        setRelatedPosts(
+                            formattedAll
+                                .filter(
+                                    (p: any) =>
+                                        p.id !== formattedPost.id &&
+                                        (p.jobCategory === formattedPost.jobCategory ||
+                                            p.location === formattedPost.location),
+                                )
+                                .slice(0, 3),
+                        )
                     }
                 }
             } catch (err) {
@@ -258,22 +276,36 @@ const PostDetailTemplate: React.FC = () => {
 
     const handleToggleBookmark = async () => {
         if (!post) return
+        const next = !bookmarked
+        setBookmarked(next)
         try {
             const token = localStorage.getItem("token")
             const resp = await fetch(`/api/posts/${post.id}/bookmark`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
-                body: JSON.stringify({ isBookmarked: !bookmarked })
+                body: JSON.stringify({ isBookmarked: next }),
             })
-
-            if (resp.ok) {
-                setBookmarked(!bookmarked)
+            if (!resp.ok) {
+                setBookmarked(!next)
             }
         } catch (err) {
             console.error("Failed to toggle bookmark:", err)
+            setBookmarked(!next)
+        }
+    }
+
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href)
+            toaster.create({
+                title: "링크가 복사되었습니다",
+                type: "success",
+            })
+        } catch (err) {
+            console.error("Failed to copy link:", err)
         }
     }
 
@@ -293,9 +325,19 @@ const PostDetailTemplate: React.FC = () => {
             <>
                 <Header />
                 <Flex pt="72px" minH="100vh" align="center" justify="center" direction="column" gap={4}>
-                    <Text fontSize="5xl">😢</Text>
-                    <Text fontSize="xl" fontWeight="bold" color="fg.muted">공고를 찾을 수 없습니다</Text>
-                    <Button onClick={() => navigate("/post")} bg="blue.500" color="white" borderRadius="full">
+                    <Box color="gray.300">
+                        <SearchX size={56} />
+                    </Box>
+                    <Text fontSize="xl" fontWeight="bold" color="fg.muted">
+                        공고를 찾을 수 없습니다
+                    </Text>
+                    <Button
+                        onClick={() => navigate("/post")}
+                        bg="blue.600"
+                        _hover={{ bg: "blue.700" }}
+                        color="white"
+                        borderRadius="lg"
+                    >
                         목록으로 돌아가기
                     </Button>
                 </Flex>
@@ -308,205 +350,171 @@ const PostDetailTemplate: React.FC = () => {
     return (
         <>
             <Header />
-            <Box pt="72px" minH="100vh" bg="bg.subtle">
-                <Box maxW="1200px" mx="auto" px={6} py={8}>
-
-                    {/* Back button */}
+            <Box pt="72px" minH="100vh" bg="gray.50">
+                <Box maxW="1160px" mx="auto" px={6} py={8}>
                     <Button
                         variant="ghost"
                         size="sm"
                         color="gray.500"
-                        mb={6}
+                        mb={5}
                         onClick={() => navigate("/post")}
-                        _hover={{ color: "blue.500", bg: "blue.50" }}
+                        _hover={{ color: "blue.600", bg: "blue.50" }}
                     >
-                        <FaArrowLeft />
+                        <ArrowLeft size={16} />
                         <Text ml={1}>공고 목록</Text>
                     </Button>
 
-                    <Flex gap={8} align="flex-start" flexDirection={{ base: "column", lg: "row" }}>
-
+                    <Flex gap={6} align="flex-start" flexDirection={{ base: "column", lg: "row" }}>
                         {/* ── Left Column: Main Content ── */}
-                        <Box flex={1} minW={0}>
-
-                            {/* Hero Card */}
-                            <Box
-                                bg="bg.panel"
-                                borderRadius="2xl"
-                                border="1px solid"
-                                borderColor="gray.200"
-                                p={6}
-                                mb={6}
-                                boxShadow="sm"
-                            >
-                                <CompanyLogo post={post} />
-
-                                <Flex justify="space-between" align="flex-start" gap={4}>
-                                    <Box flex={1}>
-                                        <Text fontSize="xl" fontWeight="bold" color="fg" mb={1}>
+                        <Box
+                            flex={1}
+                            minW={0}
+                            w="100%"
+                            bg="white"
+                            border="1px solid"
+                            borderColor="gray.200"
+                            borderRadius="lg"
+                            p={{ base: 5, md: 7 }}
+                        >
+                            {/* Header */}
+                            <Flex justify="space-between" align="flex-start" gap={4} mb={5}>
+                                <HStack gap={4} align="flex-start">
+                                    <CompanyLogo post={post} size="56px" />
+                                    <Box>
+                                        <Text fontSize="sm" color="blue.600" fontWeight="semibold" mb={1}>
+                                            {post.companyName}
+                                        </Text>
+                                        <Text fontSize="xl" fontWeight="bold" color="gray.900" lineHeight="1.4">
                                             {post.title}
                                         </Text>
-                                        <Text fontSize="sm" color="gray.500" mb={3}>{post.companyName}</Text>
-
-                                        <HStack gap={2} flexWrap="wrap">
-                                            <Badge colorPalette="blue" variant="subtle" borderRadius="full" px={3} py={1}>
-                                                {post.jobCategory}
-                                            </Badge>
-                                            <Badge colorPalette="gray" variant="subtle" borderRadius="full" px={3} py={1}>
-                                                {post.employmentType}
-                                            </Badge>
-                                            <Badge
-                                                colorPalette={isExpired ? "red" : "green"}
-                                                variant="subtle"
-                                                borderRadius="full"
-                                                px={3}
-                                                py={1}
-                                            >
-                                                {isExpired ? "채용 완료 시 마감" : `~${post.deadline}`}
-                                            </Badge>
-                                        </HStack>
                                     </Box>
+                                </HStack>
 
-                                    {/* Bookmark + Apply */}
-                                    <VStack gap={2}>
-                                        <Button
-                                            variant="outline"
-                                            colorPalette="red"
-                                            borderRadius="full"
-                                            px={6}
-                                            onClick={handleToggleBookmark}
-                                        >
-                                            {bookmarked ? <FaHeart color="var(--chakra-colors-red-500)" /> : <FaRegHeart />}
-                                            <Text ml={2}>{bookmarked ? "스크랩 됨" : "스크랩"}</Text>
-                                        </Button>
-                                    </VStack>
-                                </Flex>
-                            </Box>
+                                <HStack gap={1} flexShrink={0}>
+                                    <IconButton
+                                        aria-label={bookmarked ? "북마크 해제" : "북마크"}
+                                        aria-pressed={bookmarked}
+                                        variant="ghost"
+                                        size="sm"
+                                        color={bookmarked ? "red.500" : "gray.400"}
+                                        onClick={handleToggleBookmark}
+                                    >
+                                        <Heart size={18} fill={bookmarked ? "currentColor" : "none"} />
+                                    </IconButton>
+                                    <IconButton
+                                        aria-label="링크 공유"
+                                        variant="ghost"
+                                        size="sm"
+                                        color="gray.400"
+                                        onClick={handleShare}
+                                    >
+                                        <Share2 size={18} />
+                                    </IconButton>
+                                </HStack>
+                            </Flex>
 
-                            {/* Info Card */}
-                            <Box
-                                bg="bg.panel"
-                                borderRadius="2xl"
-                                border="1px solid"
-                                borderColor="gray.200"
-                                px={6}
-                                py={4}
+                            <Badge
+                                variant="outline"
+                                colorPalette="gray"
+                                borderRadius="md"
+                                px={2.5}
+                                py={1}
+                                fontSize="xs"
+                                fontWeight="medium"
                                 mb={6}
-                                boxShadow="sm"
                             >
-                                <Text fontSize="md" fontWeight="bold" color="gray.800" mb={2}>공고 정보</Text>
-                                <InfoItem icon={<FaMapMarkerAlt size={14} />} label="근무지" value={`${post.location} ${post.district}`} />
-                                <InfoItem icon={<FaUser size={14} />} label="경력" value={post.experience} />
-                                <InfoItem icon={<FaBriefcase size={14} />} label="고용형태" value={post.employmentType} />
-                                <InfoItem icon={<FaMoneyBillWave size={14} />} label="급여" value={post.salary} />
-                                <InfoItem icon={<FaClock size={14} />} label="마감일" value={post.deadline} />
-                            </Box>
+                                {post.jobCategory}
+                            </Badge>
 
-                            <Box
-                                bg="bg.panel"
-                                borderRadius="2xl"
-                                border="1px solid"
-                                borderColor="gray.200"
-                                px={6}
-                                py={5}
-                                mb={6}
-                                boxShadow="sm"
-                            >
-                                <Flex align="center" gap={2} mb={4}>
-                                    <FaCode color="blue.600" size={16} />
-                                    <Text fontSize="md" fontWeight="bold" color="gray.800">기술 스택</Text>
-                                </Flex>
+                            <InfoGrid
+                                rows={[
+                                    { label: "근무지", value: `${post.location} ${post.district}` },
+                                    { label: "경력", value: post.experience },
+                                    { label: "고용형태", value: post.employmentType },
+                                    { label: "급여", value: post.salary },
+                                    {
+                                        label: "마감일",
+                                        value: isExpired ? "채용 완료 시 마감" : post.deadline,
+                                        accent: !isExpired,
+                                    },
+                                ]}
+                            />
+
+                            <ContentSection title="기술 스택">
                                 <HStack gap={2} flexWrap="wrap">
                                     {post.techStack.map((t) => (
                                         <Badge
                                             key={t}
                                             colorPalette="blue"
-                                            variant="outline"
-                                            borderRadius="lg"
-                                            px={3}
+                                            variant="subtle"
+                                            borderRadius="md"
+                                            px={2.5}
                                             py={1}
-                                            fontSize="sm"
+                                            fontSize="xs"
                                         >
                                             {t}
                                         </Badge>
                                     ))}
                                 </HStack>
-                            </Box>
+                            </ContentSection>
 
-                            {/* Description + sections */}
-                            <Box
-                                bg="bg.panel"
-                                borderRadius="2xl"
-                                border="1px solid"
-                                borderColor="gray.200"
-                                px={6}
-                                py={6}
-                                mb={6}
-                                boxShadow="sm"
-                            >
-                                {/* Description */}
-                                <Box mb={8}>
-                                    <Flex align="center" gap={2} mb={4}>
-                                        <Box w="4px" h="20px" bg="blue.500" borderRadius="full" />
-                                        <Text fontSize="lg" fontWeight="bold" color="gray.800">회사 소개</Text>
-                                    </Flex>
-                                    <Text fontSize="sm" color="fg.muted" lineHeight="1.8" pl={4}>
-                                        {post.description}
-                                    </Text>
-                                </Box>
+                            <ContentSection title="회사 소개">
+                                <Text fontSize="sm" color="gray.600" lineHeight="1.8">
+                                    {post.description}
+                                </Text>
+                            </ContentSection>
 
-                                <SectionBlock title="주요 업무" items={post.responsibilities} />
-                                <SectionBlock title="자격 요건" items={post.requirements} />
-                                <SectionBlock title="우대 사항" items={post.preferredRequirements} />
-                                <SectionBlock title="복리 후생" items={post.benefits} />
-                            </Box>
+                            <ContentSection title="주요 업무">
+                                <BulletList items={post.responsibilities} />
+                            </ContentSection>
+
+                            <ContentSection title="자격 요건">
+                                <BulletList items={post.requirements} />
+                            </ContentSection>
+
+                            <ContentSection title="우대 사항">
+                                <BulletList items={post.preferredRequirements} />
+                            </ContentSection>
+
+                            <ContentSection title="복리 후생">
+                                <BulletList items={post.benefits} />
+                            </ContentSection>
                         </Box>
 
                         {/* ── Right Column: Sticky apply + related ── */}
-                        <Box w={{ base: "100%", lg: "320px" }} flexShrink={0}>
-                            {/* Sticky Apply Card */}
+                        <Box w={{ base: "100%", lg: "300px" }} flexShrink={0}>
                             <Box
-                                bg="bg.panel"
-                                borderRadius="2xl"
+                                bg="white"
                                 border="1px solid"
                                 borderColor="gray.200"
+                                borderRadius="lg"
                                 p={5}
-                                mb={6}
-                                boxShadow="sm"
+                                mb={5}
                                 position={{ base: "static", lg: "sticky" }}
                                 top="90px"
                             >
-                                <Text fontSize="md" fontWeight="bold" color="gray.800" mb={1}>
-                                    {post.title}
-                                </Text>
-                                <Text fontSize="sm" color="gray.500" mb={4}>{post.companyName}</Text>
-
-                                <VStack gap={2} mb={4}>
-                                    <Flex w="100%" justify="space-between" fontSize="xs">
-                                        <Text color="gray.500">근무지</Text>
-                                        <Text fontWeight="medium">{post.district}</Text>
-                                    </Flex>
-                                    <Flex w="100%" justify="space-between" fontSize="xs">
-                                        <Text color="gray.500">마감일</Text>
-                                        <Text fontWeight="medium" color={isExpired ? "red.500" : "gray.700"}>
-                                            {post.deadline}
-                                        </Text>
-                                    </Flex>
-                                    <Flex w="100%" justify="space-between" fontSize="xs">
-                                        <Text color="gray.500">경력</Text>
-                                        <Text fontWeight="medium">{post.experience}</Text>
-                                    </Flex>
-                                </VStack>
+                                <Flex justify="space-between" align="center" mb={4}>
+                                    <Text fontSize="xs" color="gray.500">
+                                        마감일
+                                    </Text>
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        color={isExpired ? "gray.400" : "red.500"}
+                                    >
+                                        {isExpired ? "채용 완료 시" : post.deadline}
+                                    </Text>
+                                </Flex>
 
                                 <Button
                                     w="100%"
-                                    bg="blue.500"
+                                    bg="blue.600"
                                     color="white"
-                                    borderRadius="xl"
+                                    borderRadius="md"
                                     size="lg"
-                                    _hover={{ bg: "blue.600" }}
-                                    mb={3}
+                                    _hover={{ bg: "blue.700" }}
                                     fontWeight="bold"
+                                    mb={2}
                                 >
                                     지원하기
                                 </Button>
@@ -514,24 +522,25 @@ const PostDetailTemplate: React.FC = () => {
                                 <Button
                                     w="100%"
                                     variant="outline"
-                                    borderColor={bookmarked ? "red.300" : "gray.200"}
+                                    borderColor={bookmarked ? "red.200" : "gray.200"}
                                     color={bookmarked ? "red.500" : "gray.600"}
-                                    borderRadius="xl"
-                                    onClick={() => setBookmarked((v) => !v)}
+                                    borderRadius="md"
+                                    onClick={handleToggleBookmark}
                                     _hover={{ bg: bookmarked ? "red.50" : "gray.50" }}
                                 >
-                                    {bookmarked ? <FaHeart /> : <FaRegHeart />}
-                                    <Text ml={1}>{bookmarked ? "북마크 해제" : "북마크"}</Text>
+                                    <Heart size={15} fill={bookmarked ? "currentColor" : "none"} />
+                                    <Text ml={1.5} fontSize="sm">
+                                        {bookmarked ? "스크랩 됨" : "스크랩"}
+                                    </Text>
                                 </Button>
                             </Box>
 
-                            {/* Related Jobs */}
                             {relatedPosts.length > 0 && (
                                 <Box>
-                                    <Text fontSize="md" fontWeight="bold" color="gray.700" mb={3}>
+                                    <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={3}>
                                         관련 공고
                                     </Text>
-                                    <VStack gap={3}>
+                                    <VStack gap={2.5}>
                                         {relatedPosts.map((p) => (
                                             <RelatedJobCard key={p.id} post={p} />
                                         ))}

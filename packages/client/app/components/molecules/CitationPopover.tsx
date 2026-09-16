@@ -8,7 +8,7 @@ import {
     HStack,
     VStack,
 } from "@chakra-ui/react"
-import { FaFileAlt, FaExternalLinkAlt } from "react-icons/fa"
+import { FileText, ExternalLink } from "lucide-react"
 
 export interface CitationItem {
     id: number
@@ -203,7 +203,7 @@ export const CitationPopover: React.FC<CitationPopoverProps> = ({
                         >
                             <HStack gap={2} overflow="hidden">
                                 <Box color="blue.400">
-                                    <FaFileAlt size={13} />
+                                    <FileText size={13} />
                                 </Box>
                                 <Text
                                     fontWeight="bold"
@@ -355,7 +355,7 @@ export const CitationPopover: React.FC<CitationPopoverProps> = ({
                             >
                                 <HStack gap={1.5}>
                                     <Text fontWeight="semibold">소스 보기</Text>
-                                    <FaExternalLinkAlt size={10} />
+                                    <ExternalLink size={10} />
                                 </HStack>
                             </Button>
 

@@ -26,8 +26,6 @@ router.post("/questions", async (req, res, next) => {
                 ? Number(count)
                 : 5
 
-        console.log(req.body)
-
         const questions = await generateInterviewQuestionsList({
             jobs: Array.isArray(jobs) ? jobs : jobs ? [jobs] : undefined,
             company,

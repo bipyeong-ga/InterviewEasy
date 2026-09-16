@@ -16,19 +16,21 @@ export default function AuthButton() {
     if (!user) {
         return (
             <HStack gap={3}>
+                <BlockLink to="/login">
+                    <Button variant="ghost" size="sm" borderRadius="md">
+                        로그인
+                    </Button>
+                </BlockLink>
                 <BlockLink to="/register">
                     <Button
                         bg="blue.600"
                         _hover={{ bg: "blue.700" }}
-                        size="xs"
+                        size="sm"
+                        fontWeight="bold"
                         borderRadius="md"
+                        px={4}
                     >
-                        회원가입
-                    </Button>
-                </BlockLink>
-                <BlockLink to="/login">
-                    <Button variant="outline" size="xs" borderRadius="md">
-                        로그인
+                        무료로 시작하기
                     </Button>
                 </BlockLink>
             </HStack>

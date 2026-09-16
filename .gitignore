@@ -1,1 +1,8 @@
 .DS_Store
+node_modules/
+
+# Local AI tooling artifacts (not part of the app)
+.21st/
+.agents/
+.claude/
+skills-lock.json

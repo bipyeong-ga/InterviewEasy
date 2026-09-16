@@ -10,25 +10,24 @@ import {
     Badge,
     SimpleGrid,
     Button,
+    IconButton,
     Checkbox,
     Image,
 } from "@chakra-ui/react"
-import { FaLocationDot } from "react-icons/fa6";
-import { IoSparklesSharp } from "react-icons/io5";
 import {
-    FaSearch,
-    FaMapMarkerAlt,
-    FaBriefcase,
-    FaHeart,
-    FaRegHeart,
-    FaChevronDown,
-    FaChevronUp,
-    FaChevronRight,
-    FaCog,
-    FaPlus,
-    FaRedo,
-} from "react-icons/fa"
-import { useNavigate } from "react-router"
+    Search,
+    MapPin,
+    Briefcase,
+    Heart,
+    ChevronDown,
+    ChevronUp,
+    ChevronRight,
+    RotateCcw,
+    Sparkles,
+    X,
+    SearchX,
+} from "lucide-react"
+import { useNavigate, useSearchParams } from "react-router"
 import Header from "../organisms/Header"
 import { type Post } from "../../data/mockPosts"
 import { getRegionsWithCounts, type Region } from "../../data/regions"
@@ -37,6 +36,28 @@ import { useEffect } from "react"
 // ────────────────────────────────────────────────
 // Job Card
 // ────────────────────────────────────────────────
+const LOGO_COLORS = ["#1a1a1a", "#0066CC", "#FF4500", "#E8001D", "#00B900", "#6B3FA0", "#005BAC"]
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"]
+
+function getDeadlineInfo(deadline: string): { label: string; tone: "urgent" | "soon" | "normal" | "neutral" } {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(deadline)
+    if (!match) {
+        return { label: deadline, tone: "neutral" }
+    }
+    const target = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    // "~10.09(금)" style, matching how other job boards format a plain due date.
+    const formatted = `~${Number(match[2])}.${match[3]}(${WEEKDAYS[target.getDay()]})`
+
+    if (diffDays < 0) return { label: "마감", tone: "neutral" }
+    if (diffDays === 0) return { label: "오늘 마감", tone: "urgent" }
+    if (diffDays <= 3) return { label: `D-${diffDays}`, tone: "urgent" }
+    if (diffDays <= 14) return { label: `D-${diffDays}`, tone: "soon" }
+    return { label: formatted, tone: "normal" }
+}
+
 function JobCard({
     post,
     onToggleBookmark,
@@ -47,8 +68,22 @@ function JobCard({
     recommendReason?: string
 }) {
     const navigate = useNavigate()
-    const colors = ["#1a1a1a", "#0066CC", "#FF4500", "#E8001D", "#00B900", "#6B3FA0", "#005BAC"]
-    const cardColor = colors[post.id % colors.length]
+    const cardColor = LOGO_COLORS[post.id % LOGO_COLORS.length]
+    const deadlineInfo = getDeadlineInfo(post.deadline)
+    const deadlineColor = {
+        urgent: "red.600",
+        soon: "orange.700",
+        normal: "gray.500",
+        neutral: "gray.400",
+    }[deadlineInfo.tone]
+    // "urgent"/"soon" get a tinted chip (not just colored text) so the D-day
+    // color still reads WCAG AA against its own background at 12px.
+    const deadlineChipBg: Record<string, string | undefined> = {
+        urgent: "red.50",
+        soon: "orange.50",
+    }
+    const visibleStack = post.techStack.slice(0, 3)
+    const extraStackCount = post.techStack.length - visibleStack.length
 
     return (
         <Box
@@ -58,15 +93,25 @@ function JobCard({
             borderRadius="xl"
             p={4}
             cursor="pointer"
-            transition="all 0.2s ease"
-            _hover={{ boxShadow: "lg", borderColor: "blue.200" }}
+            transition="all 0.18s ease"
+            _hover={{ boxShadow: "lg", borderColor: "blue.200", transform: "translateY(-2px)" }}
             position="relative"
             onClick={() => navigate(`/post/${post.id}`)}
         >
-            <Box
+            <IconButton
+                aria-label={post.bookmarked ? "북마크 해제" : "북마크"}
+                aria-pressed={post.bookmarked}
+                variant="plain"
                 position="absolute"
                 top={3}
                 right={3}
+                w={8}
+                h={8}
+                minW={8}
+                p={0}
+                borderRadius="full"
+                bg="whiteAlpha.900"
+                boxShadow="xs"
                 onClick={(e) => {
                     e.stopPropagation()
                     onToggleBookmark(post.id)
@@ -76,24 +121,26 @@ function JobCard({
                 transition="color 0.15s"
                 zIndex={1}
             >
-                {post.bookmarked ? <FaHeart size={16} /> : <FaRegHeart size={16} />}
-            </Box>
+                <Heart size={15} fill={post.bookmarked ? "currentColor" : "none"} />
+            </IconButton>
 
-            <Box
+            <Flex
                 w="100%"
-                h="80px"
+                h="88px"
                 borderRadius="lg"
                 mb={3}
-                display="flex"
-                alignItems="center"
-                justifyContent="flex-start"
+                align="center"
+                justify="center"
                 overflow="hidden"
-                p={2}
+                p={3}
+                bg="bg.subtle"
+                border="1px solid"
+                borderColor="border.muted"
             >
                 <Image
                     src={post.companyLogo}
                     alt={post.companyName}
-                    maxH="60px"
+                    maxH="56px"
                     maxW="100%"
                     objectFit="contain"
                     onError={(e) => {
@@ -108,20 +155,21 @@ function JobCard({
                                 align-items:center;justify-content:center;
                                 background:${cardColor};border-radius:8px;
                             `
-                            fallback.innerHTML = `<span style="font-weight:900;font-size:18px;color:white;letter-spacing:-0.5px">${post.companyName.replace("(주) ", "").slice(0, 5)}</span>`
+                            fallback.innerHTML = `<span style="font-weight:900;font-size:16px;color:white;letter-spacing:-0.5px">${post.companyName.replace("(주) ", "").slice(0, 5)}</span>`
                             parent.appendChild(fallback)
                         }
                     }}
                 />
-            </Box>
+            </Flex>
 
             {/* Title */}
             <Text
                 fontWeight="bold"
-                fontSize="sm"
-                color="gray.800"
+                fontSize="16px"
+                color="gray.900"
                 mb={1}
                 pr={5}
+                lineHeight="1.35"
                 style={{
                     display: "-webkit-box",
                     WebkitLineClamp: 2,
@@ -133,13 +181,42 @@ function JobCard({
             </Text>
 
             {/* Company */}
-            <Text fontSize="xs" color="gray.500" mb={1}>
+            <Text fontSize="xs" color="gray.500" fontWeight="medium" mb={2}>
                 {post.companyName}
             </Text>
 
+            {/* Tech stack chips */}
+            {visibleStack.length > 0 && (
+                <HStack gap={1.5} mb={2.5} flexWrap="wrap">
+                    {visibleStack.map((tech) => (
+                        <Badge
+                            key={tech}
+                            variant="outline"
+                            colorPalette="gray"
+                            fontSize="10px"
+                            fontWeight="medium"
+                            borderRadius="md"
+                            px={1.5}
+                            py={0.5}
+                            color="gray.600"
+                            borderColor="gray.200"
+                        >
+                            {tech}
+                        </Badge>
+                    ))}
+                    {extraStackCount > 0 && (
+                        <Text fontSize="10px" color="gray.400">
+                            +{extraStackCount}
+                        </Text>
+                    )}
+                </HStack>
+            )}
+
             {/* Location */}
-            <HStack mb={3}>
-                <FaLocationDot color="gray.400" size={12} />
+            <HStack mb={3} gap={1.5}>
+                <Box color="gray.400" flexShrink={0} display="flex">
+                    <MapPin size={12} />
+                </Box>
                 <Text fontSize="xs" color="gray.400">
                     {post.location} · {post.district} · {post.experience}
                 </Text>
@@ -159,10 +236,16 @@ function JobCard({
                 </Badge>
                 <Text
                     fontSize="xs"
-                    color={post.deadline === "채용 완료 시" ? "gray.400" : "gray.500"}
-                    fontWeight="medium"
+                    color={deadlineColor}
+                    fontWeight={deadlineInfo.tone === "urgent" ? "bold" : "medium"}
+                    {...(deadlineChipBg[deadlineInfo.tone] && {
+                        bg: deadlineChipBg[deadlineInfo.tone],
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: "full",
+                    })}
                 >
-                    {post.deadline}
+                    {deadlineInfo.label}
                 </Text>
             </Flex>
 
@@ -171,7 +254,7 @@ function JobCard({
                 <Box mt={3} pt={3} borderTop="1px dashed" borderColor="blue.100">
                     <HStack align="flex-start" gap={1.5}>
                         <Box color="blue.500" mt={0.5}>
-                            <IoSparklesSharp size={12} />
+                            <Sparkles size={12} />
                         </Box>
                         <Text fontSize="xs" color="blue.600" css={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                             {recommendReason}
@@ -213,7 +296,7 @@ function RegionFilterPanel({
         <Box borderTop="1px solid" borderColor="border.muted" bg="bg.panel">
             {/* Region search */}
             <Box px={4} pt={3} pb={2}>
-                <InputGroup startElement={<FaSearch color="gray.400" size={12} />} maxW="220px">
+                <InputGroup startElement={<Search color="gray.400" size={12} />} maxW="220px">
                     <Input
                         placeholder="지역명 입력"
                         size="sm"
@@ -362,7 +445,7 @@ function RegionRow({
             </Flex>
             {isSelected && (
                 <Box color="blue.500">
-                    <FaChevronRight size={10} />
+                    <ChevronRight size={10} />
                 </Box>
             )}
         </Flex>
@@ -466,7 +549,7 @@ function PillButton({
         >
             <HStack gap={1}>
                 <Text>{label}</Text>
-                {active ? <FaChevronUp size={10} /> : <FaChevronDown size={10} />}
+                {active ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
             </HStack>
         </Box>
     )
@@ -609,7 +692,7 @@ function CareerFilterPanel({
                     onClick={onClear}
                 >
                     <HStack gap={1}>
-                        <FaRedo size={10} />
+                        <RotateCcw size={10} />
                         <Text fontSize="xs">선택 초기화</Text>
                     </HStack>
                 </Button>
@@ -713,7 +796,7 @@ function EducationFilterPanel({
                     onClick={onClear}
                 >
                     <HStack gap={1}>
-                        <FaRedo size={10} />
+                        <RotateCcw size={10} />
                         <Text fontSize="xs">선택 초기화</Text>
                     </HStack>
                 </Button>
@@ -780,7 +863,8 @@ const PostTemplate: React.FC = () => {
     const [posts, setPosts] = useState<Post[]>([])
     const regions = useMemo(() => getRegionsWithCounts(posts), [posts])
     const [recommendedJobs, setRecommendedJobs] = useState<any[]>([])
-    const [searchQuery, setSearchQuery] = useState("")
+    const [searchParams] = useSearchParams()
+    const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "")
     const [selectedRegion, setSelectedRegion] = useState("서울")
     const [selectedDistricts, setSelectedDistricts] = useState<string[]>([])
     const [selectedJobs, setSelectedJobs] = useState<string[]>([])
@@ -797,6 +881,10 @@ const PostTemplate: React.FC = () => {
     const toggleTopPanel = (panel: "career" | "education") => {
         setOpenTopPanel((prev) => (prev === panel ? null : panel))
     }
+
+    useEffect(() => {
+        setSearchQuery(searchParams.get("q") || "")
+    }, [searchParams])
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -934,9 +1022,13 @@ const PostTemplate: React.FC = () => {
                 ...selectedCareerYears,
             ])
 
-            return matchSearch && matchDistrict && matchCareer
+            const matchJob =
+                selectedJobs.length === 0 ||
+                selectedJobs.includes(post.jobCategory)
+
+            return matchSearch && matchDistrict && matchCareer && matchJob
         })
-    }, [posts, searchQuery, selectedDistricts, selectedRegion, selectedCareerTypes, selectedCareerYears])
+    }, [posts, searchQuery, selectedDistricts, selectedRegion, selectedCareerTypes, selectedCareerYears, selectedJobs])
 
     const activeFilters = [
         ...selectedDistricts,
@@ -1026,7 +1118,7 @@ const PostTemplate: React.FC = () => {
                                 userSelect="none"
                             >
                                 <Box color="blue.500" flexShrink={0}>
-                                    <FaMapMarkerAlt size={13} />
+                                    <MapPin size={13} />
                                 </Box>
                                 <Text
                                     fontSize="sm"
@@ -1046,9 +1138,9 @@ const PostTemplate: React.FC = () => {
                                 </Text>
                                 <Box color="gray.400" flexShrink={0}>
                                     {openPanel === "region" ? (
-                                        <FaChevronUp size={11} />
+                                        <ChevronUp size={11} />
                                     ) : (
-                                        <FaChevronDown size={11} />
+                                        <ChevronDown size={11} />
                                     )}
                                 </Box>
                             </Flex>
@@ -1070,7 +1162,7 @@ const PostTemplate: React.FC = () => {
                                 userSelect="none"
                             >
                                 <Box color="blue.500" flexShrink={0}>
-                                    <FaBriefcase size={13} />
+                                    <Briefcase size={13} />
                                 </Box>
                                 <Text
                                     fontSize="sm"
@@ -1090,9 +1182,9 @@ const PostTemplate: React.FC = () => {
                                 </Text>
                                 <Box color="gray.400" flexShrink={0}>
                                     {openPanel === "job" ? (
-                                        <FaChevronUp size={11} />
+                                        <ChevronUp size={11} />
                                     ) : (
-                                        <FaChevronDown size={11} />
+                                        <ChevronDown size={11} />
                                     )}
                                 </Box>
                             </Flex>
@@ -1100,7 +1192,7 @@ const PostTemplate: React.FC = () => {
                             {/* 검색 */}
                             <Flex flex={2} align="center" px={4}>
                                 <InputGroup
-                                    startElement={<FaSearch color="gray.400" size={13} />}
+                                    startElement={<Search color="gray.400" size={13} />}
                                     flex={1}
                                 >
                                     <Input
@@ -1156,7 +1248,7 @@ const PostTemplate: React.FC = () => {
                                     fontSize="xs"
                                     onClick={() => handleToggleDistrict(d)}
                                 >
-                                    {d} ✕
+                                    <HStack as="span" gap={1}>{d}<X size={10} /></HStack>
                                 </Badge>
                             ))}
                             {selectedJobs.map((j) => (
@@ -1171,7 +1263,7 @@ const PostTemplate: React.FC = () => {
                                     fontSize="xs"
                                     onClick={() => handleToggleJob(j)}
                                 >
-                                    {j} ✕
+                                    <HStack as="span" gap={1}>{j}<X size={10} /></HStack>
                                 </Badge>
                             ))}
                             {selectedCareerTypes.map((c) => (
@@ -1186,7 +1278,7 @@ const PostTemplate: React.FC = () => {
                                     fontSize="xs"
                                     onClick={() => handleToggleCareerType(c)}
                                 >
-                                    {c} ✕
+                                    <HStack as="span" gap={1}>{c}<X size={10} /></HStack>
                                 </Badge>
                             ))}
                             {selectedCareerYears.map((y) => (
@@ -1201,7 +1293,7 @@ const PostTemplate: React.FC = () => {
                                     fontSize="xs"
                                     onClick={() => handleToggleCareerYear(y)}
                                 >
-                                    {y} ✕
+                                    <HStack as="span" gap={1}>{y}<X size={10} /></HStack>
                                 </Badge>
                             ))}
                             {selectedEducationLevels.map((e) => (
@@ -1216,7 +1308,7 @@ const PostTemplate: React.FC = () => {
                                     fontSize="xs"
                                     onClick={() => handleToggleEducationLevel(e)}
                                 >
-                                    {e} ✕
+                                    <HStack as="span" gap={1}>{e}<X size={10} /></HStack>
                                 </Badge>
                             ))}
                             <Button
@@ -1270,7 +1362,7 @@ const PostTemplate: React.FC = () => {
                     {recommendedJobs.length > 0 && (
                         <Box mb={8} bg="blue.50" p={5} borderRadius="xl" border="1px solid" borderColor="blue.100">
                             <Flex align="center" gap={2} mb={4}>
-                                <FaBriefcase color="#3182CE" />
+                                <Briefcase color="#3182CE" size={14} />
                                 <Text fontSize="lg" fontWeight="bold" color="blue.700">이력서 기반 AI 맞춤 추천 공고</Text>
                             </Flex>
                             <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
@@ -1309,7 +1401,7 @@ const PostTemplate: React.FC = () => {
                             py={20}
                             gap={3}
                         >
-                            <Text fontSize="4xl">🔍</Text>
+                            <Box color="gray.300"><SearchX size={48} /></Box>
                             <Text fontSize="lg" fontWeight="bold" color="fg.muted">
                                 검색 결과가 없습니다
                             </Text>
