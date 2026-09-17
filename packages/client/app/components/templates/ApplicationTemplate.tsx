@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState, useRef, useMemo } from "react"
 import {
     Box,
     Flex,
@@ -121,6 +121,16 @@ const SpaceInvaderIcon = () => (
 
 import { CitationPopover } from "../molecules/CitationPopover"
 import type { CitationItem } from "../molecules/CitationPopover"
+
+const parseJsonSafe = (data: any, fallback: any = []) => {
+    if (!data) return fallback
+    if (typeof data !== "string") return data
+    try {
+        return JSON.parse(data)
+    } catch {
+        return fallback
+    }
+}
 
 // Markdown rendering component supporting KaTeX and CodeBlock
 interface MarkdownRendererProps {
@@ -311,8 +321,9 @@ const ThinkingProcessCard: React.FC<{
     thought: string
     isLive?: boolean
     duration?: number | null
-}> = ({ thought, isLive = false, duration }) => {
-    const [isExpanded, setIsExpanded] = useState(isLive)
+    defaultExpanded?: boolean
+}> = ({ thought, isLive = false, duration, defaultExpanded = false }) => {
+    const [isExpanded, setIsExpanded] = useState(isLive || defaultExpanded)
 
     useEffect(() => {
         if (isLive) {
@@ -320,7 +331,8 @@ const ThinkingProcessCard: React.FC<{
         }
     }, [isLive])
 
-    if (!thought || thought.trim() === "") return null
+    const hasThought = Boolean(thought && thought.trim() !== "")
+    if (!hasThought) return null
 
     return (
         <Box
@@ -415,6 +427,18 @@ const ThinkingProcessCard: React.FC<{
                     overflowY="auto"
                 >
                     {thought}
+                    {isLive && (
+                        <Box
+                            as="span"
+                            display="inline-block"
+                            w="6px"
+                            h="12px"
+                            bg="blue.500"
+                            ml={1}
+                            className="animate-pulse"
+                            verticalAlign="middle"
+                        />
+                    )}
                 </Box>
             )}
         </Box>
@@ -734,6 +758,101 @@ const ResumeAnalysisInlineProgress: React.FC<
     )
 }
 
+interface ChatInputBarProps {
+    onSend: (text: string) => void
+    disabled?: boolean
+    placeholder?: string
+}
+
+const ChatInputBar: React.FC<ChatInputBarProps> = ({
+    onSend,
+    disabled = false,
+    placeholder = "무엇이든 질문하세요",
+}) => {
+    const [text, setText] = useState("")
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" && !e.shiftKey && !disabled) {
+            e.preventDefault()
+            const trimmed = text.trim()
+            if (trimmed) {
+                onSend(trimmed)
+                setText("")
+            }
+        }
+    }
+
+    const handleClickSend = () => {
+        if (disabled) return
+        const trimmed = text.trim()
+        if (trimmed) {
+            onSend(trimmed)
+            setText("")
+        }
+    }
+
+    return (
+        <Flex
+            position="relative"
+            align="center"
+            bg="white"
+            borderRadius="full"
+            border="1px solid"
+            borderColor="gray.200"
+            p={1.5}
+            transition="all 0.2s"
+            _focusWithin={{
+                borderColor: "blue.400",
+                boxShadow: "0 0 0 1px blue.600",
+            }}
+        >
+            <Input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                fontSize="sm"
+                border="none"
+                outline="none"
+                _focus={{
+                    outline: "none",
+                    boxShadow: "none",
+                }}
+                pl={4}
+                pr={12}
+                disabled={disabled}
+            />
+            <Button
+                onClick={handleClickSend}
+                position="absolute"
+                right="1.5"
+                w="9"
+                h="9"
+                minW="9"
+                p={0}
+                borderRadius="full"
+                bg="gray.100"
+                color="gray.600"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                _hover={{
+                    bg: "blue.50",
+                    color: "blue.600",
+                }}
+                _disabled={{
+                    opacity: 0.5,
+                    cursor: "not-allowed",
+                }}
+                disabled={disabled || text.trim() === ""}
+                transition="all 0.2s"
+            >
+                <ArrowRight size={16} />
+            </Button>
+        </Flex>
+    )
+}
+
 interface PdfViewerProps {
     resumeId: number
     pdfName?: string
@@ -990,6 +1109,7 @@ const ApplicationTemplate: React.FC = () => {
     const [isGenerating, setIsGenerating] = useState(false)
     const [streamingThought, setStreamingThought] = useState("")
     const [streamingAnswer, setStreamingAnswer] = useState("")
+    const [streamingMatchingStatus, setStreamingMatchingStatus] = useState("")
     const [isThinking, setIsThinking] = useState(false)
     const [thinkingDuration, setThinkingDuration] = useState<number | null>(
         null,
@@ -1007,6 +1127,8 @@ const ApplicationTemplate: React.FC = () => {
     const [highlightedText, setHighlightedText] = useState<string | null>(null)
     const highlightTimerRef = useRef<any>(null)
     const chatEndRef = useRef<HTMLDivElement>(null)
+    const chatContainerRef = useRef<HTMLDivElement>(null)
+    const isAutoScrollEnabledRef = useRef<boolean>(true)
     const pollingTimerRef = useRef<any>(null)
 
     useEffect(() => {
@@ -1584,6 +1706,19 @@ const ApplicationTemplate: React.FC = () => {
         return <Box>{segments}</Box>
     }
 
+    const cachedInlineFeedbackView = useMemo(() => {
+        if (!selectedResume) return null
+        return renderInlineFeedbackView(
+            selectedResume.raw_text,
+            selectedResume.improvements,
+            selectedResume.citations,
+        )
+    }, [
+        selectedResume?.raw_text,
+        selectedResume?.improvements,
+        selectedResume?.citations,
+    ])
+
     function RecommendedJobCard({
         job,
         onNavigate,
@@ -1776,14 +1911,30 @@ const ApplicationTemplate: React.FC = () => {
         }
     }, [selectedResume?.id])
 
-    // Auto-scroll chat to bottom
-    const scrollToBottom = () => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    // Smart auto-scroll chat to bottom
+    const handleChatScroll = () => {
+        if (!chatContainerRef.current) return
+        const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current
+        const isAtBottom = scrollHeight - scrollTop - clientHeight <= 140
+        isAutoScrollEnabledRef.current = isAtBottom
+    }
+
+    const scrollToBottom = (force = false) => {
+        if (!chatContainerRef.current) {
+            chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
+            return
+        }
+        if (force || isAutoScrollEnabledRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: "smooth",
+            })
+        }
     }
 
     useEffect(() => {
-        scrollToBottom()
-    }, [messages])
+        scrollToBottom(false)
+    }, [messages, streamingThought, streamingAnswer])
 
     const fetchLikedJobs = async () => {
         try {
@@ -2220,7 +2371,10 @@ const ApplicationTemplate: React.FC = () => {
         setIsThinking(true)
         setStreamingThought("")
         setStreamingAnswer("")
+        setStreamingMatchingStatus("")
         setThinkingDuration(null)
+        isAutoScrollEnabledRef.current = true
+        setTimeout(() => scrollToBottom(true), 60)
 
         const startTime = Date.now()
 
@@ -2238,6 +2392,11 @@ const ApplicationTemplate: React.FC = () => {
                 },
             )
 
+            console.log(
+                "[CLIENT Stream] Fetch response received! HTTP status:",
+                resp.status,
+            )
+
             if (!resp.ok) {
                 throw new Error("AI 응답을 생성하는 중에 오류가 발생했습니다.")
             }
@@ -2250,10 +2409,20 @@ const ApplicationTemplate: React.FC = () => {
             const decoder = new TextDecoder("utf-8")
             let buffer = ""
             let firstAnswerReceived = false
+            let eventCount = 0
+
+            console.log(
+                "[CLIENT Stream] Reader started, listening for chunks...",
+            )
 
             while (true) {
                 const { done, value } = await reader.read()
-                if (done) break
+                if (done) {
+                    console.log(
+                        `[CLIENT Stream] Reader finished in ${Date.now() - startTime}ms! Total events received: ${eventCount}`,
+                    )
+                    break
+                }
 
                 buffer += decoder.decode(value, { stream: true })
                 const lines = buffer.split("\n\n")
@@ -2266,8 +2435,24 @@ const ApplicationTemplate: React.FC = () => {
                     const jsonStr = trimmed.replace(/^data:\s*/, "")
                     try {
                         const eventData = JSON.parse(jsonStr)
+                        eventCount++
+                        const preview = eventData.text
+                            ? ` (${eventData.text.length}자: "${eventData.text.slice(0, 30).replace(/\n/g, " ")}...")`
+                            : ""
+                        console.log(
+                            `[CLIENT Stream #${eventCount} +${Date.now() - startTime}ms] Type: ${eventData.type}${preview}`,
+                        )
 
-                        if (eventData.type === "thought") {
+                        if (eventData.type === "connected") {
+                            console.log(
+                                `[CLIENT Stream] ⚡ SSE Connection confirmed by server in ${Date.now() - startTime}ms!`,
+                            )
+                        } else if (eventData.type === "heartbeat") {
+                            console.log(
+                                `[CLIENT Stream Heartbeat] 💓 서버와 연결 정상 유지 중 (${eventData.elapsedSec}초 경과)`,
+                            )
+                            setThinkingDuration(eventData.elapsedSec)
+                        } else if (eventData.type === "thought") {
                             setStreamingThought((prev) => prev + eventData.text)
                         } else if (eventData.type === "answer") {
                             if (!firstAnswerReceived) {
@@ -2280,6 +2465,8 @@ const ApplicationTemplate: React.FC = () => {
                                 setThinkingDuration(durationSec)
                             }
                             setStreamingAnswer((prev) => prev + eventData.text)
+                        } else if (eventData.type === "matching") {
+                            setStreamingMatchingStatus(eventData.text)
                         } else if (eventData.type === "user_message") {
                             setMessages((prev) => [
                                 ...prev.slice(0, -1),
@@ -2297,9 +2484,14 @@ const ApplicationTemplate: React.FC = () => {
                             setMessages((prev) => [...prev, assistantMsg])
                             setStreamingThought("")
                             setStreamingAnswer("")
+                            setStreamingMatchingStatus("")
                             setIsThinking(false)
                             setThinkingDuration(null)
                         } else if (eventData.type === "error") {
+                            console.error(
+                                "[CLIENT Stream] Error from server:",
+                                eventData.error,
+                            )
                             throw new Error(
                                 eventData.error ||
                                     "AI 스트리밍 중 오류가 발생했습니다.",
@@ -2309,6 +2501,11 @@ const ApplicationTemplate: React.FC = () => {
                         console.error("SSE parse error:", parseErr, jsonStr)
                     }
                 }
+            }
+
+            // 스트림 종료 즉시 서버 DB로부터 최종 메시지(생각과정/인용구/공고포함)를 즉시 동기화
+            if (selectedResume?.id) {
+                await fetchMessages(selectedResume.id)
             }
         } catch (err: any) {
             toaster.create({
@@ -2321,6 +2518,7 @@ const ApplicationTemplate: React.FC = () => {
             setIsThinking(false)
             setStreamingThought("")
             setStreamingAnswer("")
+            setStreamingMatchingStatus("")
             setThinkingDuration(null)
         }
     }
@@ -3029,11 +3227,7 @@ const ApplicationTemplate: React.FC = () => {
                                             )}
                                         </Flex>
                                         {rawTextViewMode === "inline" ? (
-                                            renderInlineFeedbackView(
-                                                selectedResume.raw_text,
-                                                selectedResume.improvements,
-                                                selectedResume.citations,
-                                            )
+                                            cachedInlineFeedbackView
                                         ) : rawTextViewMode === "raw" ? (
                                             renderRawTextWithHighlight(
                                                 selectedResume.raw_text,
@@ -3067,6 +3261,8 @@ const ApplicationTemplate: React.FC = () => {
                                     >
                                         {/* Unified Scrolling View */}
                                         <Box
+                                            ref={chatContainerRef}
+                                            onScroll={handleChatScroll}
                                             flex={1}
                                             overflowY="auto"
                                             pr={2}
@@ -3155,30 +3351,24 @@ const ApplicationTemplate: React.FC = () => {
                                                                     msg.sender ===
                                                                     "user"
                                                                 const msgCitations =
-                                                                    typeof msg.citations ===
-                                                                    "string"
-                                                                        ? JSON.parse(
-                                                                              msg.citations ||
-                                                                                  "[]",
+                                                                    msg.citations &&
+                                                                    msg
+                                                                        .citations
+                                                                        .length >
+                                                                        0
+                                                                        ? parseJsonSafe(
+                                                                              msg.citations,
+                                                                              [],
                                                                           )
-                                                                        : msg.citations ||
-                                                                          (typeof selectedResume.citations ===
-                                                                          "string"
-                                                                              ? JSON.parse(
-                                                                                    selectedResume.citations ||
-                                                                                        "[]",
-                                                                                )
-                                                                              : selectedResume.citations ||
-                                                                                [])
+                                                                        : parseJsonSafe(
+                                                                              selectedResume.citations,
+                                                                              [],
+                                                                          )
                                                                 const msgRecommendedJobs =
-                                                                    typeof msg.recommended_jobs ===
-                                                                    "string"
-                                                                        ? JSON.parse(
-                                                                              msg.recommended_jobs ||
-                                                                                  "[]",
-                                                                          )
-                                                                        : msg.recommended_jobs ||
-                                                                          []
+                                                                    parseJsonSafe(
+                                                                        msg.recommended_jobs,
+                                                                        [],
+                                                                    )
                                                                 return (
                                                                     <Flex
                                                                         key={
@@ -3306,19 +3496,7 @@ const ApplicationTemplate: React.FC = () => {
                                                                                                 개)
                                                                                             </Text>
                                                                                         </HStack>
-                                                                                        <SimpleGrid
-                                                                                            columns={{
-                                                                                                base: 1,
-                                                                                                md:
-                                                                                                    msgRecommendedJobs.length ===
-                                                                                                    1
-                                                                                                        ? 1
-                                                                                                        : 2,
-                                                                                            }}
-                                                                                            gap={
-                                                                                                3
-                                                                                            }
-                                                                                        >
+                                                        <VStack align="stretch" gap={2.5} w="100%">
                                                                                             {msgRecommendedJobs.map(
                                                                                                 (
                                                                                                     job: any,
@@ -3342,7 +3520,7 @@ const ApplicationTemplate: React.FC = () => {
                                                                                                     />
                                                                                                 ),
                                                                                             )}
-                                                                                        </SimpleGrid>
+                                                                                        </VStack>
                                                                                     </Box>
                                                                                 )}
                                                                             </Box>
@@ -3375,7 +3553,19 @@ const ApplicationTemplate: React.FC = () => {
                                                             />
                                                         </Box>
                                                         <Box flex={1} pt={1}>
-                                                            {/* 실시간 생각 과정 스트리밍 */}
+                                                            {/* 첫 토큰 대기 중: 가짜 텍스트 없이 스피너만 심플하게 표시 */}
+                                                            {!streamingThought &&
+                                                                !streamingAnswer && (
+                                                                    <HStack
+                                                                        gap={2}
+                                                                        color="blue.500"
+                                                                        py={1}
+                                                                    >
+                                                                        <Spinner size="xs" />
+                                                                    </HStack>
+                                                                )}
+
+                                                            {/* 실시간 실제 생각 과정 스트리밍 */}
                                                             {streamingThought ? (
                                                                 <ThinkingProcessCard
                                                                     thought={
@@ -3387,40 +3577,11 @@ const ApplicationTemplate: React.FC = () => {
                                                                     duration={
                                                                         thinkingDuration
                                                                     }
+                                                                    defaultExpanded={
+                                                                        true
+                                                                    }
                                                                 />
-                                                            ) : (
-                                                                isThinking && (
-                                                                    <HStack
-                                                                        gap={2}
-                                                                        mb={3}
-                                                                        p={2.5}
-                                                                        bg="blue.50/50"
-                                                                        borderRadius="lg"
-                                                                        border="1px dashed"
-                                                                        borderColor="blue.200"
-                                                                    >
-                                                                        <Spinner
-                                                                            size="xs"
-                                                                            color="blue.600"
-                                                                        />
-                                                                        <Text
-                                                                            fontSize="xs"
-                                                                            color="blue.700"
-                                                                            fontWeight="medium"
-                                                                        >
-                                                                            AI
-                                                                            어시스턴트가
-                                                                            이력서와
-                                                                            채용
-                                                                            공고를
-                                                                            분석하며
-                                                                            답변을
-                                                                            생각하는
-                                                                            중입니다...
-                                                                        </Text>
-                                                                    </HStack>
-                                                                )
-                                                            )}
+                                                            ) : null}
 
                                                             {/* 실시간 답변 스트리밍 */}
                                                             {streamingAnswer ? (
@@ -3443,6 +3604,23 @@ const ApplicationTemplate: React.FC = () => {
                                                                         className="animate-pulse"
                                                                         verticalAlign="middle"
                                                                     />
+                                                                    {streamingMatchingStatus ? (
+                                                                        <HStack
+                                                                            gap={2}
+                                                                            mt={3}
+                                                                            p={2.5}
+                                                                            bg="blue.50"
+                                                                            borderRadius="md"
+                                                                            borderWidth="1px"
+                                                                            borderColor="blue.100"
+                                                                            animation="pulse 2s infinite"
+                                                                        >
+                                                                            <Spinner size="xs" color="blue.600" />
+                                                                            <Text fontSize="xs" fontWeight="medium" color="blue.700">
+                                                                                {streamingMatchingStatus}
+                                                                            </Text>
+                                                                        </HStack>
+                                                                    ) : null}
                                                                 </Box>
                                                             ) : (
                                                                 !isThinking && (
@@ -3596,92 +3774,18 @@ const ApplicationTemplate: React.FC = () => {
                                                         </HStack>
                                                     )}
 
-                                                    <Flex
-                                                        position="relative"
-                                                        align="center"
-                                                        border="1px solid"
-                                                        borderColor="gray.200"
-                                                        borderRadius="2xl"
-                                                        p={1.5}
-                                                        bg="white"
-                                                        shadow="sm"
-                                                        _focusWithin={{
-                                                            borderColor:
-                                                                "blue.400",
-                                                            boxShadow:
-                                                                "0 0 0 1px blue.600",
-                                                        }}
-                                                    >
-                                                        <Input
-                                                            value={prompt}
-                                                            onChange={(e) =>
-                                                                setPrompt(
-                                                                    e.target
-                                                                        .value,
-                                                                )
-                                                            }
-                                                            onKeyDown={(e) => {
-                                                                if (
-                                                                    e.key ===
-                                                                        "Enter" &&
-                                                                    !isGenerating
-                                                                ) {
-                                                                    handleSendPromptOrChat()
-                                                                }
-                                                            }}
-                                                            placeholder="무엇이든 질문하세요"
-                                                            fontSize="sm"
-                                                            border="none"
-                                                            outline="none"
-                                                            _focus={{
-                                                                outline: "none",
-                                                                boxShadow:
-                                                                    "none",
-                                                            }}
-                                                            pl={4}
-                                                            pr={12}
-                                                            disabled={
-                                                                isGenerating ||
-                                                                isUploading
-                                                            }
-                                                        />
-                                                        <Button
-                                                            onClick={() =>
-                                                                handleSendPromptOrChat()
-                                                            }
-                                                            position="absolute"
-                                                            right="1.5"
-                                                            w="9"
-                                                            h="9"
-                                                            minW="9"
-                                                            p={0}
-                                                            borderRadius="full"
-                                                            bg="gray.100"
-                                                            color="gray.600"
-                                                            display="flex"
-                                                            alignItems="center"
-                                                            justifyContent="center"
-                                                            _hover={{
-                                                                bg: "blue.50",
-                                                                color: "blue.600",
-                                                            }}
-                                                            _disabled={{
-                                                                opacity: 0.5,
-                                                                cursor: "not-allowed",
-                                                            }}
-                                                            disabled={
-                                                                isGenerating ||
-                                                                isUploading ||
-                                                                prompt.trim() ===
-                                                                    ""
-                                                            }
-                                                            transition="all 0.2s"
-                                                        >
-                                                            <ArrowRight
-                                                                size={12}
-                                                            />
-                                                        </Button>
-                                                    </Flex>
+                                                    <ChatInputBar
+                                                        onSend={(text) =>
+                                                            handleSendPromptOrChat(
+                                                                text,
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            isGenerating ||
+                                                            isUploading
+                                                        }
+                                                        placeholder="무엇이든 질문하세요"
+                                                    />
                                                 </>
                                             )}
                                         </Box>

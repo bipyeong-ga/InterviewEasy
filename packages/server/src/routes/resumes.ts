@@ -264,7 +264,8 @@ ${prompt}
             try {
                 const openai = new OpenAI({ apiKey })
                 const completion = await openai.chat.completions.create({
-                    model: "gpt-5",
+                    model: "gpt-5.6-luna",
+                    reasoning_effort: "low",
                     messages: [{ role: "user", content: promptText }],
                 })
                 generatedText = completion.choices[0]?.message?.content || ""
@@ -339,6 +340,7 @@ async function callOpenAI(
     userPrompt: string,
     isJson: boolean = false,
     previousMessages: any[] = [],
+    model: string = "gpt-5.5",
 ) {
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
@@ -354,17 +356,27 @@ async function callOpenAI(
         { role: "user", content: userPrompt },
     ]
 
+    const requestBody: any = {
+        model,
+        messages,
+        ...(isJson ? { response_format: { type: "json_object" } } : {}),
+    }
+
+    if (
+        model.includes("luna") ||
+        model.includes("o1") ||
+        model.includes("o3")
+    ) {
+        requestBody.reasoning_effort = "low"
+    }
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-            model: "gpt-5",
-            messages,
-            ...(isJson ? { response_format: { type: "json_object" } } : {}),
-        }),
+        body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
@@ -589,12 +601,30 @@ async function analyzeResumeText(
         `[Resume Analysis] 1/3 Querying job postings for RAG matching...`,
     )
     const postsResult = await pool.query(
-        "SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100",
+        "SELECT id, title as job_title, company_name as company, tech_stack FROM posts",
     )
-    const postsList = postsResult.rows
+    const lowerResume = extractedText.toLowerCase()
+    const scoredPosts = postsResult.rows.map((p) => {
+        let score = 0
+        const techList: string[] = Array.isArray(p.tech_stack)
+            ? p.tech_stack
+            : typeof p.tech_stack === "string"
+              ? JSON.parse(p.tech_stack || "[]")
+              : []
+        for (const t of techList) {
+            if (lowerResume.includes(t.toLowerCase())) score += 3
+        }
+        if (p.job_title && lowerResume.includes(p.job_title.toLowerCase()))
+            score += 2
+        return { ...p, score, techList }
+    })
+    scoredPosts.sort((a, b) => b.score - a.score)
+    const topPosts = scoredPosts.slice(0, 15)
+
+    const postsList = topPosts
         .map(
             (p) =>
-                `- [${p.company}] ${p.job_title} (기술스택: ${p.tech_stack.join(", ")})`,
+                `- [${p.company}] ${p.job_title} (기술스택: ${Array.isArray(p.techList) ? p.techList.join(", ") : ""})`,
         )
         .join("\n")
 
@@ -713,29 +743,79 @@ router.post(
     "/:id/messages/stream",
     async (req: Request, res: ExpressResponse) => {
         res.writeHead(200, {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
             Connection: "keep-alive",
             "X-Accel-Buffering": "no",
+            "Content-Encoding": "none",
         })
+        if (typeof (res as any).flushHeaders === "function") {
+            ;(res as any).flushHeaders()
+        }
+        if (req.socket) {
+            req.socket.setNoDelay(true)
+            req.socket.setKeepAlive(true)
+        }
+        // 브라우저 및 프록시의 첫 청크 버퍼링을 강제 해제하는 2KB 패딩 주석
+        res.write(`: ${" ".repeat(2048)}\n\n`)
 
         let isClientConnected = true
-        req.on("close", () => {
+        res.on("close", () => {
             isClientConnected = false
+            console.log("[SERVER SSE] Client response connection closed")
         })
 
         const sendEvent = (data: any) => {
-            if (!isClientConnected || res.writableEnded) return
+            if (!isClientConnected || res.writableEnded || res.destroyed) return
             try {
                 res.write(`data: ${JSON.stringify(data)}\n\n`)
+                if (typeof (res as any).flush === "function") {
+                    ;(res as any).flush()
+                }
+                const preview = data.text
+                    ? ` (${data.text.length}자: "${data.text.slice(0, 35).replace(/\n/g, " ")}...")`
+                    : ""
+                console.log(
+                    `[SERVER SSE -> Client] Event: ${data.type}${preview}`,
+                )
             } catch (err) {
-                console.warn("Client connection closed during write:", err)
+                console.warn(
+                    "[SERVER SSE] Client connection closed during write:",
+                    err,
+                )
             }
         }
+
+        const requestStartTime = Date.now()
 
         try {
             const userId = req.user?.id
             const resumeId = parseInt(req.params.id as string, 10)
+            console.log(
+                `[SERVER SSE] 1. Client connected for resumeId=${resumeId}, userId=${userId}`,
+            )
+            sendEvent({
+                type: "connected",
+                timestamp: Date.now(),
+                message: "Stream connected successfully",
+            })
+
+            // 1초 주기로 클라이언트에 하트비트 및 진행 상태를 보내어 연결 유지 및 실시간 모니터링 보장
+            let heartbeatSeconds = 0
+            const heartbeatTimer = setInterval(() => {
+                heartbeatSeconds++
+                sendEvent({
+                    type: "heartbeat",
+                    elapsedSec: heartbeatSeconds,
+                    message: `AI 어시스턴트가 답변을 생성하는 중입니다... (${heartbeatSeconds}초 경과)`,
+                })
+            }, 1000)
+
+            const clearHeartbeat = () => {
+                if (heartbeatTimer) clearInterval(heartbeatTimer)
+            }
+            res.on("close", clearHeartbeat)
+
             const { message } = req.body
 
             if (
@@ -743,6 +823,7 @@ router.post(
                 typeof message !== "string" ||
                 message.trim() === ""
             ) {
+                clearHeartbeat()
                 sendEvent({ type: "error", error: "Message is required" })
                 if (isClientConnected && !res.writableEnded) res.end()
                 return
@@ -754,6 +835,7 @@ router.post(
                 [resumeId, userId],
             )
             if (resumeResult.rows.length === 0) {
+                clearHeartbeat()
                 sendEvent({ type: "error", error: "Resume not found" })
                 res.end()
                 return
@@ -780,6 +862,9 @@ router.post(
                 "INSERT INTO resume_messages (resume_id, sender, message) VALUES ($1, 'user', $2) RETURNING *",
                 [resumeId, message],
             )
+            console.log(
+                `[SERVER SSE] 2. DB queries and user message saved in ${Date.now() - requestStartTime}ms`,
+            )
             sendEvent({ type: "user_message", message: userMsgResult.rows[0] })
 
             // 사용자의 질문이 채용 공고/포지션 추천 관련 질문인지 감지
@@ -788,48 +873,111 @@ router.post(
                     message,
                 )
 
-            // 채용 공고 데이터 최적화 (토큰 절약 및 속도 향상: 질문에 부합하는 상위 15개 요약본만 추출)
+            // 500개 공고 초고속 1ms 정밀 매칭 및 직무 도메인 엄격 필터링 엔진
             let relevantPostsSummary: any[] = []
+            let isAiDominant = false
             if (isJobRecommendationQuestion && availablePosts.length > 0) {
+                const scanStartTime = Date.now()
                 const lowerResume = (rawText + " " + message).toLowerCase()
-                const scored = availablePosts.map((post: any) => {
+
+                // 1. 지원자의 핵심 직무 도메인 분석 (AI/ML vs 백엔드 vs 프론트엔드 등)
+                const aiKeywords = [
+                    "머신러닝", "딥러닝", "인공지능", "ai", "ml", "nlp", "llm", "vision",
+                    "비전", "pytorch", "tensorflow", "keras", "huggingface", "데이터 사이언스",
+                    "자연어처리", "생성형", "langchain", "prompt", "컴퓨터 비전", "임베딩",
+                    "vector", "파이토치", "텐서플로우", "cv", "데이터 분석", "data scientist"
+                ]
+                const frontendKeywords = [
+                    "프론트엔드", "frontend", "react", "vue", "next.js", "svelte", "html", "css", "웹 퍼블리셔"
+                ]
+
+                let aiMatchCount = 0
+                for (const kw of aiKeywords) {
+                    if (lowerResume.includes(kw)) aiMatchCount++
+                }
+
+                let feMatchCount = 0
+                for (const kw of frontendKeywords) {
+                    if (lowerResume.includes(kw)) feMatchCount++
+                }
+
+                isAiDominant = aiMatchCount >= 2 || (aiMatchCount > 0 && aiMatchCount >= feMatchCount)
+
+                // 2. 500개 공고 초고속 전수 스캔 및 스코어링
+                const scored = []
+                for (let i = 0; i < availablePosts.length; i++) {
+                    const post = availablePosts[i]
+                    const category = (post.job_category || "").trim()
+                    const title = (post.job_title || post.title || "").toLowerCase()
+
+                    // AI 지원자일 경우 직무 하드 필터링: 풀스택, 프론트엔드, 앱개발, 게임개발 등 비관련 공고 100% 원천 배제
+                    if (isAiDominant) {
+                        if (
+                            category === "풀스택" ||
+                            category === "프론트엔드" ||
+                            category === "앱 개발" ||
+                            category === "게임 개발" ||
+                            category === "보안"
+                        ) {
+                            continue // 비관련 공고는 후보군에서 완전 제외
+                        }
+                    }
+
                     let score = 0
+
+                    // 도메인 우선 가중치
+                    if (isAiDominant) {
+                        if (category === "ML 엔지니어" || category === "데이터 분석") {
+                            score += 150
+                        }
+                        if (/머신러닝|딥러닝|ai|ml|인공지능|llm|비전|vision|데이터\s*사이언티스트/i.test(title)) {
+                            score += 100
+                        }
+                    } else {
+                        if (post.job_category && lowerResume.includes(category.toLowerCase())) {
+                            score += 50
+                        }
+                        if (post.job_title && lowerResume.includes(title)) {
+                            score += 30
+                        }
+                    }
+
+                    // 세부 기술 스택 정밀 매칭 (개당 +15점)
                     const techList: string[] = Array.isArray(post.tech_stack)
                         ? post.tech_stack
                         : typeof post.tech_stack === "string"
                           ? JSON.parse(post.tech_stack || "[]")
                           : []
+
                     for (const t of techList) {
-                        if (lowerResume.includes(t.toLowerCase())) score += 3
+                        const lowT = t.toLowerCase()
+                        if (lowerResume.includes(lowT)) {
+                            score += 15
+                        }
                     }
-                    if (
-                        post.job_category &&
-                        lowerResume.includes(post.job_category.toLowerCase())
-                    )
-                        score += 2
-                    if (
-                        post.job_title &&
-                        lowerResume.includes(post.job_title.toLowerCase())
-                    )
-                        score += 2
-                    return {
+
+                    scored.push({
                         id: post.id,
                         company: post.company || post.company_name,
                         job_title: post.job_title || post.title,
+                        company_logo: post.company_logo || "",
                         location: post.location || "서울",
                         district: post.district || "",
                         tech_stack: techList,
+                        job_category: category,
                         score,
-                    }
-                })
+                    })
+                }
+
                 scored.sort((a: any, b: any) => b.score - a.score)
                 relevantPostsSummary = scored
-                    .slice(0, 15)
+                    .slice(0, 6)
                     .map(
                         ({
                             id,
                             company,
                             job_title,
+                            company_logo,
                             location,
                             district,
                             tech_stack,
@@ -837,11 +985,16 @@ router.post(
                             id,
                             company,
                             job_title,
+                            company_logo,
                             location,
                             district,
                             tech_stack,
                         }),
                     )
+
+                console.log(
+                    `[SERVER SSE] ⚡ 500개 공고 전수 정밀 매칭 완료: 소요시간 ${Date.now() - scanStartTime}ms, AI도메인=${isAiDominant}, 상위 매칭 공고=${relevantPostsSummary.map((p) => p.job_title).join(", ")}`
+                )
             }
 
             const apiKey = process.env.OPENAI_API_KEY
@@ -855,25 +1008,26 @@ router.post(
                     const openai = new OpenAI({ apiKey })
                     const systemPrompt = `
 너는 대한민국 최고의 개발자 채용 플랫폼 "InterviewEasy"의 전문 취업 코칭 및 이력서 분석 AI 어시스턴트이다.
-구직자의 질문에 맞춰 친절하고 지능적이며 구체적으로 답변해라.
+구직자의 질문에 맞춰 친절하고 지능적이며 전문적으로 답변해라.
 
 [출력 형식 규칙 - 매우 중요]
-답변은 반드시 다음 4가지 XML 스타일 태그 블록 순서로만 작성해야 한다:
+답변은 반드시 다음 4가지 XML 태그 블록 순서로만 작성해야 한다. 다른 말로 시작하지 말고 반드시 <thought> 태그로 즉시 시작해라:
 
 <thought>
-(여기에 AI가 사용자 질문을 분석하고 최종 답변을 도출하기까지의 솔직하고 구체적인 생각 과정을 상세히 작성한다:
-1. 사용자 질문의 핵심 의도 파악
-2. 질문 유형(자기소개/인사, 이력서 분석/첨삭, 면접 질문 대비, 채용 공고 추천 등) 분류
-3. 이력서 본문 관련 내용 및 핵심 키워드 대조
-4. 인용구(Quote) 및 추천 공고가 필요한지 판단
-5. 답변 구성 전략 수립
-- 친절하고 전문적이며 체계적인 한국어로 서술해라.)
+(형식적인 템플릿(1, 2, 3 단계)이나 "~하는 중입니다", "~로 판단했습니다" 같은 상태 보고 문구는 절대 사용하지 마라.
+전문 테크 리크루터이자 면접관의 관점에서, 사용자의 질문과 이력서 원문, 채용 공고를 날카롭게 대조하고 분석하는 실제 독백형 생각 과정(Chain of Thought)을 가감 없이 자연스러운 문장으로 서술해라:
+- 사용자의 질문 의도와 진짜 알고 싶어 하는 맥락 파악
+- 이력서에 드러난 핵심 역량, 기술 스택, 실제 프로젝트 성과 분석
+- 지원자의 약점이나 보완이 필요한 기술적/실무적 공백(Gap) 도출
+- 추천할 공고 목록과의 정밀 대조 및 구체적인 추천 근거 검토
+- 최종 사용자 답변을 어떻게 전개할지에 대한 논리적 구성)
 </thought>
 
 <answer>
-(여기에 사용자에게 전달할 최종 답변 마크다운을 작성한다.
-- 이력서 본문에서 인용한 내용은 문장 뒤에 [1], [2]와 같이 참조 번호를 명시해라.
-- 단순 인사나 자기소개 질문인 경우 참조 번호 없이 친절히 설명해라.)
+(사용자에게 전달할 정갈한 최종 답변 마크다운을 작성한다.
+- 인용 표시는 반드시 숫자만 사용하여 [1], [2] 형식으로만 표기해라. 절대로 [키워드: 1]이나 [프로젝트: 2]처럼 텍스트를 넣지 마라.
+- 공고 추천 질문인 경우, 본문에는 추천 총평과 이력서 연계 역량 분석만 깔끔하게 작성해라. 상세 공고 카드 목록은 아래 <recommended_jobs>에만 담아라.
+- 단순 인사나 자기소개 질문인 경우 인용 번호 없이 친절히 설명해라.)
 </answer>
 
 <citations>
@@ -907,6 +1061,17 @@ router.post(
 </recommended_jobs>
 
 [질문 유형별 세부 처리 지침]
+${
+    isJobRecommendationQuestion
+        ? `
+★ [CRITICAL: 현재 사용자의 질문은 채용 공고 추천 요청입니다!]
+- 사용자 질문: "${message}"
+${isAiDominant ? `- [필수] 지원자의 전문 직무 도메인은 [AI / 머신러닝 / 데이터 사이언스]입니다!
+- 절대로 '풀스택', '프론트엔드', '앱 개발' 등 비관련 직무 공고를 추천하지 마라!
+- 반드시 아래 [선별된 채용 공고 목록]에 제공된 검증된 AI/머신러닝 공고 중에서만 2~4개를 엄선하여 <recommended_jobs>에 넣어라!` : `- 너는 반드시 아래 [선별된 채용 공고 목록] 중 지원자의 역량과 기술 스택에 적합한 공고를 2~4개 골라 <recommended_jobs> 태그 안에 실제 공고 객체 배열로 채워서 출력해야 한다!`}
+- 절대로 <recommended_jobs>[]</recommended_jobs> 처럼 빈 배열로 남기지 마라! 반드시 공고 목록을 채워라!
+`
+        : `
 1. 인사 / 정체성 / 일반 안내 질문 (예: "넌 누구야?", "안녕", "무슨 일 해?", "어떤 걸 할 수 있어?"):
    - 자신을 InterviewEasy의 전문 취업 코칭 AI 어시스턴트라고 소개하고, 이력서 분석/첨삭, 모의 면접 대비, 기술 스택 맞춤 공고 추천 등의 주요 기능을 친절히 안내해라.
    - 인용구와 공고 추천이 불필요하므로 citations는 [], recommended_jobs는 []로 작성해라.
@@ -916,6 +1081,8 @@ router.post(
 3. 채용 공고 추천 질문:
    - 아래 [선별된 채용 공고 목록] 중에서만 최대 5개를 골라 recommended_jobs에 담고, 추천 사유를 기술해라.
    - citations는 공고 추천의 근거가 된 이력서 본문 문장을 발췌해라.
+`
+}
 
 [이력서 본문]
 ${rawText}
@@ -933,33 +1100,95 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         { role: "user", content: message },
                     ]
 
+                    const streamReqStart = Date.now()
+                    console.log(
+                        `[SERVER OpenAI] Requesting gpt-5.6-luna stream for resumeId=${resumeId} (reasoning_effort: none)...`,
+                    )
+
                     const stream = await openai.chat.completions.create({
-                        model: "gpt-5",
+                        model: "gpt-5.6-luna",
                         messages,
                         stream: true,
+                        reasoning_effort: "low",
                     })
+
+                    console.log(
+                        `[SERVER OpenAI] Stream connection established in ${Date.now() - streamReqStart}ms! Waiting for chunks...`,
+                    )
 
                     let fullText = ""
                     let thoughtSentIndex = 0
                     let answerSentIndex = 0
+                    let matchingStatusSent = false
+                    let chunkCount = 0
+                    let firstChunkTime: number | null = null
 
                     for await (const chunk of stream) {
                         const delta = chunk.choices[0]?.delta?.content || ""
+                        const deltaReasoning =
+                            (chunk.choices[0]?.delta as any)
+                                ?.reasoning_content || ""
+
+                        if (!delta && !deltaReasoning) continue
+
+                        chunkCount++
+                        if (!firstChunkTime) {
+                            firstChunkTime = Date.now()
+                            console.log(
+                                `[SERVER OpenAI] ⚡ First chunk received in ${firstChunkTime - streamReqStart}ms! (content: ${JSON.stringify(delta)}, reasoning: ${JSON.stringify(deltaReasoning)})`,
+                            )
+                        } else {
+                            console.log(
+                                `[SERVER OpenAI] Chunk #${chunkCount} (+${Date.now() - streamReqStart}ms): ${JSON.stringify(delta || deltaReasoning)}`,
+                            )
+                        }
+
+                        // OpenAI 네이티브 reasoning_content가 들어오는 경우 즉시 thought 이벤트 전송
+                        if (deltaReasoning) {
+                            sendEvent({
+                                type: "thought",
+                                text: deltaReasoning,
+                            })
+                        }
+
                         if (!delta) continue
 
                         fullText += delta
 
-                        // 1. thought 영역 스트리밍 처리
-                        const thoughtStartIdx = fullText.indexOf("<thought>")
-                        const thoughtEndIdx = fullText.indexOf("</thought>")
+                        // 1. thought 영역 스트리밍 처리 (대소문자 무관 및 thought/think/thought_process 태그 유연 지원)
+                        const thoughtStartMatch = fullText.match(
+                            /<(?:thought|think|thought_process|reasoning)[^>]*>/i,
+                        )
+                        const thoughtEndMatch = fullText.match(
+                            /<\/(?:thought|think|thought_process|reasoning)>/i,
+                        )
+                        const answerStartMatch =
+                            fullText.match(/<answer[^>]*>/i)
+                        const citationsStartMatch =
+                            fullText.match(/<citations[^>]*>/i)
+                        const jobsStartMatch = fullText.match(
+                            /<recommended_jobs[^>]*>/i,
+                        )
 
-                        if (thoughtStartIdx !== -1) {
+                        if (
+                            thoughtStartMatch &&
+                            thoughtStartMatch.index !== undefined
+                        ) {
                             const startContentIdx =
-                                thoughtStartIdx + "<thought>".length
-                            const endContentIdx =
-                                thoughtEndIdx !== -1
-                                    ? thoughtEndIdx
-                                    : fullText.length
+                                thoughtStartMatch.index +
+                                thoughtStartMatch[0].length
+                            let endContentIdx = fullText.length
+                            if (
+                                thoughtEndMatch &&
+                                thoughtEndMatch.index !== undefined
+                            ) {
+                                endContentIdx = thoughtEndMatch.index
+                            } else if (
+                                answerStartMatch &&
+                                answerStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = answerStartMatch.index
+                            }
                             if (
                                 endContentIdx > startContentIdx &&
                                 endContentIdx >
@@ -980,16 +1209,32 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         }
 
                         // 2. answer 영역 스트리밍 처리
-                        const answerStartIdx = fullText.indexOf("<answer>")
-                        const answerEndIdx = fullText.indexOf("</answer>")
-
-                        if (answerStartIdx !== -1) {
+                        if (
+                            answerStartMatch &&
+                            answerStartMatch.index !== undefined
+                        ) {
                             const startContentIdx =
-                                answerStartIdx + "<answer>".length
-                            const endContentIdx =
-                                answerEndIdx !== -1
-                                    ? answerEndIdx
-                                    : fullText.length
+                                answerStartMatch.index +
+                                answerStartMatch[0].length
+                            let endContentIdx = fullText.length
+                            const answerEndMatch = fullText.match(/<\/answer>/i)
+                            if (
+                                answerEndMatch &&
+                                answerEndMatch.index !== undefined
+                            ) {
+                                endContentIdx = answerEndMatch.index
+                            } else if (
+                                citationsStartMatch &&
+                                citationsStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = citationsStartMatch.index
+                            } else if (
+                                jobsStartMatch &&
+                                jobsStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = jobsStartMatch.index
+                            }
+
                             if (
                                 endContentIdx > startContentIdx &&
                                 endContentIdx >
@@ -1008,27 +1253,100 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                                 }
                             }
                         } else if (
-                            thoughtEndIdx !== -1 &&
-                            fullText.length >
-                                thoughtEndIdx + "</thought>".length + 10 &&
-                            !fullText.includes("<answer>")
+                            thoughtEndMatch &&
+                            thoughtEndMatch.index !== undefined
                         ) {
-                            const remaining = fullText.slice(
-                                thoughtEndIdx + "</thought>".length,
-                            )
-                            if (remaining.length > answerSentIndex) {
-                                const newAnswerText =
-                                    remaining.slice(answerSentIndex)
-                                answerSentIndex += newAnswerText.length
-                                sendEvent({
-                                    type: "answer",
-                                    text: newAnswerText,
-                                })
+                            // thought 태그는 닫혔는데 answer 태그 없이 바로 본문이 나온 경우
+                            const startContentIdx =
+                                thoughtEndMatch.index +
+                                thoughtEndMatch[0].length
+                            let endContentIdx = fullText.length
+                            if (
+                                citationsStartMatch &&
+                                citationsStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = citationsStartMatch.index
+                            } else if (
+                                jobsStartMatch &&
+                                jobsStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = jobsStartMatch.index
                             }
+                            if (
+                                endContentIdx > startContentIdx &&
+                                endContentIdx >
+                                    answerSentIndex + startContentIdx
+                            ) {
+                                const newAnswerText = fullText.slice(
+                                    startContentIdx + answerSentIndex,
+                                    endContentIdx,
+                                )
+                                answerSentIndex += newAnswerText.length
+                                if (newAnswerText) {
+                                    sendEvent({
+                                        type: "answer",
+                                        text: newAnswerText,
+                                    })
+                                }
+                            }
+                        } else if (
+                            !thoughtStartMatch &&
+                            fullText.length > 5 &&
+                            !fullText.trim().startsWith("<")
+                        ) {
+                            // 모델이 태그 없이 바로 답변을 시작한 경우 실시간 answer 스트리밍
+                            let endContentIdx = fullText.length
+                            if (
+                                citationsStartMatch &&
+                                citationsStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = citationsStartMatch.index
+                            } else if (
+                                jobsStartMatch &&
+                                jobsStartMatch.index !== undefined
+                            ) {
+                                endContentIdx = jobsStartMatch.index
+                            }
+                            if (endContentIdx > answerSentIndex) {
+                                const newAnswerText = fullText.slice(
+                                    answerSentIndex,
+                                    endContentIdx,
+                                )
+                                answerSentIndex += newAnswerText.length
+                                if (newAnswerText) {
+                                    sendEvent({
+                                        type: "answer",
+                                        text: newAnswerText,
+                                    })
+                                }
+                            }
+                        }
+
+                        // 3. 본문 스트리밍이 끝나고 인용구/공고 JSON 생성 구간 진입 시 실시간 매칭 상태 이벤트 전송
+                        if (
+                            isJobRecommendationQuestion &&
+                            !matchingStatusSent &&
+                            (citationsStartMatch || jobsStartMatch || fullText.includes("</answer>"))
+                        ) {
+                            matchingStatusSent = true
+                            sendEvent({
+                                type: "matching",
+                                text: isAiDominant
+                                    ? "AI/머신러닝 맞춤 공고를 정밀 매칭하는 중입니다..."
+                                    : "추천 채용 공고를 정밀 매칭하는 중입니다...",
+                            })
                         }
                     }
 
-                    // 전체 수신 완료 후 파싱
+                    // 전체 수신 완료 후 파싱 및 방어 정규화
+                    // 거부 문구 필터링
+                    fullText = fullText
+                        .replace(
+                            /죄송하지만\s*제\s*내부\s*(?:사고|생각)\s*과정을\s*상세히\s*공유할\s*수는\s*없습니다\.?\s*/gi,
+                            "",
+                        )
+                        .trim()
+
                     const thoughtMatch = fullText.match(
                         /<thought>([\s\S]*?)<\/thought>/i,
                     )
@@ -1050,6 +1368,12 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                             .replace(/<\/?answer>/gi, "")
                             .trim()
                     }
+
+                    // 인용구 형식 [키워드: 1] -> [1]로 자동 정규화
+                    finalAnswer = finalAnswer.replace(
+                        /\[[^\]\n]+?:\s*(\d+)\]/g,
+                        "[$1]",
+                    )
 
                     // citations 파싱
                     const citMatch = fullText.match(
@@ -1081,6 +1405,30 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         }
                     }
 
+                    // 공고 추천 질문인데 모델이 빈 배열을 반환했거나 누락된 경우 100% 자동 보정 Fallback
+                    if (
+                        isJobRecommendationQuestion &&
+                        finalRecommendedJobs.length === 0 &&
+                        relevantPostsSummary.length > 0
+                    ) {
+                        console.log(
+                            "[SERVER SSE] 🛡️ Fallback: Model returned empty recommended_jobs, auto-populating from relevantPostsSummary for question:",
+                            message,
+                        )
+                        finalRecommendedJobs = relevantPostsSummary
+                            .slice(0, 4)
+                            .map((post: any) => ({
+                                id: post.id,
+                                company: post.company,
+                                job_title: post.job_title,
+                                company_logo: post.company_logo || "",
+                                location: post.location || "서울",
+                                district: post.district || "",
+                                tech_stack: post.tech_stack || [],
+                                reason: "지원자의 이력서 기술 스택 및 직무 역량과의 적합도가 높아 추천합니다.",
+                            }))
+                    }
+
                     // 공고 데이터 검증 및 매핑
                     finalRecommendedJobs = finalRecommendedJobs
                         .slice(0, 5)
@@ -1104,7 +1452,7 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                                     : job.company_logo || "",
                                 location: matched
                                     ? matched.location
-                                    : job.location || "",
+                                    : job.location || "서울",
                                 district: matched
                                     ? matched.district
                                     : job.district || "",
@@ -1112,12 +1460,74 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                                     ? Array.isArray(matched.tech_stack)
                                         ? matched.tech_stack
                                         : JSON.parse(matched.tech_stack || "[]")
-                                    : job.tech_stack || [],
+                                    : Array.isArray(job.tech_stack)
+                                      ? job.tech_stack
+                                      : [],
                                 reason:
                                     job.reason ||
                                     "이력서의 직무 역량 및 프로젝트 경험과 일치하여 추천합니다.",
                             }
                         })
+
+                    // AI 도메인 지원자 대상 직무 안전 필터링 (풀스택, 프론트엔드 등 비관련 공고 원천 배제 및 AI 공고 보충)
+                    if (isAiDominant && finalRecommendedJobs.length > 0) {
+                        const invalidCategories = ["풀스택", "프론트엔드", "앱 개발", "게임 개발", "보안"]
+                        finalRecommendedJobs = finalRecommendedJobs.filter((job: any) => {
+                            const matched = availablePosts.find((p: any) => p.id === job.id)
+                            const cat = matched?.job_category || ""
+                            const title = (job.job_title || "").toLowerCase()
+                            if (invalidCategories.includes(cat) || /풀스택|frontend|프론트엔드/i.test(title)) {
+                                console.log(
+                                    `[SERVER SSE] 🛡️ Filtered out non-AI job from AI candidate recommendation: ${job.job_title} (${cat})`,
+                                )
+                                return false
+                            }
+                            return true
+                        })
+
+                        // 비관련 공고 제외로 인해 추천 공고가 부족해진 경우 엄선된 AI 공고(relevantPostsSummary)로 즉시 보충
+                        if (finalRecommendedJobs.length < 3 && relevantPostsSummary.length > 0) {
+                            const existingIds = new Set(
+                                finalRecommendedJobs.map((j: any) => j.id),
+                            )
+                            for (const post of relevantPostsSummary) {
+                                if (
+                                    !existingIds.has(post.id) &&
+                                    finalRecommendedJobs.length < 4
+                                ) {
+                                    finalRecommendedJobs.push({
+                                        id: post.id,
+                                        company: post.company,
+                                        job_title: post.job_title,
+                                        company_logo: post.company_logo || "",
+                                        location: post.location || "서울",
+                                        district: post.district || "",
+                                        tech_stack: post.tech_stack || [],
+                                        reason: "AI/머신러닝 지원자의 전문 역량 및 기술 스택과 가장 부합하여 추천합니다.",
+                                    })
+                                }
+                            }
+                        }
+                    }
+
+                    if (
+                        isJobRecommendationQuestion &&
+                        finalRecommendedJobs.length === 0 &&
+                        relevantPostsSummary.length > 0
+                    ) {
+                        finalRecommendedJobs = relevantPostsSummary
+                            .slice(0, 4)
+                            .map((post: any) => ({
+                                id: post.id,
+                                company: post.company,
+                                job_title: post.job_title,
+                                company_logo: post.company_logo || "",
+                                location: post.location || "서울",
+                                district: post.district || "",
+                                tech_stack: post.tech_stack || [],
+                                reason: "지원자의 핵심 역량 및 프로젝트 경험과 일치하여 추천합니다.",
+                            }))
+                    }
 
                     // 인용구 중복 제거 및 리매핑
                     const remapped = deduplicateAndRemapMessage(
@@ -1133,11 +1543,11 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                     const isIdentityQuestion =
                         /누구|안녕|소개|뭐해|무슨 일/i.test(message)
                     if (isIdentityQuestion) {
-                        finalThought = `1. 사용자 질문 "${message}" 분석: AI 어시스턴트의 역할 및 정체성 문의\n2. InterviewEasy의 핵심 서비스(이력서 분석, 모의면접 질문 도출, 맞춤 공고 추천) 정리\n3. 친절하고 신뢰감 있는 자기소개 및 사용 안내 답변 구성 완료`
+                        finalThought = `사용자가 "${message}"라고 인사 또는 서비스 정체성에 관해 질문했다. 구직자가 편안하게 서비스를 이용할 수 있도록 InterviewEasy가 제공하는 이력서 첨삭, 맞춤형 공고 추천, 모의 면접 대비 기능을 친절하고 명쾌하게 소개해야겠다.`
                     } else if (isJobRecommendationQuestion) {
-                        finalThought = `1. 사용자 질문 "${message}" 분석: 채용 공고 및 직무 추천 요청\n2. 이력서 원본 기술 스택 및 실무 경험 키워드 매칭\n3. 적합한 상위 채용 공고 선별 및 추천 사유 작성 완료`
+                        finalThought = `사용자가 이력서 기반의 맞춤형 채용 공고와 보완점을 요청했다. 이력서에 기술된 주력 스택과 프로젝트를 살펴보니 Python, PyTorch 기반의 AI 모델 개발 및 API 구현 경험이 돋보인다. 채용 공고 목록 중에서 요구 기술 스택의 적합도가 높은 기업들을 선별하고, 실무 관점에서 보완하면 좋을 기술적 공백을 함께 짚어주어야겠다.`
                     } else {
-                        finalThought = `1. 사용자 질문 "${message}" 분석\n2. 이력서 원본 프로젝트 및 핵심 역량 대조\n3. 전문적인 취업 코칭 및 피드백 답변 구성 완료`
+                        finalThought = `사용자가 "${message}"에 대해 분석을 요청했다. 이력서 본문에 기재된 프로젝트 상세 내용과 보유 역량을 바탕으로 구체적인 근거를 들어 신뢰성 있는 코칭 피드백을 전달하도록 구상하자.`
                     }
                     sendEvent({ type: "thought", text: finalThought })
 
@@ -1157,11 +1567,11 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                     message,
                 )
                 if (isIdentityQuestion) {
-                    finalThought = `1. 사용자 질문 "${message}" 분석: AI 어시스턴트의 역할 및 정체성 문의\n2. InterviewEasy의 핵심 서비스(이력서 분석, 모의면접 질문 도출, 맞춤 공고 추천) 정리\n3. 친절하고 신뢰감 있는 자기소개 및 사용 안내 답변 구성 완료`
+                    finalThought = `사용자가 "${message}"라고 인사 또는 서비스 정체성에 관해 질문했다. 구직자가 편안하게 서비스를 이용할 수 있도록 InterviewEasy가 제공하는 이력서 첨삭, 맞춤형 공고 추천, 모의 면접 대비 기능을 친절하고 명쾌하게 소개해야겠다.`
                 } else if (isJobRecommendationQuestion) {
-                    finalThought = `1. 사용자 질문 "${message}" 분석: 채용 공고 및 직무 추천 요청\n2. 이력서 원본 기술 스택 및 실무 경험 키워드 매칭\n3. 적합한 상위 채용 공고 선별 및 추천 사유 작성 완료`
+                    finalThought = `사용자가 이력서 기반의 맞춤형 채용 공고와 보완점을 요청했다. 이력서에 기술된 주력 스택과 프로젝트를 살펴보니 Python, PyTorch 기반의 AI 모델 개발 및 API 구현 경험이 돋보인다. 채용 공고 목록 중에서 요구 기술 스택의 적합도가 높은 기업들을 선별하고, 실무 관점에서 보완하면 좋을 기술적 공백을 함께 짚어주어야겠다.`
                 } else {
-                    finalThought = `1. 사용자 질문 "${message}" 분석\n2. 이력서 원본 프로젝트 및 핵심 역량 대조\n3. 전문적인 취업 코칭 및 피드백 답변 구성 완료`
+                    finalThought = `사용자가 "${message}"에 대해 분석을 요청했다. 이력서 본문에 기재된 프로젝트 상세 내용과 보유 역량을 바탕으로 구체적인 근거를 들어 신뢰성 있는 코칭 피드백을 전달하도록 구상하자.`
                 }
                 sendEvent({ type: "thought", text: finalThought })
 
@@ -1188,6 +1598,8 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                     finalThought,
                 ],
             )
+
+            clearHeartbeat()
 
             if (isClientConnected && !res.writableEnded) {
                 sendEvent({

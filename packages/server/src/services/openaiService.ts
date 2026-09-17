@@ -180,6 +180,7 @@ ${params.resumeText || "(이력서 미등록 - 일반 직무 질문)"}
 
         const response = await client.chat.completions.create({
             model: "gpt-5.6-luna",
+            reasoning_effort: "low",
             messages: [
                 {
                     role: "system",
@@ -188,7 +189,6 @@ ${params.resumeText || "(이력서 미등록 - 일반 직무 질문)"}
                 },
                 { role: "user", content: prompt },
             ],
-            temperature: 0.7,
             response_format: { type: "json_object" },
         })
 
@@ -471,7 +471,8 @@ ${params.job || "소프트웨어 엔지니어"}
 }
 `
         const response = await client.chat.completions.create({
-            model: "gpt-5",
+            model: "gpt-5.6-luna",
+            reasoning_effort: "low",
             messages: [
                 {
                     role: "system",
@@ -480,7 +481,6 @@ ${params.job || "소프트웨어 엔지니어"}
                 },
                 { role: "user", content: prompt },
             ],
-            temperature: 0.3,
             response_format: { type: "json_object" },
         })
 
@@ -592,7 +592,8 @@ ${JSON.stringify(params.results, null, 2)}
 }
 `
         const response = await client.chat.completions.create({
-            model: "gpt-5",
+            model: "gpt-5.6-luna",
+            reasoning_effort: "low",
             messages: [
                 {
                     role: "system",
@@ -601,7 +602,6 @@ ${JSON.stringify(params.results, null, 2)}
                 },
                 { role: "user", content: prompt },
             ],
-            temperature: 0.5,
             response_format: { type: "json_object" },
         })
 
@@ -696,7 +696,8 @@ export async function generateTtsAudio(text: string): Promise<string> {
 export async function analyzeCoverLetter(coverLetter: string): Promise<string> {
     try {
         const response = await client.chat.completions.create({
-            model: "gpt-5",
+            model: "gpt-5.6-luna",
+            reasoning_effort: "low",
             messages: [
                 {
                     role: "system",
@@ -708,7 +709,6 @@ export async function analyzeCoverLetter(coverLetter: string): Promise<string> {
                     content: `분석할 자기소개서:\n<cover_letter>\n${coverLetter}\n</cover_letter>`,
                 },
             ],
-            temperature: 0.5,
         })
         return response.choices[0].message.content || ""
     } catch (error) {
@@ -720,7 +720,8 @@ export async function analyzeCoverLetter(coverLetter: string): Promise<string> {
 export async function analyzeResume(resumeText: string): Promise<string> {
     try {
         const response = await client.chat.completions.create({
-            model: "gpt-5",
+            model: "gpt-5.6-luna",
+            reasoning_effort: "low",
             messages: [
                 {
                     role: "system",
@@ -732,7 +733,6 @@ export async function analyzeResume(resumeText: string): Promise<string> {
                     content: `분석할 이력서 내용\n<resume>\n${resumeText}\n</resume>`,
                 },
             ],
-            temperature: 0.5,
         })
         return response.choices[0].message.content || ""
     } catch (error) {
