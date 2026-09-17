@@ -326,6 +326,9 @@ const ApplicationTemplate: React.FC = () => {
     const [isEditingTitle, setIsEditingTitle] = useState(false)
     const [editTitleText, setEditTitleText] = useState("")
 
+    const [rawTextViewMode, setRawTextViewMode] = useState<"inline" | "raw">(
+        "inline",
+    )
     const [messages, setMessages] = useState<any[]>([])
     const [likedJobs, setLikedJobs] = useState<any[]>([])
     const [highlightedText, setHighlightedText] = useState<string | null>(null)
@@ -497,175 +500,536 @@ const ApplicationTemplate: React.FC = () => {
         )
     }
 
-function RecommendedJobCard({
-    job,
-    onNavigate,
-}: {
-    job: any
-    onNavigate: (id: number) => void
-}) {
-    const techStack: string[] = Array.isArray(job.tech_stack)
-        ? job.tech_stack
-        : typeof job.tech_stack === "string"
-        ? JSON.parse(job.tech_stack || "[]")
-        : []
+    // AI 인라인 첨삭 피드백 뷰 (형광펜 하이라이트 + 카드 코멘트)
+    const renderInlineFeedbackView = (
+        rawText: string,
+        improvementsStr: string,
+        citationsData: any,
+    ) => {
+        if (!rawText) return null
 
-    return (
-        <Box
-            bg="white"
-            border="1px solid"
-            borderColor="blue.100"
-            borderRadius="xl"
-            p={3.5}
-            shadow="xs"
-            _hover={{
-                shadow: "sm",
-                borderColor: "blue.300",
-                transform: "translateY(-1px)",
-            }}
-            transition="all 0.15s ease"
-            cursor="pointer"
-            onClick={() => onNavigate(job.id)}
-            position="relative"
-        >
-            <Flex justify="space-between" align="start" gap={2} mb={2}>
-                <HStack gap={2.5} align="center" flex={1} minW={0}>
-                    <Box
-                        w="36px"
-                        h="36px"
-                        borderRadius="lg"
-                        bg="gray.50"
-                        border="1px solid"
-                        borderColor="gray.100"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        overflow="hidden"
-                        p={1}
-                        flexShrink={0}
+        // 1. 인용 데이터 및 개선점 파싱
+        const citations: any[] =
+            typeof citationsData === "string"
+                ? (() => {
+                      try {
+                          return JSON.parse(citationsData || "[]")
+                      } catch {
+                          return []
+                      }
+                  })()
+                : Array.isArray(citationsData)
+                  ? citationsData
+                  : []
+
+        interface FeedbackItem {
+            id: number
+            quote: string
+            feedbackText: string
+            title?: string
+        }
+
+        const feedbackItems: FeedbackItem[] = []
+        const lines = (improvementsStr || "")
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0)
+
+        // 문맥 및 인용구 분석을 통해 "어떻게 보완하면 더 좋은지" 첨삭 가이드 생성 도우미
+        const getActionableFeedback = (quote: string, candidateText?: string): string => {
+            const trimmedCandidate = (candidateText || "").trim()
+
+            // 1. 이미 개선 조언 형태인 경우 (~좋아요, ~보강, ~추가, ~설득력, ~하세요 등)
+            const isAdvicePattern = /(보강|추가|설명|서술|구체화|강조|작성|제시|언급|좋아요|있어요|높아집니다|돋보여요|해 보세요|바랍니다)/.test(trimmedCandidate)
+            const isJustFact = /(달성|확보|구축|진행|완료|수행|사용함|개발함|기여함|수준 확보)/.test(trimmedCandidate) && !isAdvicePattern
+
+            if (trimmedCandidate && isAdvicePattern && !isJustFact && trimmedCandidate.length > 8) {
+                return trimmedCandidate
+            }
+
+            // 2. 본문 인용구(quote)의 내용에 따라 맞춤형 첨삭 피드백 생성
+            const lowerQuote = (quote || "").toLowerCase()
+
+            if (/데이터셋|dataset|이미지|image|yolo|모델|실험|학습|epoch/i.test(lowerQuote)) {
+                return "데이터셋을 구축하고 반복 개선하는 과정에서 겪은 문제점(라벨링 오차, 불균형 등)과 이를 해결한 접근 방식을 함께 서술하면 문제 해결력이 훨씬 돋보여요"
+            }
+            if (/map|fps|속도|지연|성능|최적화|초과|달성|latency|throughput/i.test(lowerQuote)) {
+                return "달성한 수치 지표와 더불어, 실제 서비스 환경의 요구 조건을 어떻게 충족했는지 또는 성능 병목을 해결한 기술적 과정을 덧붙이면 더 설득력 있어요"
+            }
+            if (/react|typescript|javascript|spring|node|docker|db|sql|아키텍처|라이브러리/i.test(lowerQuote)) {
+                return "단순 기술 스택 나열을 넘어, 해당 기술을 선택한 타당한 이유와 기존 방식 대비 어떤 개선을 이끌어냈는지 구체화하면 좋아요"
+            }
+            if (/팀|협업|동료|커뮤니케이션|리뷰|기여/i.test(lowerQuote)) {
+                return "팀 협업 과정에서 본인이 주도적으로 수행한 역할과 문제 발생 시 동료들과 어떻게 조율했는지를 구체적으로 드러내면 좋아요"
+            }
+
+            return "이 부분에 구체적인 트러블슈팅 경험이나 수치적 근거(어떻게 해결했는지)를 1~2문장 추가하면 더 설득력 있는 자소서가 돼요"
+        }
+
+        lines.forEach((line, idx) => {
+            const citeMatches = [...line.matchAll(/\[(\d+)\]/g)]
+            const citeIds = citeMatches.map((m) => parseInt(m[1], 10))
+
+            let cleanLine = line
+                .replace(/^[-*]\s*/, "")
+                .replace(/\[\d+\]/g, "")
+                .trim()
+            let title = ""
+            let rawFeedback = cleanLine
+            const boldMatch = cleanLine.match(/^\*\*([^*]+)\*\*[:\s]*(.*)/)
+            if (boldMatch) {
+                title = boldMatch[1].trim()
+                rawFeedback = boldMatch[2].trim()
+            }
+
+            if (citeIds.length > 0) {
+                citeIds.forEach((cid) => {
+                    const citeObj = citations.find((c: any) => c.id === cid)
+                    if (citeObj && citeObj.quote) {
+                        feedbackItems.push({
+                            id: cid,
+                            quote: citeObj.quote,
+                            feedbackText: getActionableFeedback(citeObj.quote, rawFeedback || citeObj.feedback),
+                            title,
+                        })
+                    }
+                })
+            } else if (citations[idx] && citations[idx].quote) {
+                feedbackItems.push({
+                    id: citations[idx].id || idx + 1,
+                    quote: citations[idx].quote,
+                    feedbackText: getActionableFeedback(citations[idx].quote, rawFeedback || citations[idx].feedback),
+                    title,
+                })
+            }
+        })
+
+        // fallback: citations에서 첨삭 조언 생성
+        if (feedbackItems.length === 0 && citations.length > 0) {
+            citations.forEach((c: any) => {
+                if (c.quote) {
+                    feedbackItems.push({
+                        id: c.id,
+                        quote: c.quote,
+                        feedbackText: getActionableFeedback(c.quote, c.feedback),
+                        title: c.title,
+                    })
+                }
+            })
+        }
+
+        // 2. rawText 내에서 quote 위치 탐색
+        interface MatchedAnnotation {
+            item: FeedbackItem
+            matchStart: number
+            matchEnd: number
+            sentenceEnd: number
+        }
+
+        const matchedAnnotations: MatchedAnnotation[] = []
+        const lowerRaw = rawText.toLowerCase()
+
+        feedbackItems.forEach((item) => {
+            const trimmed = item.quote.trim()
+            if (!trimmed) return
+
+            let matchStart = -1
+            let matchEnd = -1
+
+            // 1단계: 직접 슬라이스 매칭
+            const sampleLengths = [trimmed.length, 60, 40, 25, 15]
+            for (const len of sampleLengths) {
+                if (len <= trimmed.length) {
+                    const query = trimmed.slice(0, len).toLowerCase()
+                    const idx = lowerRaw.indexOf(query)
+                    if (idx !== -1) {
+                        matchStart = idx
+                        matchEnd =
+                            idx + Math.min(rawText.length - idx, trimmed.length)
+                        break
+                    }
+                }
+            }
+
+            // 2단계: 정규식 유연 매칭
+            if (matchStart === -1) {
+                const escaped = trimmed
+                    .slice(0, 30)
+                    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+                    .replace(/\s+/g, "\\s+")
+                try {
+                    const regex = new RegExp(escaped, "i")
+                    const match = regex.exec(rawText)
+                    if (match) {
+                        matchStart = match.index
+                        matchEnd = match.index + match[0].length
+                    }
+                } catch {
+                    // ignore
+                }
+            }
+
+            // 3단계: 핵심 단어 토큰 매칭
+            if (matchStart === -1) {
+                const words = trimmed
+                    .replace(/[^\w가-힣\s]/g, " ")
+                    .split(/\s+/)
+                    .filter((w) => w.length >= 2)
+
+                for (const word of words) {
+                    const idx = lowerRaw.indexOf(word.toLowerCase())
+                    if (idx !== -1) {
+                        matchStart = idx
+                        matchEnd = idx + word.length
+                        break
+                    }
+                }
+            }
+
+            if (matchStart !== -1) {
+                // 구절이 포함된 문장의 종결 위치(마침표나 줄바꿈) 탐색
+                let sentenceEnd = matchEnd
+                const nextPeriod = rawText.indexOf(".", matchEnd)
+                const nextNewline = rawText.indexOf("\n", matchEnd)
+                const candidates = [nextPeriod, nextNewline].filter(
+                    (i) => i !== -1,
+                )
+
+                if (candidates.length > 0) {
+                    const earliest = Math.min(...candidates)
+                    sentenceEnd =
+                        earliest === nextPeriod ? nextPeriod + 1 : earliest
+                } else {
+                    sentenceEnd = rawText.length
+                }
+
+                matchedAnnotations.push({
+                    item,
+                    matchStart,
+                    matchEnd,
+                    sentenceEnd,
+                })
+            }
+        })
+
+        // 매칭된 항목이 없으면 기본 텍스트 렌더링
+        if (matchedAnnotations.length === 0) {
+            return (
+                <Text
+                    fontSize="sm"
+                    color="gray.700"
+                    whiteSpace="pre-wrap"
+                    lineHeight="1.7"
+                >
+                    {rawText}
+                </Text>
+            )
+        }
+
+        // 시작 위치 기준 오름차순 정렬 및 겹침 제거
+        matchedAnnotations.sort((a, b) => a.matchStart - b.matchStart)
+        const nonOverlapping: MatchedAnnotation[] = []
+        let lastCovered = -1
+
+        matchedAnnotations.forEach((ann) => {
+            if (ann.matchStart >= lastCovered) {
+                nonOverlapping.push(ann)
+                lastCovered = ann.sentenceEnd
+            }
+        })
+
+        // 3. 인라인 첨삭 UI 렌더링 (이미지와 동일한 스타일 적용)
+        const segments: React.ReactNode[] = []
+        let cursor = 0
+
+        nonOverlapping.forEach((ann, idx) => {
+            // 하이라이트 전 일반 본문
+            if (ann.matchStart > cursor) {
+                segments.push(
+                    <Text
+                        as="span"
+                        key={`text-before-${idx}`}
+                        fontSize="sm"
+                        color="gray.700"
+                        whiteSpace="pre-wrap"
+                        lineHeight="1.7"
                     >
-                        {job.company_logo ? (
-                            <Image
-                                src={job.company_logo}
-                                alt={job.company}
-                                maxH="26px"
-                                maxW="100%"
-                                objectFit="contain"
-                                onError={(e) => {
-                                    e.currentTarget.style.display = "none"
-                                }}
-                            />
-                        ) : (
+                        {rawText.slice(cursor, ann.matchStart)}
+                    </Text>,
+                )
+            }
+
+            // 노란색 형광펜 하이라이트된 문장/구절
+            segments.push(
+                <Box
+                    as="mark"
+                    key={`highlight-${idx}`}
+                    bg="#FDE047"
+                    color="gray.950"
+                    px={1.5}
+                    py={0.5}
+                    borderRadius="md"
+                    fontWeight="semibold"
+                    display="inline"
+                    boxDecorationBreak="clone"
+                    WebkitBoxDecorationBreak="clone"
+                    fontSize="sm"
+                    lineHeight="1.7"
+                >
+                    {rawText.slice(ann.matchStart, ann.matchEnd)}
+                </Box>,
+            )
+
+            // 하이라이트 끝부터 문장 끝까지의 텍스트
+            if (ann.sentenceEnd > ann.matchEnd) {
+                segments.push(
+                    <Text
+                        as="span"
+                        key={`text-sentence-end-${idx}`}
+                        fontSize="sm"
+                        color="gray.700"
+                        whiteSpace="pre-wrap"
+                        lineHeight="1.7"
+                    >
+                        {rawText.slice(ann.matchEnd, ann.sentenceEnd)}
+                    </Text>,
+                )
+            }
+
+            // 문장 바로 아래 인라인 AI 피드백 카드
+            segments.push(
+                <Box
+                    key={`card-${idx}`}
+                    my={3}
+                    p={3.5}
+                    bg="blue.50/80"
+                    border="1px solid"
+                    borderColor="blue.100"
+                    borderRadius="xl"
+                    shadow="2xs"
+                    transition="all 0.2s ease"
+                    _hover={{
+                        borderColor: "blue.300",
+                        bg: "blue.50",
+                        shadow: "xs",
+                        transform: "translateY(-1px)",
+                    }}
+                    cursor="pointer"
+                    onClick={() => handleViewSource({ quote: ann.item.quote })}
+                >
+                    <Flex align="center" gap={2.5}>
+                        <Box
+                            color="blue.500"
+                            flexShrink={0}
+                            display="flex"
+                            alignItems="center"
+                        >
+                            <Sparkles size={16} />
+                        </Box>
+                        <Text
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color="blue.700"
+                            lineHeight="1.5"
+                            flex={1}
+                        >
+                            {ann.item.feedbackText}
+                        </Text>
+                    </Flex>
+                </Box>,
+            )
+
+            cursor = ann.sentenceEnd
+        })
+
+        // 마지막 남은 텍스트
+        if (cursor < rawText.length) {
+            segments.push(
+                <Text
+                    as="span"
+                    key="text-tail"
+                    fontSize="sm"
+                    color="gray.700"
+                    whiteSpace="pre-wrap"
+                    lineHeight="1.7"
+                >
+                    {rawText.slice(cursor)}
+                </Text>,
+            )
+        }
+
+        return <Box>{segments}</Box>
+    }
+
+    function RecommendedJobCard({
+        job,
+        onNavigate,
+    }: {
+        job: any
+        onNavigate: (id: number) => void
+    }) {
+        const techStack: string[] = Array.isArray(job.tech_stack)
+            ? job.tech_stack
+            : typeof job.tech_stack === "string"
+              ? JSON.parse(job.tech_stack || "[]")
+              : []
+
+        return (
+            <Box
+                bg="white"
+                border="1px solid"
+                borderColor="blue.100"
+                borderRadius="xl"
+                p={3.5}
+                shadow="xs"
+                _hover={{
+                    shadow: "sm",
+                    borderColor: "blue.300",
+                    transform: "translateY(-1px)",
+                }}
+                transition="all 0.15s ease"
+                cursor="pointer"
+                onClick={() => onNavigate(job.id)}
+                position="relative"
+            >
+                <Flex justify="space-between" align="start" gap={2} mb={2}>
+                    <HStack gap={2.5} align="center" flex={1} minW={0}>
+                        <Box
+                            w="36px"
+                            h="36px"
+                            borderRadius="lg"
+                            bg="gray.50"
+                            border="1px solid"
+                            borderColor="gray.100"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            overflow="hidden"
+                            p={1}
+                            flexShrink={0}
+                        >
+                            {job.company_logo ? (
+                                <Image
+                                    src={job.company_logo}
+                                    alt={job.company}
+                                    maxH="26px"
+                                    maxW="100%"
+                                    objectFit="contain"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = "none"
+                                    }}
+                                />
+                            ) : (
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    color="blue.600"
+                                >
+                                    {job.company?.slice(0, 2) || "채용"}
+                                </Text>
+                            )}
+                        </Box>
+                        <Box minW={0} flex={1}>
+                            <Text
+                                fontSize="2xs"
+                                fontWeight="semibold"
+                                color="gray.500"
+                                truncate
+                            >
+                                {job.company}
+                            </Text>
                             <Text
                                 fontSize="xs"
                                 fontWeight="bold"
-                                color="blue.600"
+                                color="gray.900"
+                                lineHeight="1.3"
+                                lineClamp={1}
                             >
-                                {job.company?.slice(0, 2) || "채용"}
+                                {job.job_title}
+                            </Text>
+                        </Box>
+                    </HStack>
+                    {job.location && (
+                        <Badge
+                            colorPalette="blue"
+                            variant="subtle"
+                            size="xs"
+                            flexShrink={0}
+                            fontSize="2xs"
+                        >
+                            {job.location} {job.district || ""}
+                        </Badge>
+                    )}
+                </Flex>
+
+                {/* Tech Stack */}
+                {techStack.length > 0 && (
+                    <HStack gap={1} mb={2.5} wrap="wrap">
+                        {techStack.slice(0, 3).map((tech, i) => (
+                            <Badge
+                                key={i}
+                                variant="surface"
+                                colorPalette="gray"
+                                fontSize="2xs"
+                                px={1.5}
+                                py={0.2}
+                            >
+                                {tech}
+                            </Badge>
+                        ))}
+                        {techStack.length > 3 && (
+                            <Text fontSize="2xs" color="gray.400">
+                                +{techStack.length - 3}
                             </Text>
                         )}
+                    </HStack>
+                )}
+
+                {/* AI Recommendation Reason */}
+                {job.reason && (
+                    <Box
+                        bg="blue.50/70"
+                        p={2}
+                        borderRadius="md"
+                        borderLeft="3px solid"
+                        borderColor="blue.400"
+                        mb={2}
+                    >
+                        <HStack align="flex-start" gap={1.5}>
+                            <Box color="blue.500" mt={0.5} flexShrink={0}>
+                                <Sparkles size={11} />
+                            </Box>
+                            <Text
+                                fontSize="2xs"
+                                color="blue.900"
+                                lineHeight="1.4"
+                                lineClamp={2}
+                            >
+                                {job.reason}
+                            </Text>
+                        </HStack>
                     </Box>
-                    <Box minW={0} flex={1}>
-                        <Text
-                            fontSize="2xs"
-                            fontWeight="semibold"
-                            color="gray.500"
-                            truncate
-                        >
-                            {job.company}
-                        </Text>
-                        <Text
-                            fontSize="xs"
-                            fontWeight="bold"
-                            color="gray.900"
-                            lineHeight="1.3"
-                            lineClamp={1}
-                        >
-                            {job.job_title}
-                        </Text>
-                    </Box>
-                </HStack>
-                {job.location && (
-                    <Badge
+                )}
+
+                {/* Action button */}
+                <Flex justify="flex-end" align="center">
+                    <Button
+                        size="xs"
                         colorPalette="blue"
                         variant="subtle"
-                        size="xs"
-                        flexShrink={0}
+                        h="24px"
                         fontSize="2xs"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onNavigate(job.id)
+                        }}
                     >
-                        {job.location} {job.district || ""}
-                    </Badge>
-                )}
-            </Flex>
-
-            {/* Tech Stack */}
-            {techStack.length > 0 && (
-                <HStack gap={1} mb={2.5} wrap="wrap">
-                    {techStack.slice(0, 3).map((tech, i) => (
-                        <Badge
-                            key={i}
-                            variant="surface"
-                            colorPalette="gray"
-                            fontSize="2xs"
-                            px={1.5}
-                            py={0.2}
-                        >
-                            {tech}
-                        </Badge>
-                    ))}
-                    {techStack.length > 3 && (
-                        <Text fontSize="2xs" color="gray.400">
-                            +{techStack.length - 3}
-                        </Text>
-                    )}
-                </HStack>
-            )}
-
-            {/* AI Recommendation Reason */}
-            {job.reason && (
-                <Box
-                    bg="blue.50/70"
-                    p={2}
-                    borderRadius="md"
-                    borderLeft="3px solid"
-                    borderColor="blue.400"
-                    mb={2}
-                >
-                    <HStack align="flex-start" gap={1.5}>
-                        <Box color="blue.500" mt={0.5} flexShrink={0}>
-                            <Sparkles size={11} />
-                        </Box>
-                        <Text
-                            fontSize="2xs"
-                            color="blue.900"
-                            lineHeight="1.4"
-                            lineClamp={2}
-                        >
-                            {job.reason}
-                        </Text>
-                    </HStack>
-                </Box>
-            )}
-
-            {/* Action button */}
-            <Flex justify="flex-end" align="center">
-                <Button
-                    size="xs"
-                    colorPalette="blue"
-                    variant="subtle"
-                    h="24px"
-                    fontSize="2xs"
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        onNavigate(job.id)
-                    }}
-                >
-                    공고 상세보기 →
-                </Button>
-            </Flex>
-        </Box>
-    )
-}
+                        공고 상세보기 →
+                    </Button>
+                </Flex>
+            </Box>
+        )
+    }
 
     // Check Authentication
     useEffect(() => {
@@ -1628,16 +1992,125 @@ function RecommendedJobCard({
                                             justify="space-between"
                                             align="center"
                                             mb={3}
+                                            wrap="wrap"
+                                            gap={2}
                                         >
-                                            <Heading
-                                                fontSize="xs"
-                                                fontWeight="bold"
-                                                color="gray.500"
-                                                textTransform="uppercase"
-                                                letterSpacing="wider"
-                                            >
-                                                원본 문서
-                                            </Heading>
+                                            <HStack gap={2} align="center">
+                                                <Heading
+                                                    fontSize="xs"
+                                                    fontWeight="bold"
+                                                    color="gray.500"
+                                                    textTransform="uppercase"
+                                                    letterSpacing="wider"
+                                                >
+                                                    문서 뷰
+                                                </Heading>
+                                                <HStack
+                                                    gap={1}
+                                                    bg="gray.200/70"
+                                                    p="3px"
+                                                    borderRadius="lg"
+                                                >
+                                                    <Button
+                                                        size="xs"
+                                                        variant="ghost"
+                                                        bg={
+                                                            rawTextViewMode ===
+                                                            "inline"
+                                                                ? "white"
+                                                                : "transparent"
+                                                        }
+                                                        color={
+                                                            rawTextViewMode ===
+                                                            "inline"
+                                                                ? "blue.600"
+                                                                : "gray.600"
+                                                        }
+                                                        fontWeight={
+                                                            rawTextViewMode ===
+                                                            "inline"
+                                                                ? "bold"
+                                                                : "medium"
+                                                        }
+                                                        shadow={
+                                                            rawTextViewMode ===
+                                                            "inline"
+                                                                ? "xs"
+                                                                : "none"
+                                                        }
+                                                        onClick={() =>
+                                                            setRawTextViewMode(
+                                                                "inline",
+                                                            )
+                                                        }
+                                                        h="24px"
+                                                        fontSize="2xs"
+                                                        px={2.5}
+                                                        borderRadius="md"
+                                                        _hover={{
+                                                            bg:
+                                                                rawTextViewMode ===
+                                                                "inline"
+                                                                    ? "white"
+                                                                    : "gray.200/80",
+                                                        }}
+                                                    >
+                                                        <Sparkles
+                                                            size={11}
+                                                            style={{
+                                                                marginRight: 4,
+                                                            }}
+                                                        />
+                                                        AI 첨삭 피드백
+                                                    </Button>
+                                                    <Button
+                                                        size="xs"
+                                                        variant="ghost"
+                                                        bg={
+                                                            rawTextViewMode ===
+                                                            "raw"
+                                                                ? "white"
+                                                                : "transparent"
+                                                        }
+                                                        color={
+                                                            rawTextViewMode ===
+                                                            "raw"
+                                                                ? "blue.600"
+                                                                : "gray.600"
+                                                        }
+                                                        fontWeight={
+                                                            rawTextViewMode ===
+                                                            "raw"
+                                                                ? "bold"
+                                                                : "medium"
+                                                        }
+                                                        shadow={
+                                                            rawTextViewMode ===
+                                                            "raw"
+                                                                ? "xs"
+                                                                : "none"
+                                                        }
+                                                        onClick={() =>
+                                                            setRawTextViewMode(
+                                                                "raw",
+                                                            )
+                                                        }
+                                                        h="24px"
+                                                        fontSize="2xs"
+                                                        px={2.5}
+                                                        borderRadius="md"
+                                                        _hover={{
+                                                            bg:
+                                                                rawTextViewMode ===
+                                                                "raw"
+                                                                    ? "white"
+                                                                    : "gray.200/80",
+                                                        }}
+                                                    >
+                                                        원본 텍스트
+                                                    </Button>
+                                                </HStack>
+                                            </HStack>
                                             {highlightedText && (
                                                 <Text
                                                     fontSize="2xs"
@@ -1648,10 +2121,16 @@ function RecommendedJobCard({
                                                 </Text>
                                             )}
                                         </Flex>
-                                        {renderRawTextWithHighlight(
-                                            selectedResume.raw_text,
-                                            highlightedText,
-                                        )}
+                                        {rawTextViewMode === "inline"
+                                            ? renderInlineFeedbackView(
+                                                  selectedResume.raw_text,
+                                                  selectedResume.improvements,
+                                                  selectedResume.citations,
+                                              )
+                                            : renderRawTextWithHighlight(
+                                                  selectedResume.raw_text,
+                                                  highlightedText,
+                                              )}
                                     </Box>
 
                                     {/* AI 피드백 & 대화 */}
@@ -1797,9 +2276,14 @@ function RecommendedJobCard({
                                                                               : selectedResume.citations ||
                                                                                 [])
                                                                 const msgRecommendedJobs =
-                                                                    typeof msg.recommended_jobs === "string"
-                                                                        ? JSON.parse(msg.recommended_jobs || "[]")
-                                                                        : msg.recommended_jobs || []
+                                                                    typeof msg.recommended_jobs ===
+                                                                    "string"
+                                                                        ? JSON.parse(
+                                                                              msg.recommended_jobs ||
+                                                                                  "[]",
+                                                                          )
+                                                                        : msg.recommended_jobs ||
+                                                                          []
                                                                 return (
                                                                     <Flex
                                                                         key={
@@ -1873,31 +2357,62 @@ function RecommendedJobCard({
                                                                                         handleViewSource
                                                                                     }
                                                                                 />
-                                                                                {msgRecommendedJobs.length > 0 && (
+                                                                                {msgRecommendedJobs.length >
+                                                                                    0 && (
                                                                                     <Box
-                                                                                        mt={4}
-                                                                                        pt={3.5}
+                                                                                        mt={
+                                                                                            4
+                                                                                        }
+                                                                                        pt={
+                                                                                            3.5
+                                                                                        }
                                                                                         borderTop="1px solid"
                                                                                         borderColor="blue.100"
                                                                                     >
-                                                                                        <HStack gap={2} mb={3}>
+                                                                                        <HStack
+                                                                                            gap={
+                                                                                                2
+                                                                                            }
+                                                                                            mb={
+                                                                                                3
+                                                                                            }
+                                                                                        >
                                                                                             <Box color="blue.600">
-                                                                                                <Briefcase size={13} />
+                                                                                                <Briefcase
+                                                                                                    size={
+                                                                                                        13
+                                                                                                    }
+                                                                                                />
                                                                                             </Box>
                                                                                             <Text
                                                                                                 fontSize="xs"
                                                                                                 fontWeight="bold"
                                                                                                 color="blue.700"
                                                                                             >
-                                                                                                AI 맞춤 추천 채용 공고 ({msgRecommendedJobs.length}개)
+                                                                                                AI
+                                                                                                맞춤
+                                                                                                추천
+                                                                                                채용
+                                                                                                공고
+                                                                                                (
+                                                                                                {
+                                                                                                    msgRecommendedJobs.length
+                                                                                                }
+                                                                                                개)
                                                                                             </Text>
                                                                                         </HStack>
                                                                                         <SimpleGrid
                                                                                             columns={{
                                                                                                 base: 1,
-                                                                                                md: msgRecommendedJobs.length === 1 ? 1 : 2,
+                                                                                                md:
+                                                                                                    msgRecommendedJobs.length ===
+                                                                                                    1
+                                                                                                        ? 1
+                                                                                                        : 2,
                                                                                             }}
-                                                                                            gap={3}
+                                                                                            gap={
+                                                                                                3
+                                                                                            }
                                                                                         >
                                                                                             {msgRecommendedJobs.map(
                                                                                                 (
@@ -2219,9 +2734,7 @@ function RecommendedJobCard({
                                                     w="14"
                                                     h="14"
                                                 >
-                                                    <UploadCloud
-                                                        size={24}
-                                                    />
+                                                    <UploadCloud size={24} />
                                                 </Box>
                                                 <VStack gap={1.5}>
                                                     <Text
