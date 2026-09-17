@@ -12,10 +12,10 @@ import {
     Badge,
     Spinner,
 } from "@chakra-ui/react"
-import { Camera, Heart, FileText, Play, ChevronDown, ChevronUp } from "lucide-react"
+import { Camera, Heart, FileText, Mic, TrendingUp, Bookmark } from "lucide-react"
 import Header from "../organisms/Header"
 import { useAuth } from "../../hooks/useAuth"
-import { useNavigate } from "react-router"
+import { useNavigate, useLocation } from "react-router"
 import type { Post } from "../../data/mockPosts"
 
 interface LikedJob {
@@ -39,59 +39,10 @@ interface InterviewSessionSummary {
     created_at: string
 }
 
-function SessionReplay({ session }: { session: InterviewSessionSummary }) {
-    const videoRef = useRef<HTMLVideoElement | null>(null)
-
-    return (
-        <Box p={4} borderTop="1px solid" borderColor="gray.200" bg="bg.subtle">
-            <VStack align="stretch" gap={3}>
-                <Box borderRadius="lg" overflow="hidden" bg="black" maxW="640px" mx="auto" w="100%">
-                    <video
-                        ref={videoRef}
-                        controls
-                        playsInline
-                        src={`/api/interview-sessions/${session.id}/video?token=${typeof window !== "undefined" ? localStorage.getItem("token") || "" : ""}`}
-                        style={{ width: "100%", display: "block" }}
-                    />
-                </Box>
-                {session.chapters?.length > 0 && (
-                    <Box overflowX="auto">
-                        <HStack gap={2} pb={1}>
-                            {session.chapters.map((ch, i) => (
-                                <Button
-                                    key={ch.index}
-                                    size="sm"
-                                    variant="outline"
-                                    borderColor="gray.300"
-                                    color="gray.700"
-                                    flexShrink={0}
-                                    _hover={{ bg: "blue.600", borderColor: "blue.600", color: "white" }}
-                                    onClick={() => {
-                                        if (videoRef.current) {
-                                            videoRef.current.currentTime = ch.startTime
-                                            videoRef.current.play().catch(() => {})
-                                        }
-                                    }}
-                                >
-                                    질문 {i + 1}
-                                </Button>
-                            ))}
-                        </HStack>
-                    </Box>
-                )}
-                {session.report_data?.overallFeedback && (
-                    <Text fontSize="sm" color="fg.muted">
-                        {session.report_data.overallFeedback}
-                    </Text>
-                )}
-            </VStack>
-        </Box>
-    )
-}
-
 export default function ProfileTemplate() {
     const { user, refreshUser, loading } = useAuth()
     const navigate = useNavigate()
+    const location = useLocation()
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const [name, setName] = useState(user?.name || "")
@@ -99,6 +50,12 @@ export default function ProfileTemplate() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [isSaving, setIsSaving] = useState(false)
+
+    const [currentPassword, setCurrentPassword] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [passwordError, setPasswordError] = useState("")
+    const [isChangingPassword, setIsChangingPassword] = useState(false)
 
     const [likedPosts, setLikedPosts] = useState<Post[]>([])
     const [likedJobs, setLikedJobs] = useState<LikedJob[]>([])
@@ -109,9 +66,6 @@ export default function ProfileTemplate() {
         InterviewSessionSummary[]
     >([])
     const [loadingHistory, setLoadingHistory] = useState(true)
-    const [expandedSessionId, setExpandedSessionId] = useState<number | null>(
-        null,
-    )
 
     useEffect(() => {
         if (loading) return
@@ -200,6 +154,13 @@ export default function ProfileTemplate() {
         }
     }, [user])
 
+    useEffect(() => {
+        if (!location.hash) return
+        const id = location.hash.slice(1)
+        const el = document.getElementById(id)
+        el?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }, [location.hash, loadingHistory])
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0]
@@ -241,6 +202,51 @@ export default function ProfileTemplate() {
         }
     }
 
+    const handleChangePassword = async () => {
+        setPasswordError("")
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            setPasswordError("모든 항목을 입력해주세요.")
+            return
+        }
+        if (newPassword.length < 8) {
+            setPasswordError("새 비밀번호는 8자 이상이어야 합니다.")
+            return
+        }
+        if (newPassword !== confirmPassword) {
+            setPasswordError("새 비밀번호가 일치하지 않습니다.")
+            return
+        }
+
+        setIsChangingPassword(true)
+        try {
+            const token = localStorage.getItem("token")
+            const resp = await fetch("/api/users/password", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify({ currentPassword, newPassword })
+            })
+            const data = await resp.json()
+
+            if (resp.ok) {
+                setCurrentPassword("")
+                setNewPassword("")
+                setConfirmPassword("")
+                alert("비밀번호가 변경되었습니다.")
+            } else {
+                setPasswordError(data.error || "비밀번호 변경에 실패했습니다.")
+            }
+        } catch (err) {
+            console.error("Password change failed:", err)
+            setPasswordError("오류가 발생했습니다.")
+        } finally {
+            setIsChangingPassword(false)
+        }
+    }
+
     const unbookmarkPost = async (id: number) => {
         try {
             const token = localStorage.getItem("token")
@@ -278,15 +284,81 @@ export default function ProfileTemplate() {
     if (loading) return null
     if (!user) return null
 
+    const scoredSessions = interviewSessions.filter(
+        (s) => typeof s.report_data?.overallScore === "number",
+    )
+    const avgScore =
+        scoredSessions.length > 0
+            ? Math.round(
+                  scoredSessions.reduce(
+                      (sum, s) => sum + (s.report_data.overallScore as number),
+                      0,
+                  ) / scoredSessions.length,
+              )
+            : null
+    const totalScraps = likedPosts.length + likedJobs.length
+
+    const summaryStats = [
+        {
+            label: "누적 모의면접",
+            value: `${interviewSessions.length}회`,
+            icon: Mic,
+        },
+        {
+            label: "평균 점수",
+            value: avgScore !== null ? `${avgScore}점` : "-",
+            icon: TrendingUp,
+        },
+        {
+            label: "작성한 자소서·이력서",
+            value: `${resumes.length}개`,
+            icon: FileText,
+        },
+        {
+            label: "스크랩한 공고",
+            value: `${totalScraps}개`,
+            icon: Bookmark,
+        },
+    ]
+
     return (
         <Box bg="bg.subtle" minH="100vh">
             <Header />
             <Box maxW="1000px" mx="auto" pt="100px" px={4} pb={12}>
                 <Text fontSize="2xl" fontWeight="bold" mb={8}>마이페이지</Text>
 
+                {loadingHistory || loadingData ? (
+                    <Flex justify="center" p={6} mb={8}>
+                        <Spinner size="sm" />
+                    </Flex>
+                ) : (
+                    <SimpleGrid columns={{ base: 2, md: 4 }} gap={4} mb={8}>
+                        {summaryStats.map((stat) => (
+                            <Box
+                                key={stat.label}
+                                bg="bg.panel"
+                                p={4}
+                                borderRadius="2xl"
+                                boxShadow="sm"
+                            >
+                                <HStack gap={2} color="blue.600" mb={1.5}>
+                                    <stat.icon size={16} />
+                                    <Text fontSize="xs" color="gray.500" fontWeight="semibold">
+                                        {stat.label}
+                                    </Text>
+                                </HStack>
+                                <Text fontSize="xl" fontWeight="bold" color="gray.900">
+                                    {stat.value}
+                                </Text>
+                            </Box>
+                        ))}
+                    </SimpleGrid>
+                )}
+
                 <Flex gap={8} direction={{ base: "column", md: "row" }} align="flex-start">
+                    <VStack gap={6} flex="1" w="100%" maxW={{ md: "350px" }} align="stretch">
                     {/* Profile Edit Section */}
-                    <Box bg="bg.panel" p={6} borderRadius="2xl" boxShadow="sm" flex="1" w="100%" maxW={{ md: "350px" }}>
+                    <Box bg="bg.panel" p={6} borderRadius="2xl" boxShadow="sm">
                         <VStack gap={6} align="center">
                             <Box position="relative" cursor="pointer" onClick={() => fileInputRef.current?.click()}>
                                 <Avatar.Root w="120px" h="120px">
@@ -352,111 +424,58 @@ export default function ProfileTemplate() {
                         </VStack>
                     </Box>
 
+                    {/* 계정/보안 설정 */}
+                    <Box id="account-settings" bg="bg.panel" p={6} borderRadius="2xl" boxShadow="sm">
+                        <Text fontSize="lg" fontWeight="bold" mb={4}>계정/보안 설정</Text>
+                        <VStack gap={4} align="stretch">
+                            <Box>
+                                <Text fontSize="sm" fontWeight="semibold" mb={1} color="fg.muted">현재 비밀번호</Text>
+                                <Input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    placeholder="현재 비밀번호"
+                                    bg="bg.subtle"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="semibold" mb={1} color="fg.muted">새 비밀번호</Text>
+                                <Input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="8자 이상 입력하세요"
+                                    bg="bg.subtle"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="semibold" mb={1} color="fg.muted">새 비밀번호 확인</Text>
+                                <Input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="새 비밀번호를 다시 입력하세요"
+                                    bg="bg.subtle"
+                                />
+                            </Box>
+                            {passwordError && (
+                                <Text fontSize="xs" color="red.500">{passwordError}</Text>
+                            )}
+                            <Button
+                                w="100%"
+                                colorPalette="blue"
+                                variant="outline"
+                                onClick={handleChangePassword}
+                                loading={isChangingPassword}
+                            >
+                                비밀번호 변경
+                            </Button>
+                        </VStack>
+                    </Box>
+                    </VStack>
+
                     {/* Bookmarked Section */}
                     <Box flex="2" w="100%">
-                        {/* 내 자소서·이력서 바로가기 */}
-                        <Box bg="bg.panel" p={6} borderRadius="2xl" boxShadow="sm" mb={6}>
-                            <Flex justify="space-between" align="center" mb={4}>
-                                <Text fontSize="lg" fontWeight="bold">내 자소서·이력서</Text>
-                                <Button size="sm" variant="ghost" colorPalette="blue" onClick={() => navigate("/analyze-application")}>
-                                    전체보기
-                                </Button>
-                            </Flex>
-                            {loadingHistory ? (
-                                <Flex justify="center" p={8}><Spinner /></Flex>
-                            ) : resumes.length === 0 ? (
-                                <Text color="gray.500" py={8} textAlign="center">작성한 자소서·이력서가 없습니다.</Text>
-                            ) : (
-                                <VStack align="stretch" gap={2}>
-                                    {resumes.slice(0, 5).map((resume) => (
-                                        <Flex
-                                            key={resume.id}
-                                            justify="space-between"
-                                            align="center"
-                                            p={3}
-                                            border="1px solid"
-                                            borderColor="gray.200"
-                                            borderRadius="lg"
-                                            cursor="pointer"
-                                            _hover={{ bg: "bg.subtle" }}
-                                            onClick={() => navigate("/analyze-application")}
-                                        >
-                                            <HStack gap={2}>
-                                                <FileText size={16} color="var(--chakra-colors-blue-500)" />
-                                                <Text fontWeight="medium" fontSize="sm">{resume.title}</Text>
-                                            </HStack>
-                                            <Text fontSize="xs" color="gray.500">
-                                                {new Date(resume.updated_at).toLocaleDateString("ko-KR")}
-                                            </Text>
-                                        </Flex>
-                                    ))}
-                                </VStack>
-                            )}
-                        </Box>
-
-                        {/* 최근 모의면접 기록 + 다시보기 */}
-                        <Box bg="bg.panel" p={6} borderRadius="2xl" boxShadow="sm" mb={6}>
-                            <Text fontSize="lg" fontWeight="bold" mb={4}>최근 모의면접 기록</Text>
-                            {loadingHistory ? (
-                                <Flex justify="center" p={8}><Spinner /></Flex>
-                            ) : interviewSessions.length === 0 ? (
-                                <Text color="gray.500" py={8} textAlign="center">모의면접 기록이 없습니다.</Text>
-                            ) : (
-                                <VStack align="stretch" gap={3}>
-                                    {interviewSessions.map((session) => {
-                                        const isExpanded = expandedSessionId === session.id
-                                        return (
-                                            <Box
-                                                key={session.id}
-                                                border="1px solid"
-                                                borderColor="gray.200"
-                                                borderRadius="xl"
-                                                overflow="hidden"
-                                            >
-                                                <Flex
-                                                    justify="space-between"
-                                                    align="center"
-                                                    p={4}
-                                                    cursor="pointer"
-                                                    _hover={{ bg: "bg.subtle" }}
-                                                    onClick={() =>
-                                                        setExpandedSessionId(isExpanded ? null : session.id)
-                                                    }
-                                                >
-                                                    <HStack gap={3}>
-                                                        <Flex
-                                                            w={9}
-                                                            h={9}
-                                                            borderRadius="full"
-                                                            bg="blue.50"
-                                                            color="blue.600"
-                                                            align="center"
-                                                            justify="center"
-                                                        >
-                                                            <Play size={12} fill="currentColor" />
-                                                        </Flex>
-                                                        <Box>
-                                                            <Text fontWeight="bold" fontSize="sm">
-                                                                종합 점수 {session.report_data?.overallScore ?? "-"}점
-                                                            </Text>
-                                                            <Text fontSize="xs" color="gray.500">
-                                                                {new Date(session.created_at).toLocaleString("ko-KR")}
-                                                                {" · "}
-                                                                질문 {session.chapters?.length ?? 0}개
-                                                            </Text>
-                                                        </Box>
-                                                    </HStack>
-                                                    {isExpanded ? <ChevronUp size={16} color="gray" /> : <ChevronDown size={16} color="gray" />}
-                                                </Flex>
-                                                {isExpanded && (
-                                                    <SessionReplay session={session} />
-                                                )}
-                                            </Box>
-                                        )
-                                    })}
-                                </VStack>
-                            )}
-                        </Box>
                         <Box bg="bg.panel" p={6} borderRadius="2xl" boxShadow="sm" mb={6}>
                             <Text fontSize="lg" fontWeight="bold" mb={4}>스크랩한 채용 공고</Text>
                             {loadingData ? (

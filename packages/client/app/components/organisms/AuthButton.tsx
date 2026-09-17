@@ -1,5 +1,6 @@
 import React from "react"
-import { HStack, Button, Avatar, Menu, Text, Portal } from "@chakra-ui/react"
+import { Box, HStack, VStack, Button, Avatar, Menu, Text, Portal } from "@chakra-ui/react"
+import { Mic, Settings, LogOut } from "lucide-react"
 import { useNavigate } from "react-router"
 import BlockLink from "../atoms/BlockLink"
 import { useAuth } from "../../hooks/useAuth"
@@ -49,12 +50,44 @@ export default function AuthButton() {
             </Menu.Trigger>
             <Portal>
                 <Menu.Positioner>
-                    <Menu.Content>
+                    <Menu.Content minW="220px">
+                        <Box px={3} py={2}>
+                            <HStack gap={2.5}>
+                                <Avatar.Root size="sm">
+                                    <Avatar.Fallback name={user.name || user.email} />
+                                    <Avatar.Image src={user.profile_image_url} />
+                                </Avatar.Root>
+                                <VStack align="flex-start" gap={0} minW={0}>
+                                    <Text fontWeight="bold" fontSize="sm" truncate>
+                                        {user.name || "사용자"}
+                                    </Text>
+                                    <Text fontSize="xs" color="gray.500" truncate>
+                                        {user.email}
+                                    </Text>
+                                </VStack>
+                            </HStack>
+                        </Box>
+                        <Menu.Separator />
                         <Menu.Item
                             value="profile"
                             onClick={() => navigate("/profile")}
                         >
-                            {user.name || "프로필"}
+                            마이페이지
+                        </Menu.Item>
+                        <Menu.Item
+                            value="interview-history"
+                            onClick={() => navigate("/interview-records")}
+                        >
+                            <Mic size={14} />
+                            모의면접 기록
+                        </Menu.Item>
+                        <Menu.Separator />
+                        <Menu.Item
+                            value="account-settings"
+                            onClick={() => navigate("/profile#account-settings")}
+                        >
+                            <Settings size={14} />
+                            계정/보안 설정
                         </Menu.Item>
                         <Menu.Separator />
                         <Menu.Item
@@ -63,6 +96,7 @@ export default function AuthButton() {
                             value="logout"
                             onClick={handleLogout}
                         >
+                            <LogOut size={14} />
                             로그아웃
                         </Menu.Item>
                     </Menu.Content>

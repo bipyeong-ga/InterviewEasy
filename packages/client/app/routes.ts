@@ -11,5 +11,7 @@ export default [
     route("post", "routes/post.tsx"),
     route("post/:id", "routes/post-detail.tsx"),
     route("profile", "routes/profile.tsx"),
-    route("interview", "routes/interview.tsx")
+    route("interview", "routes/interview.tsx"),
+    route("interview-records", "routes/interview-records.tsx"),
+    route("interview-record/:id", "routes/interview-record.tsx")
 ] satisfies RouteConfig

@@ -1,10 +1,24 @@
 import { Router } from "express"
 import type { Request, Response } from "express"
 import multer from "multer"
+import bcrypt from "bcrypt"
+import rateLimit from "express-rate-limit"
 import pool from "../db"
 import { authMiddleware } from "../middleware/auth"
 
 const router = Router()
+
+const passwordChangeLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    limit: 5,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+    handler: (_, res) => {
+        res.status(429).json({
+            error: "Too many attempts. Please try again in 10 minutes.",
+        })
+    },
+})
 
 // Configure multer storage to use memory
 const upload = multer({
@@ -71,7 +85,62 @@ router.put("/profile", authMiddleware, upload.single("profile_image"), async (re
     }
 })
 
-// 2. Serve profile image binary
+// 2. Change password
+router.put(
+    "/password",
+    authMiddleware,
+    passwordChangeLimiter,
+    async (req: Request, res: Response) => {
+        try {
+            const userId = req.user?.id
+            const { currentPassword, newPassword } = req.body
+
+            if (!currentPassword || !newPassword) {
+                return res
+                    .status(400)
+                    .json({ error: "현재 비밀번호와 새 비밀번호를 모두 입력해주세요." })
+            }
+            if (typeof newPassword !== "string" || newPassword.length < 8) {
+                return res
+                    .status(400)
+                    .json({ error: "새 비밀번호는 8자 이상이어야 합니다." })
+            }
+
+            const result = await pool.query(
+                "SELECT password_hash FROM users WHERE id = $1",
+                [userId],
+            )
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: "User not found" })
+            }
+
+            const isMatch = await bcrypt.compare(
+                currentPassword,
+                result.rows[0].password_hash,
+            )
+            if (!isMatch) {
+                return res
+                    .status(401)
+                    .json({ error: "현재 비밀번호가 일치하지 않습니다." })
+            }
+
+            const salt = await bcrypt.genSalt(10)
+            const newPasswordHash = await bcrypt.hash(newPassword, salt)
+
+            await pool.query(
+                "UPDATE users SET password_hash = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
+                [newPasswordHash, userId],
+            )
+
+            res.json({ success: true })
+        } catch (error) {
+            console.error("Failed to change password:", error)
+            res.status(500).json({ error: "Internal server error" })
+        }
+    },
+)
+
+// 3. Serve profile image binary
 router.get("/:id/profile-image", async (req: Request, res: Response) => {
     try {
         const userId = parseInt(req.params.id as string)

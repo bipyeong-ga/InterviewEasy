@@ -23,7 +23,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 1,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[토스뱅크 뱅킹플랫폼팀] 프론트엔드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -69,7 +69,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 2,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[토스증권 WTS 프론트엔드팀] 프론트엔드 개발자",
         "location": "서울",
         "district": "강남구",
@@ -115,7 +115,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 3,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[페이먼트 코어 셀] 프론트엔드 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -161,7 +161,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 4,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[고객경험 UI/UX 실] 프론트엔드 전문가",
         "location": "서울",
         "district": "강남구",
@@ -207,7 +207,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 5,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[디자인시스템 파트] 프론트엔드 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -253,7 +253,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 6,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[카카오톡 탭프론트엔드팀] 프론트엔드 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -299,7 +299,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 7,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[카카오페이 자산관리 셀] 프론트엔드 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -345,7 +345,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 8,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[카카오커머스 웹개발 파트] 프론트엔드 담당자",
         "location": "서울",
         "district": "강남구",
@@ -391,7 +391,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 9,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[카카오모빌리티 UI셀] 프론트엔드 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -436,7 +436,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 10,
         "companyName": "비바리퍼블리카(토스)",
-        "companyLogo": "https://logo.clearbit.com/toss.im",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         "title": "[카카오엔터 웹플랫폼팀] 프론트엔드 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -482,7 +482,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 11,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[네이버 검색 FE셀] 프론트엔드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -528,7 +528,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 12,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[네이버 쇼핑 서비스 개발팀] 프론트엔드 개발자",
         "location": "경기",
         "district": "성남시",
@@ -574,7 +574,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 13,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[네이버 웹툰 글로벌 FE팀] 프론트엔드 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -620,7 +620,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 14,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[네이버 치지직 스트리밍 파트] 프론트엔드 전문가",
         "location": "경기",
         "district": "성남시",
@@ -666,7 +666,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 15,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[네이버클라우드 파이프라인팀] 프론트엔드 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -712,7 +712,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 16,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[당근 중고거래 FE팀] 프론트엔드 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -758,7 +758,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 17,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[당근알바 웹서비스 파트] 프론트엔드 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -804,7 +804,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 18,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[당근페이 클라이언트팀] 프론트엔드 담당자",
         "location": "경기",
         "district": "성남시",
@@ -850,7 +850,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 19,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[당근 로컬 커머스 셀] 프론트엔드 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -895,7 +895,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 20,
         "companyName": "카카오",
-        "companyLogo": "https://logo.clearbit.com/kakaocorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         "title": "[당근 광고플랫폼 FE팀] 프론트엔드 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -941,7 +941,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 21,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[쿠팡 로켓배송 주문웹 파트] 프론트엔드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -987,7 +987,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 22,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[쿠팡이츠 파트너웹팀] 프론트엔드 개발자",
         "location": "경기",
         "district": "성남시",
@@ -1033,7 +1033,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 23,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[쿠팡 Play 웹플랫폼 파트] 프론트엔드 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -1079,7 +1079,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 24,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[쿠팡 글로벌 셀러웹팀] 프론트엔드 전문가",
         "location": "경기",
         "district": "성남시",
@@ -1125,7 +1125,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 25,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[쿠팡 결제 FE셀] 프론트엔드 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -1171,7 +1171,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 26,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[토스뱅크 뱅킹플랫폼팀] 프론트엔드 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -1217,7 +1217,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 27,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[토스증권 WTS 프론트엔드팀] 프론트엔드 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -1263,7 +1263,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 28,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[페이먼트 코어 셀] 프론트엔드 담당자",
         "location": "경기",
         "district": "성남시",
@@ -1309,7 +1309,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 29,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[고객경험 UI/UX 실] 프론트엔드 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -1354,7 +1354,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 30,
         "companyName": "네이버",
-        "companyLogo": "https://logo.clearbit.com/navercorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=navercorp.com&sz=128",
         "title": "[디자인시스템 파트] 프론트엔드 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -1400,7 +1400,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 31,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[카카오톡 탭프론트엔드팀] 프론트엔드 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -1446,7 +1446,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 32,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[카카오페이 자산관리 셀] 프론트엔드 개발자",
         "location": "서울",
         "district": "구로구",
@@ -1492,7 +1492,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 33,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[카카오커머스 웹개발 파트] 프론트엔드 리드 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -1538,7 +1538,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 34,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[카카오모빌리티 UI셀] 프론트엔드 전문가",
         "location": "서울",
         "district": "구로구",
@@ -1584,7 +1584,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 35,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[카카오엔터 웹플랫폼팀] 프론트엔드 코어 개발자",
         "location": "서울",
         "district": "구로구",
@@ -1630,7 +1630,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 36,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[네이버 검색 FE셀] 프론트엔드 수석 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -1676,7 +1676,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 37,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[네이버 쇼핑 서비스 개발팀] 프론트엔드 테크 리드",
         "location": "서울",
         "district": "구로구",
@@ -1722,7 +1722,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 38,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[네이버 웹툰 글로벌 FE팀] 프론트엔드 담당자",
         "location": "서울",
         "district": "구로구",
@@ -1768,7 +1768,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 39,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[네이버 치지직 스트리밍 파트] 프론트엔드 아키텍트",
         "location": "서울",
         "district": "구로구",
@@ -1813,7 +1813,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 40,
         "companyName": "당근",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[네이버클라우드 파이프라인팀] 프론트엔드 플랫폼 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -1859,7 +1859,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 41,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[당근 중고거래 FE팀] 프론트엔드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -1905,7 +1905,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 42,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[당근알바 웹서비스 파트] 프론트엔드 개발자",
         "location": "서울",
         "district": "송파구",
@@ -1951,7 +1951,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 43,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[당근페이 클라이언트팀] 프론트엔드 리드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -1997,7 +1997,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 44,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[당근 로컬 커머스 셀] 프론트엔드 전문가",
         "location": "서울",
         "district": "송파구",
@@ -2043,7 +2043,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 45,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[당근 광고플랫폼 FE팀] 프론트엔드 코어 개발자",
         "location": "서울",
         "district": "송파구",
@@ -2089,7 +2089,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 46,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[쿠팡 로켓배송 주문웹 파트] 프론트엔드 수석 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -2135,7 +2135,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 47,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[쿠팡이츠 파트너웹팀] 프론트엔드 테크 리드",
         "location": "서울",
         "district": "송파구",
@@ -2181,7 +2181,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 48,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[쿠팡 Play 웹플랫폼 파트] 프론트엔드 담당자",
         "location": "서울",
         "district": "송파구",
@@ -2227,7 +2227,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 49,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[쿠팡 글로벌 셀러웹팀] 프론트엔드 아키텍트",
         "location": "서울",
         "district": "송파구",
@@ -2272,7 +2272,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 50,
         "companyName": "쿠팡",
-        "companyLogo": "https://logo.clearbit.com/coupang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=coupang.com&sz=128",
         "title": "[쿠팡 결제 FE셀] 프론트엔드 플랫폼 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -2318,7 +2318,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 51,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[배민 주문/결제 시스템팀] 백엔드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -2364,7 +2364,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 52,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[배민 라이더 배차 코어셀] 백엔드 개발자",
         "location": "서울",
         "district": "송파구",
@@ -2410,7 +2410,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 53,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[배민상회 플랫폼 개발팀] 백엔드 리드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -2456,7 +2456,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 54,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[배민 라이브커머스 백엔드 파트] 백엔드 전문가",
         "location": "서울",
         "district": "송파구",
@@ -2502,7 +2502,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 55,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[우아한 데이터플랫폼팀] 백엔드 코어 개발자",
         "location": "서울",
         "district": "송파구",
@@ -2548,7 +2548,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 56,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[LINE 메세징 코어 서버팀] 백엔드 수석 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -2594,7 +2594,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 57,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[LINE Pay 결제 엔진셀] 백엔드 테크 리드",
         "location": "서울",
         "district": "송파구",
@@ -2640,7 +2640,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 58,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[LINE 타임라인 추천서버 파트] 백엔드 담당자",
         "location": "서울",
         "district": "송파구",
@@ -2686,7 +2686,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 59,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[LINE 스티커/아이템 플랫폼] 백엔드 아키텍트",
         "location": "서울",
         "district": "송파구",
@@ -2732,7 +2732,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 60,
         "companyName": "우아한형제들",
-        "companyLogo": "https://logo.clearbit.com/woowahan.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=woowahan.com&sz=128",
         "title": "[LINE 글로벌 인프라 백엔드팀] 백엔드 플랫폼 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -2778,7 +2778,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 61,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[마비노기 모바일 서버팀] 백엔드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -2824,7 +2824,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 62,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[메이플스토리 플랫폼 인프라셀] 백엔드 개발자",
         "location": "경기",
         "district": "성남시",
@@ -2870,7 +2870,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 63,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[던전앤파이터 결제 및 계정팀] 백엔드 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -2916,7 +2916,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 64,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[NEXON 글로벌 통합회원 파트] 백엔드 전문가",
         "location": "경기",
         "district": "성남시",
@@ -2962,7 +2962,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 65,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[프로젝트 MOD 서버팀] 백엔드 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -3008,7 +3008,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 66,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[리니지W 서버 파트] 백엔드 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3054,7 +3054,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 67,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[TL(Throne and Liberty) 코어엔진셀] 백엔드 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -3100,7 +3100,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 68,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[NC 클라우드 게임 플랫폼팀] 백엔드 담당자",
         "location": "경기",
         "district": "성남시",
@@ -3146,7 +3146,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 69,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[NC 데이터플랫폼 파트] 백엔드 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -3192,7 +3192,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 70,
         "companyName": "라인플러스",
-        "companyLogo": "https://logo.clearbit.com/linecorp.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=linecorp.com&sz=128",
         "title": "[NC AI 매칭 서버팀] 백엔드 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3238,7 +3238,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 71,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[야놀자 숙박/레저 예약엔진팀] 백엔드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3284,7 +3284,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 72,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[야놀자 글로벌 결제 파트] 백엔드 개발자",
         "location": "경기",
         "district": "성남시",
@@ -3330,7 +3330,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 73,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[야놀자 클라우드 PMS 개발셀] 백엔드 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3376,7 +3376,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 74,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[야놀자 항공/교통 연동팀] 백엔드 전문가",
         "location": "경기",
         "district": "성남시",
@@ -3422,7 +3422,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 75,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[야놀자 멤버십/포인트 파트] 백엔드 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -3468,7 +3468,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 76,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[배민 주문/결제 시스템팀] 백엔드 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3514,7 +3514,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 77,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[배민 라이더 배차 코어셀] 백엔드 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -3560,7 +3560,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 78,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[배민상회 플랫폼 개발팀] 백엔드 담당자",
         "location": "경기",
         "district": "성남시",
@@ -3606,7 +3606,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 79,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[배민 라이브커머스 백엔드 파트] 백엔드 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -3652,7 +3652,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 80,
         "companyName": "넥슨코리아",
-        "companyLogo": "https://logo.clearbit.com/nexon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=nexon.com&sz=128",
         "title": "[우아한 데이터플랫폼팀] 백엔드 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3698,7 +3698,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 81,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[LINE 메세징 코어 서버팀] 백엔드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3744,7 +3744,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 82,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[LINE Pay 결제 엔진셀] 백엔드 개발자",
         "location": "경기",
         "district": "성남시",
@@ -3790,7 +3790,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 83,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[LINE 타임라인 추천서버 파트] 백엔드 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3836,7 +3836,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 84,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[LINE 스티커/아이템 플랫폼] 백엔드 전문가",
         "location": "경기",
         "district": "성남시",
@@ -3882,7 +3882,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 85,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[LINE 글로벌 인프라 백엔드팀] 백엔드 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -3928,7 +3928,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 86,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[마비노기 모바일 서버팀] 백엔드 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -3974,7 +3974,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 87,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[메이플스토리 플랫폼 인프라셀] 백엔드 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -4020,7 +4020,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 88,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[던전앤파이터 결제 및 계정팀] 백엔드 담당자",
         "location": "경기",
         "district": "성남시",
@@ -4066,7 +4066,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 89,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[NEXON 글로벌 통합회원 파트] 백엔드 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -4112,7 +4112,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 90,
         "companyName": "엔씨소프트",
-        "companyLogo": "https://logo.clearbit.com/ncsoft.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ncsoft.com&sz=128",
         "title": "[프로젝트 MOD 서버팀] 백엔드 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -4158,7 +4158,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 91,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[리니지W 서버 파트] 백엔드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4204,7 +4204,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 92,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[TL(Throne and Liberty) 코어엔진셀] 백엔드 개발자",
         "location": "서울",
         "district": "강남구",
@@ -4250,7 +4250,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 93,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[NC 클라우드 게임 플랫폼팀] 백엔드 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4296,7 +4296,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 94,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[NC 데이터플랫폼 파트] 백엔드 전문가",
         "location": "서울",
         "district": "강남구",
@@ -4342,7 +4342,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 95,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[NC AI 매칭 서버팀] 백엔드 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -4388,7 +4388,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 96,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[야놀자 숙박/레저 예약엔진팀] 백엔드 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4434,7 +4434,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 97,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[야놀자 글로벌 결제 파트] 백엔드 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -4480,7 +4480,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 98,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[야놀자 클라우드 PMS 개발셀] 백엔드 담당자",
         "location": "서울",
         "district": "강남구",
@@ -4526,7 +4526,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 99,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[야놀자 항공/교통 연동팀] 백엔드 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -4572,7 +4572,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 100,
         "companyName": "야놀자",
-        "companyLogo": "https://logo.clearbit.com/yanolja.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=yanolja.com&sz=128",
         "title": "[야놀자 멤버십/포인트 파트] 백엔드 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4618,7 +4618,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 101,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[채널톡 메신저 풀스택팀] 풀스택 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4665,7 +4665,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 102,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[채널톡 AI 챗봇 셀] 풀스택 개발자",
         "location": "서울",
         "district": "강남구",
@@ -4712,7 +4712,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 103,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[채널톡 고객관리 CRM 파트] 풀스택 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4759,7 +4759,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 104,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[채널톡 글로벌 마케팅 파트] 풀스택 전문가",
         "location": "서울",
         "district": "강남구",
@@ -4806,7 +4806,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 105,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[채널톡 어드민 개발팀] 풀스택 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -4853,7 +4853,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 106,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[리디셀렉트 풀스택 파트] 풀스택 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -4900,7 +4900,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 107,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[리디북스 뷰어플랫폼팀] 풀스택 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -4947,7 +4947,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 108,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[리디 만화/웹툰 서비스셀] 풀스택 담당자",
         "location": "서울",
         "district": "강남구",
@@ -4993,7 +4993,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 109,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[리디 글로벌 딜라이트팀] 풀스택 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -5040,7 +5040,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 110,
         "companyName": "채널코퍼레이션",
-        "companyLogo": "https://logo.clearbit.com/channel.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=channel.io&sz=128",
         "title": "[리디 결제/구독 파트] 풀스택 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5087,7 +5087,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 111,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[몰로코 애드텍 콘솔팀] 풀스택 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5134,7 +5134,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 112,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[몰로코 데이터 대시보드셀] 풀스택 개발자",
         "location": "서울",
         "district": "강남구",
@@ -5181,7 +5181,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 113,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[몰로코 머신러닝 모니터링팀] 풀스택 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5228,7 +5228,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 114,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[몰로코 글로벌 딜러 파트] 풀스택 전문가",
         "location": "서울",
         "district": "강남구",
@@ -5275,7 +5275,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 115,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[몰로코 애널리틱스 파트] 풀스택 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -5322,7 +5322,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 116,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[오늘의집 3D 인테리어팀] 풀스택 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5369,7 +5369,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 117,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[오늘의집 시공/커머스 셀] 풀스택 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -5416,7 +5416,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 118,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[오늘의집 커뮤니티 파트] 풀스택 담당자",
         "location": "서울",
         "district": "강남구",
@@ -5462,7 +5462,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 119,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[오늘의집 물류 풀스택팀] 풀스택 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -5509,7 +5509,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 120,
         "companyName": "리디",
-        "companyLogo": "https://logo.clearbit.com/ridi.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ridi.com&sz=128",
         "title": "[오늘의집 파트너센터 파트] 풀스택 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5556,7 +5556,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 121,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[직방 3D 단지투어 파트] 풀스택 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5603,7 +5603,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 122,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[직방 부동산 중개플랫폼팀] 풀스택 개발자",
         "location": "서울",
         "district": "강남구",
@@ -5650,7 +5650,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 123,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[직방 스마트홈 IoT 셀] 풀스택 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5697,7 +5697,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 124,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[직방 분양/투자 파트] 풀스택 전문가",
         "location": "서울",
         "district": "강남구",
@@ -5744,7 +5744,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 125,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[직방 계약자동화 파트] 풀스택 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -5791,7 +5791,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 126,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[채널톡 메신저 풀스택팀] 풀스택 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -5838,7 +5838,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 127,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[채널톡 AI 챗봇 셀] 풀스택 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -5885,7 +5885,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 128,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[채널톡 고객관리 CRM 파트] 풀스택 담당자",
         "location": "서울",
         "district": "강남구",
@@ -5931,7 +5931,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 129,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[채널톡 글로벌 마케팅 파트] 풀스택 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -5978,7 +5978,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 130,
         "companyName": "몰로코",
-        "companyLogo": "https://logo.clearbit.com/moloco.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=moloco.com&sz=128",
         "title": "[채널톡 어드민 개발팀] 풀스택 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -6025,7 +6025,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 131,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[리디셀렉트 풀스택 파트] 풀스택 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -6072,7 +6072,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 132,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[리디북스 뷰어플랫폼팀] 풀스택 개발자",
         "location": "서울",
         "district": "서초구",
@@ -6119,7 +6119,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 133,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[리디 만화/웹툰 서비스셀] 풀스택 리드 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -6166,7 +6166,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 134,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[리디 글로벌 딜라이트팀] 풀스택 전문가",
         "location": "서울",
         "district": "서초구",
@@ -6213,7 +6213,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 135,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[리디 결제/구독 파트] 풀스택 코어 개발자",
         "location": "서울",
         "district": "서초구",
@@ -6260,7 +6260,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 136,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[몰로코 애드텍 콘솔팀] 풀스택 수석 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -6307,7 +6307,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 137,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[몰로코 데이터 대시보드셀] 풀스택 테크 리드",
         "location": "서울",
         "district": "서초구",
@@ -6354,7 +6354,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 138,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[몰로코 머신러닝 모니터링팀] 풀스택 담당자",
         "location": "서울",
         "district": "서초구",
@@ -6400,7 +6400,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 139,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[몰로코 글로벌 딜러 파트] 풀스택 아키텍트",
         "location": "서울",
         "district": "서초구",
@@ -6447,7 +6447,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 140,
         "companyName": "오늘의집(버킷플레이스)",
-        "companyLogo": "https://logo.clearbit.com/bucketplace.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bucketplace.co.kr&sz=128",
         "title": "[몰로코 애널리틱스 파트] 풀스택 플랫폼 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -6494,7 +6494,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 141,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[오늘의집 3D 인테리어팀] 풀스택 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -6541,7 +6541,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 142,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[오늘의집 시공/커머스 셀] 풀스택 개발자",
         "location": "서울",
         "district": "강남구",
@@ -6588,7 +6588,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 143,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[오늘의집 커뮤니티 파트] 풀스택 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -6635,7 +6635,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 144,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[오늘의집 물류 풀스택팀] 풀스택 전문가",
         "location": "서울",
         "district": "강남구",
@@ -6682,7 +6682,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 145,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[오늘의집 파트너센터 파트] 풀스택 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -6729,7 +6729,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 146,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[직방 3D 단지투어 파트] 풀스택 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -6776,7 +6776,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 147,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[직방 부동산 중개플랫폼팀] 풀스택 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -6823,7 +6823,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 148,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[직방 스마트홈 IoT 셀] 풀스택 담당자",
         "location": "서울",
         "district": "강남구",
@@ -6869,7 +6869,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 149,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[직방 분양/투자 파트] 풀스택 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -6916,7 +6916,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 150,
         "companyName": "직방",
-        "companyLogo": "https://logo.clearbit.com/zigbang.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=zigbang.com&sz=128",
         "title": "[직방 계약자동화 파트] 풀스택 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -6963,7 +6963,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 151,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[Upstage LLM 코어모델팀] ML 엔지니어 엔지니어",
         "location": "경기",
         "district": "용인시",
@@ -7010,7 +7010,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 152,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[Upstage Solar 파인튜닝셀] ML 엔지니어 개발자",
         "location": "경기",
         "district": "용인시",
@@ -7057,7 +7057,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 153,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[Upstage Document AI 파트] ML 엔지니어 리드 엔지니어",
         "location": "경기",
         "district": "용인시",
@@ -7104,7 +7104,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 154,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[Upstage RAG 엔진 파트] ML 엔지니어 전문가",
         "location": "경기",
         "district": "용인시",
@@ -7151,7 +7151,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 155,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[Upstage MLOps 플랫폼팀] ML 엔지니어 코어 개발자",
         "location": "경기",
         "district": "용인시",
@@ -7198,7 +7198,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 156,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[뤼튼 생성형 AI 에이전트팀] ML 엔지니어 수석 엔지니어",
         "location": "경기",
         "district": "용인시",
@@ -7245,7 +7245,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 157,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[뤼튼 Prompt Engineering 파트] ML 엔지니어 테크 리드",
         "location": "경기",
         "district": "용인시",
@@ -7292,7 +7292,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 158,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[뤼튼 멀티모달 모델 파트] ML 엔지니어 담당자",
         "location": "경기",
         "district": "용인시",
@@ -7338,7 +7338,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 159,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[뤼튼 검색엔진 연동셀] ML 엔지니어 아키텍트",
         "location": "경기",
         "district": "용인시",
@@ -7385,7 +7385,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 160,
         "companyName": "업스테이지",
-        "companyLogo": "https://logo.clearbit.com/upstage.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=upstage.ai&sz=128",
         "title": "[뤼튼 AI 서빙 파트] ML 엔지니어 플랫폼 엔지니어",
         "location": "경기",
         "district": "용인시",
@@ -7432,7 +7432,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 161,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[Lunit INSIGHT 흉부분석팀] ML 엔지니어 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -7479,7 +7479,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 162,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[Lunit SCOPE 면역항암 AI셀] ML 엔지니어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -7526,7 +7526,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 163,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[Lunit 3D 의료영상 엔진팀] ML 엔지니어 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -7573,7 +7573,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 164,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[Lunit MLOps 파이프라인 파트] ML 엔지니어 전문가",
         "location": "서울",
         "district": "강남구",
@@ -7620,7 +7620,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 165,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[Lunit AI 가속화셀] ML 엔지니어 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -7667,7 +7667,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 166,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[VUNO Med-DeepBrain 팀] ML 엔지니어 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -7714,7 +7714,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 167,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[VUNO 심혈관 AI 파트] ML 엔지니어 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -7761,7 +7761,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 168,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[VUNO 생체신호 분석셀] ML 엔지니어 담당자",
         "location": "서울",
         "district": "강남구",
@@ -7807,7 +7807,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 169,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[VUNO AI 모델 경량화팀] ML 엔지니어 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -7854,7 +7854,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 170,
         "companyName": "뤼튼테크놀로지스",
-        "companyLogo": "https://logo.clearbit.com/wrtn.ai",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wrtn.ai&sz=128",
         "title": "[VUNO 클라우드 AI 서빙 파트] ML 엔지니어 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -7901,7 +7901,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 171,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[딥노이드 뇌질환 AI 검출팀] ML 엔지니어 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -7948,7 +7948,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 172,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[딥노이드 산업용 AI 비전셀] ML 엔지니어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -7995,7 +7995,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 173,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[딥노이드 데이터 라벨링 자동화 파트] ML 엔지니어 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -8042,7 +8042,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 174,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[딥노이드 딥러닝 코어팀] ML 엔지니어 전문가",
         "location": "서울",
         "district": "강남구",
@@ -8089,7 +8089,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 175,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[딥노이드 AI Edge 디바이스팀] ML 엔지니어 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -8136,7 +8136,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 176,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[Upstage LLM 코어모델팀] ML 엔지니어 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -8183,7 +8183,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 177,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[Upstage Solar 파인튜닝셀] ML 엔지니어 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -8230,7 +8230,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 178,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[Upstage Document AI 파트] ML 엔지니어 담당자",
         "location": "서울",
         "district": "강남구",
@@ -8276,7 +8276,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 179,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[Upstage RAG 엔진 파트] ML 엔지니어 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -8323,7 +8323,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 180,
         "companyName": "루닛",
-        "companyLogo": "https://logo.clearbit.com/lunit.io",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lunit.io&sz=128",
         "title": "[Upstage MLOps 플랫폼팀] ML 엔지니어 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -8370,7 +8370,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 181,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[뤼튼 생성형 AI 에이전트팀] ML 엔지니어 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -8417,7 +8417,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 182,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[뤼튼 Prompt Engineering 파트] ML 엔지니어 개발자",
         "location": "서울",
         "district": "서초구",
@@ -8464,7 +8464,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 183,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[뤼튼 멀티모달 모델 파트] ML 엔지니어 리드 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -8511,7 +8511,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 184,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[뤼튼 검색엔진 연동셀] ML 엔지니어 전문가",
         "location": "서울",
         "district": "서초구",
@@ -8558,7 +8558,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 185,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[뤼튼 AI 서빙 파트] ML 엔지니어 코어 개발자",
         "location": "서울",
         "district": "서초구",
@@ -8605,7 +8605,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 186,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[Lunit INSIGHT 흉부분석팀] ML 엔지니어 수석 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -8652,7 +8652,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 187,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[Lunit SCOPE 면역항암 AI셀] ML 엔지니어 테크 리드",
         "location": "서울",
         "district": "서초구",
@@ -8699,7 +8699,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 188,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[Lunit 3D 의료영상 엔진팀] ML 엔지니어 담당자",
         "location": "서울",
         "district": "서초구",
@@ -8745,7 +8745,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 189,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[Lunit MLOps 파이프라인 파트] ML 엔지니어 아키텍트",
         "location": "서울",
         "district": "서초구",
@@ -8792,7 +8792,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 190,
         "companyName": "뷰노",
-        "companyLogo": "https://logo.clearbit.com/vuno.co",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=vuno.co&sz=128",
         "title": "[Lunit AI 가속화셀] ML 엔지니어 플랫폼 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -8839,7 +8839,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 191,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[VUNO Med-DeepBrain 팀] ML 엔지니어 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -8886,7 +8886,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 192,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[VUNO 심혈관 AI 파트] ML 엔지니어 개발자",
         "location": "서울",
         "district": "구로구",
@@ -8933,7 +8933,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 193,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[VUNO 생체신호 분석셀] ML 엔지니어 리드 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -8980,7 +8980,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 194,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[VUNO AI 모델 경량화팀] ML 엔지니어 전문가",
         "location": "서울",
         "district": "구로구",
@@ -9027,7 +9027,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 195,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[VUNO 클라우드 AI 서빙 파트] ML 엔지니어 코어 개발자",
         "location": "서울",
         "district": "구로구",
@@ -9074,7 +9074,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 196,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[딥노이드 뇌질환 AI 검출팀] ML 엔지니어 수석 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -9121,7 +9121,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 197,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[딥노이드 산업용 AI 비전셀] ML 엔지니어 테크 리드",
         "location": "서울",
         "district": "구로구",
@@ -9168,7 +9168,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 198,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[딥노이드 데이터 라벨링 자동화 파트] ML 엔지니어 담당자",
         "location": "서울",
         "district": "구로구",
@@ -9214,7 +9214,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 199,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[딥노이드 딥러닝 코어팀] ML 엔지니어 아키텍트",
         "location": "서울",
         "district": "구로구",
@@ -9261,7 +9261,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 200,
         "companyName": "딥노이드",
-        "companyLogo": "https://logo.clearbit.com/deepnoid.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=deepnoid.com&sz=128",
         "title": "[딥노이드 AI Edge 디바이스팀] ML 엔지니어 플랫폼 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -9308,7 +9308,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 201,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[무신사 블랙프라이데이 인프라셀] DevOps 엔지니어",
         "location": "서울",
         "district": "성남시",
@@ -9355,7 +9355,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 202,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[무신사 플랫폼 SRE팀] DevOps 개발자",
         "location": "서울",
         "district": "성남시",
@@ -9402,7 +9402,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 203,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[무신사 CI/CD 자동화 파트] DevOps 리드 엔지니어",
         "location": "서울",
         "district": "성남시",
@@ -9449,7 +9449,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 204,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[무신사 코어 네트워크팀] DevOps 전문가",
         "location": "서울",
         "district": "성남시",
@@ -9496,7 +9496,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 205,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[무신사 클라우드보안 파트] DevOps 코어 개발자",
         "location": "서울",
         "district": "성남시",
@@ -9543,7 +9543,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 206,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[여기어때 클라우드 인프라팀] DevOps 수석 엔지니어",
         "location": "서울",
         "district": "성남시",
@@ -9590,7 +9590,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 207,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[여기어때 SRE 엔지니어링셀] DevOps 테크 리드",
         "location": "서울",
         "district": "성남시",
@@ -9636,7 +9636,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 208,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[여기어때 데이타베이스 Ops 파트] DevOps 담당자",
         "location": "서울",
         "district": "성남시",
@@ -9683,7 +9683,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 209,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[여기어때 트래픽제어 파트] DevOps 아키텍트",
         "location": "서울",
         "district": "성남시",
@@ -9730,7 +9730,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 210,
         "companyName": "무신사",
-        "companyLogo": "https://logo.clearbit.com/musinsa.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=musinsa.com&sz=128",
         "title": "[여기어때 모니터링 셀] DevOps 플랫폼 엔지니어",
         "location": "서울",
         "district": "성남시",
@@ -9777,7 +9777,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 211,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[쏘카 차량 IoT 인프라팀] DevOps 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -9824,7 +9824,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 212,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[쏘카 클라우드 아키텍처셀] DevOps 개발자",
         "location": "서울",
         "district": "강남구",
@@ -9871,7 +9871,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 213,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[쏘카 서비스 SRE 파트] DevOps 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -9918,7 +9918,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 214,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[쏘카 쿠버네티스 파트너팀] DevOps 전문가",
         "location": "서울",
         "district": "강남구",
@@ -9965,7 +9965,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 215,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[쏘카 비용최적화 TaskForce] DevOps 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -10012,7 +10012,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 216,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[당근 로컬 인프라 파트] DevOps 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -10059,7 +10059,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 217,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[당근 SRE 개발실] DevOps 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -10105,7 +10105,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 218,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[당근 글로벌 데브옵스셀] DevOps 담당자",
         "location": "서울",
         "district": "강남구",
@@ -10152,7 +10152,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 219,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[당근 서비스 메시 파트] DevOps 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -10199,7 +10199,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 220,
         "companyName": "여기어때",
-        "companyLogo": "https://logo.clearbit.com/goodchoice.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=goodchoice.kr&sz=128",
         "title": "[당근 데이터인프라 Ops] DevOps 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -10246,7 +10246,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 221,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[지그재그 코어 인프라팀] DevOps 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -10293,7 +10293,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 222,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[지그재그 SRE 파트] DevOps 개발자",
         "location": "서울",
         "district": "성동구",
@@ -10340,7 +10340,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 223,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[지그재그 배포자동화 셀] DevOps 리드 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -10387,7 +10387,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 224,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[지그재그 모니터링 파트] DevOps 전문가",
         "location": "서울",
         "district": "성동구",
@@ -10434,7 +10434,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 225,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[지그재그 클라우드 가속팀] DevOps 코어 개발자",
         "location": "서울",
         "district": "성동구",
@@ -10481,7 +10481,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 226,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[무신사 블랙프라이데이 인프라셀] DevOps 수석 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -10528,7 +10528,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 227,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[무신사 플랫폼 SRE팀] DevOps 테크 리드",
         "location": "서울",
         "district": "성동구",
@@ -10574,7 +10574,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 228,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[무신사 CI/CD 자동화 파트] DevOps 담당자",
         "location": "서울",
         "district": "성동구",
@@ -10621,7 +10621,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 229,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[무신사 코어 네트워크팀] DevOps 아키텍트",
         "location": "서울",
         "district": "성동구",
@@ -10668,7 +10668,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 230,
         "companyName": "쏘카",
-        "companyLogo": "https://logo.clearbit.com/socar.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=socar.kr&sz=128",
         "title": "[무신사 클라우드보안 파트] DevOps 플랫폼 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -10715,7 +10715,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 231,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[여기어때 클라우드 인프라팀] DevOps 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -10762,7 +10762,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 232,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[여기어때 SRE 엔지니어링셀] DevOps 개발자",
         "location": "서울",
         "district": "구로구",
@@ -10809,7 +10809,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 233,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[여기어때 데이타베이스 Ops 파트] DevOps 리드 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -10856,7 +10856,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 234,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[여기어때 트래픽제어 파트] DevOps 전문가",
         "location": "서울",
         "district": "구로구",
@@ -10903,7 +10903,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 235,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[여기어때 모니터링 셀] DevOps 코어 개발자",
         "location": "서울",
         "district": "구로구",
@@ -10950,7 +10950,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 236,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[쏘카 차량 IoT 인프라팀] DevOps 수석 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -10997,7 +10997,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 237,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[쏘카 클라우드 아키텍처셀] DevOps 테크 리드",
         "location": "서울",
         "district": "구로구",
@@ -11043,7 +11043,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 238,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[쏘카 서비스 SRE 파트] DevOps 담당자",
         "location": "서울",
         "district": "구로구",
@@ -11090,7 +11090,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 239,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[쏘카 쿠버네티스 파트너팀] DevOps 아키텍트",
         "location": "서울",
         "district": "구로구",
@@ -11137,7 +11137,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 240,
         "companyName": "당근알바",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[쏘카 비용최적화 TaskForce] DevOps 플랫폼 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -11184,7 +11184,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 241,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[당근 로컬 인프라 파트] DevOps 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11231,7 +11231,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 242,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[당근 SRE 개발실] DevOps 개발자",
         "location": "서울",
         "district": "강남구",
@@ -11278,7 +11278,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 243,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[당근 글로벌 데브옵스셀] DevOps 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11325,7 +11325,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 244,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[당근 서비스 메시 파트] DevOps 전문가",
         "location": "서울",
         "district": "강남구",
@@ -11372,7 +11372,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 245,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[당근 데이터인프라 Ops] DevOps 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -11419,7 +11419,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 246,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[지그재그 코어 인프라팀] DevOps 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11466,7 +11466,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 247,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[지그재그 SRE 파트] DevOps 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -11512,7 +11512,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 248,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[지그재그 배포자동화 셀] DevOps 담당자",
         "location": "서울",
         "district": "강남구",
@@ -11559,7 +11559,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 249,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[지그재그 모니터링 파트] DevOps 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -11606,7 +11606,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 250,
         "companyName": "지그재그(카카오스타일)",
-        "companyLogo": "https://logo.clearbit.com/kakaostyle.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kakaostyle.com&sz=128",
         "title": "[지그재그 클라우드 가속팀] DevOps 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11653,7 +11653,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 251,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[메가존 AWS 아키텍처 센터] 클라우드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11699,7 +11699,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 252,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[메가존 GCP 마이그레이션팀] 클라우드 개발자",
         "location": "서울",
         "district": "강남구",
@@ -11745,7 +11745,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 253,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[메가존 FinOps 컨설팅셀] 클라우드 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11790,7 +11790,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 254,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[메가존 클라우드 보안센터] 클라우드 전문가",
         "location": "서울",
         "district": "강남구",
@@ -11837,7 +11837,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 255,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[메가존 MSP 운영 파트] 클라우드 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -11883,7 +11883,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 256,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[베스핀 OpsNow 개발팀] 클라우드 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -11929,7 +11929,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 257,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[베스핀 멀티클라우드 아키텍처 파트] 클라우드 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -11975,7 +11975,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 258,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[베스핀 하이브리드 인프라셀] 클라우드 담당자",
         "location": "서울",
         "district": "강남구",
@@ -12021,7 +12021,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 259,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[베스핀 글로벌 마이그레이션팀] 클라우드 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -12067,7 +12067,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 260,
         "companyName": "메가존클라우드",
-        "companyLogo": "https://logo.clearbit.com/megazone.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=megazone.com&sz=128",
         "title": "[베스핀 클라우드 네트워크팀] 클라우드 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -12113,7 +12113,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 261,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[삼성SDS SCP 클라우드 개발팀] 클라우드 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -12159,7 +12159,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 262,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[삼성SDS 금융 클라우드 컨설팅파목] 클라우드 개발자",
         "location": "서울",
         "district": "서초구",
@@ -12205,7 +12205,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 263,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[삼성SDS 글로벌 인프라 파트] 클라우드 리드 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -12250,7 +12250,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 264,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[삼성SDS 클라우드 네이티브셀] 클라우드 전문가",
         "location": "서울",
         "district": "서초구",
@@ -12297,7 +12297,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 265,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[삼성SDS MSP 기술지원팀] 클라우드 코어 개발자",
         "location": "서울",
         "district": "서초구",
@@ -12343,7 +12343,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 266,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[LG CNS 엔터프라이즈 클라우드팀] 클라우드 수석 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -12389,7 +12389,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 267,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[LG CNS AM(App Modernization) 파트] 클라우드 테크 리드",
         "location": "서울",
         "district": "서초구",
@@ -12435,7 +12435,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 268,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[LG CNS 클라우드 거버넌스셀] 클라우드 담당자",
         "location": "서울",
         "district": "서초구",
@@ -12481,7 +12481,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 269,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[LG CNS 스마트팩토리 클라우드팀] 클라우드 아키텍트",
         "location": "서울",
         "district": "서초구",
@@ -12527,7 +12527,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 270,
         "companyName": "베스핀글로벌",
-        "companyLogo": "https://logo.clearbit.com/bespinglobal.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=bespinglobal.com&sz=128",
         "title": "[LG CNS 데이터클라우드 파트] 클라우드 플랫폼 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -12573,7 +12573,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 271,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[SK C&C Cloud Z 아키텍처팀] 클라우드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -12619,7 +12619,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 272,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[SK C&C 클라우드 마이그레이션셀] 클라우드 개발자",
         "location": "서울",
         "district": "송파구",
@@ -12665,7 +12665,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 273,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[SK C&C 컨테이너 플랫폼팀] 클라우드 리드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -12710,7 +12710,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 274,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[SK C&C 클라우드 보안 파트] 클라우드 전문가",
         "location": "서울",
         "district": "송파구",
@@ -12757,7 +12757,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 275,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[SK C&C 금융 테크엔지니어링] 클라우드 코어 개발자",
         "location": "서울",
         "district": "송파구",
@@ -12803,7 +12803,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 276,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[메가존 AWS 아키텍처 센터] 클라우드 수석 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -12849,7 +12849,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 277,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[메가존 GCP 마이그레이션팀] 클라우드 테크 리드",
         "location": "서울",
         "district": "송파구",
@@ -12895,7 +12895,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 278,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[메가존 FinOps 컨설팅셀] 클라우드 담당자",
         "location": "서울",
         "district": "송파구",
@@ -12941,7 +12941,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 279,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[메가존 클라우드 보안센터] 클라우드 아키텍트",
         "location": "서울",
         "district": "송파구",
@@ -12987,7 +12987,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 280,
         "companyName": "삼성SDS",
-        "companyLogo": "https://logo.clearbit.com/samsungsds.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=samsungsds.com&sz=128",
         "title": "[메가존 MSP 운영 파트] 클라우드 플랫폼 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -13033,7 +13033,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 281,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[베스핀 OpsNow 개발팀] 클라우드 엔지니어",
         "location": "서울",
         "district": "강서구",
@@ -13079,7 +13079,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 282,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[베스핀 멀티클라우드 아키텍처 파트] 클라우드 개발자",
         "location": "서울",
         "district": "강서구",
@@ -13125,7 +13125,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 283,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[베스핀 하이브리드 인프라셀] 클라우드 리드 엔지니어",
         "location": "서울",
         "district": "강서구",
@@ -13170,7 +13170,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 284,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[베스핀 글로벌 마이그레이션팀] 클라우드 전문가",
         "location": "서울",
         "district": "강서구",
@@ -13217,7 +13217,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 285,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[베스핀 클라우드 네트워크팀] 클라우드 코어 개발자",
         "location": "서울",
         "district": "강서구",
@@ -13263,7 +13263,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 286,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[삼성SDS SCP 클라우드 개발팀] 클라우드 수석 엔지니어",
         "location": "서울",
         "district": "강서구",
@@ -13309,7 +13309,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 287,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[삼성SDS 금융 클라우드 컨설팅파목] 클라우드 테크 리드",
         "location": "서울",
         "district": "강서구",
@@ -13355,7 +13355,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 288,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[삼성SDS 글로벌 인프라 파트] 클라우드 담당자",
         "location": "서울",
         "district": "강서구",
@@ -13401,7 +13401,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 289,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[삼성SDS 클라우드 네이티브셀] 클라우드 아키텍트",
         "location": "서울",
         "district": "강서구",
@@ -13447,7 +13447,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 290,
         "companyName": "LG CNS",
-        "companyLogo": "https://logo.clearbit.com/lgcns.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lgcns.com&sz=128",
         "title": "[삼성SDS MSP 기술지원팀] 클라우드 플랫폼 엔지니어",
         "location": "서울",
         "district": "강서구",
@@ -13493,7 +13493,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 291,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[LG CNS 엔터프라이즈 클라우드팀] 클라우드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -13539,7 +13539,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 292,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[LG CNS AM(App Modernization) 파트] 클라우드 개발자",
         "location": "경기",
         "district": "성남시",
@@ -13585,7 +13585,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 293,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[LG CNS 클라우드 거버넌스셀] 클라우드 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -13630,7 +13630,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 294,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[LG CNS 스마트팩토리 클라우드팀] 클라우드 전문가",
         "location": "경기",
         "district": "성남시",
@@ -13677,7 +13677,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 295,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[LG CNS 데이터클라우드 파트] 클라우드 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -13723,7 +13723,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 296,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[SK C&C Cloud Z 아키텍처팀] 클라우드 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -13769,7 +13769,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 297,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[SK C&C 클라우드 마이그레이션셀] 클라우드 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -13815,7 +13815,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 298,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[SK C&C 컨테이너 플랫폼팀] 클라우드 담당자",
         "location": "경기",
         "district": "성남시",
@@ -13861,7 +13861,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 299,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[SK C&C 클라우드 보안 파트] 클라우드 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -13907,7 +13907,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 300,
         "companyName": "SK C&C",
-        "companyLogo": "https://logo.clearbit.com/sk.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=sk.co.kr&sz=128",
         "title": "[SK C&C 금융 테크엔지니어링] 클라우드 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -13953,7 +13953,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 301,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[AhnLab V3 코어엔진팀] 보안 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -13999,7 +13999,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 302,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[AhnLab ASEC 악성코드분석팀] 보안 개발자",
         "location": "경기",
         "district": "성남시",
@@ -14045,7 +14045,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 303,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[AhnLab 모의해킹 컨설팅셀] 보안 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -14092,7 +14092,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 304,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[AhnLab 침해대응 CERT팀] 보안 전문가",
         "location": "경기",
         "district": "성남시",
@@ -14138,7 +14138,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 305,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[AhnLab 클라우드보안개발] 보안 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -14183,7 +14183,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 306,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[이스트시큐리티 알약 엔진개발팀] 보안 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -14229,7 +14229,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 307,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[이스트시큐리티 랜섬웨어 대응센터] 보안 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -14275,7 +14275,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 308,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[이스트시큐리티 악성URL 분석파목] 보안 담당자",
         "location": "경기",
         "district": "성남시",
@@ -14322,7 +14322,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 309,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[이스트시큐리티 보안SW 셀] 보안 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -14368,7 +14368,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 310,
         "companyName": "안랩",
-        "companyLogo": "https://logo.clearbit.com/ahnlab.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=ahnlab.com&sz=128",
         "title": "[이스트시큐리티 모바일보안 파트] 보안 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -14414,7 +14414,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 311,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[SK실더스 RedTeam 모의해킹실] 보안 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -14460,7 +14460,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 312,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[SK실더스 Top-CERT 분석팀] 보안 개발자",
         "location": "서울",
         "district": "서초구",
@@ -14506,7 +14506,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 313,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[SK실더스 클라우드 보안관제셀] 보안 리드 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -14553,7 +14553,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 314,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[SK실더스 보안아키텍처 파트] 보안 전문가",
         "location": "서울",
         "district": "서초구",
@@ -14599,7 +14599,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 315,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[SK실더스 정보보호 컨설팅팀] 보안 코어 개발자",
         "location": "서울",
         "district": "서초구",
@@ -14644,7 +14644,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 316,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[파수 DRM 코어개발팀] 보안 수석 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -14690,7 +14690,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 317,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[파수 데이터식별 기술팀] 보안 테크 리드",
         "location": "서울",
         "district": "서초구",
@@ -14736,7 +14736,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 318,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[파수 개인정보보호 솔루션셀] 보안 담당자",
         "location": "서울",
         "district": "서초구",
@@ -14783,7 +14783,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 319,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[파수 소스코드 취약점진단 파트] 보안 아키텍트",
         "location": "서울",
         "district": "서초구",
@@ -14829,7 +14829,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 320,
         "companyName": "이스트시큐리티",
-        "companyLogo": "https://logo.clearbit.com/estsecurity.seoul.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=estsecurity.seoul.kr&sz=128",
         "title": "[파수 보안지식그래프 팀] 보안 플랫폼 엔지니어",
         "location": "서울",
         "district": "서초구",
@@ -14875,7 +14875,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 321,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[윈스 SNIPER IPS/IDS 개발팀] 보안 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -14921,7 +14921,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 322,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[윈스 DDoS 공격대응 연구소] 보안 개발자",
         "location": "서울",
         "district": "중구",
@@ -14967,7 +14967,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 323,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[윈스 5G 네트워크 보안셀] 보안 리드 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -15014,7 +15014,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 324,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[윈스 보안관제 센터(SOC)] 보안 전문가",
         "location": "서울",
         "district": "중구",
@@ -15060,7 +15060,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 325,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[윈스 커널 드라이버 분석팀] 보안 코어 개발자",
         "location": "서울",
         "district": "중구",
@@ -15105,7 +15105,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 326,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[AhnLab V3 코어엔진팀] 보안 수석 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -15151,7 +15151,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 327,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[AhnLab ASEC 악성코드분석팀] 보안 테크 리드",
         "location": "서울",
         "district": "중구",
@@ -15197,7 +15197,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 328,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[AhnLab 모의해킹 컨설팅셀] 보안 담당자",
         "location": "서울",
         "district": "중구",
@@ -15244,7 +15244,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 329,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[AhnLab 침해대응 CERT팀] 보안 아키텍트",
         "location": "서울",
         "district": "중구",
@@ -15290,7 +15290,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 330,
         "companyName": "SK실더스",
-        "companyLogo": "https://logo.clearbit.com/skshieldus.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=skshieldus.com&sz=128",
         "title": "[AhnLab 클라우드보안개발] 보안 플랫폼 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -15336,7 +15336,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 331,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[이스트시큐리티 알약 엔진개발팀] 보안 엔지니어",
         "location": "서울",
         "district": "마포구",
@@ -15382,7 +15382,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 332,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[이스트시큐리티 랜섬웨어 대응센터] 보안 개발자",
         "location": "서울",
         "district": "마포구",
@@ -15428,7 +15428,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 333,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[이스트시큐리티 악성URL 분석파목] 보안 리드 엔지니어",
         "location": "서울",
         "district": "마포구",
@@ -15475,7 +15475,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 334,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[이스트시큐리티 보안SW 셀] 보안 전문가",
         "location": "서울",
         "district": "마포구",
@@ -15521,7 +15521,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 335,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[이스트시큐리티 모바일보안 파트] 보안 코어 개발자",
         "location": "서울",
         "district": "마포구",
@@ -15566,7 +15566,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 336,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[SK실더스 RedTeam 모의해킹실] 보안 수석 엔지니어",
         "location": "서울",
         "district": "마포구",
@@ -15612,7 +15612,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 337,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[SK실더스 Top-CERT 분석팀] 보안 테크 리드",
         "location": "서울",
         "district": "마포구",
@@ -15658,7 +15658,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 338,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[SK실더스 클라우드 보안관제셀] 보안 담당자",
         "location": "서울",
         "district": "마포구",
@@ -15705,7 +15705,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 339,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[SK실더스 보안아키텍처 파트] 보안 아키텍트",
         "location": "서울",
         "district": "마포구",
@@ -15751,7 +15751,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 340,
         "companyName": "파수",
-        "companyLogo": "https://logo.clearbit.com/fasoo.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=fasoo.com&sz=128",
         "title": "[SK실더스 정보보호 컨설팅팀] 보안 플랫폼 엔지니어",
         "location": "서울",
         "district": "마포구",
@@ -15797,7 +15797,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 341,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[파수 DRM 코어개발팀] 보안 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -15843,7 +15843,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 342,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[파수 데이터식별 기술팀] 보안 개발자",
         "location": "경기",
         "district": "성남시",
@@ -15889,7 +15889,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 343,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[파수 개인정보보호 솔루션셀] 보안 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -15936,7 +15936,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 344,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[파수 소스코드 취약점진단 파트] 보안 전문가",
         "location": "경기",
         "district": "성남시",
@@ -15982,7 +15982,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 345,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[파수 보안지식그래프 팀] 보안 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -16027,7 +16027,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 346,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[윈스 SNIPER IPS/IDS 개발팀] 보안 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -16073,7 +16073,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 347,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[윈스 DDoS 공격대응 연구소] 보안 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -16119,7 +16119,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 348,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[윈스 5G 네트워크 보안셀] 보안 담당자",
         "location": "경기",
         "district": "성남시",
@@ -16166,7 +16166,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 349,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[윈스 보안관제 센터(SOC)] 보안 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -16212,7 +16212,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 350,
         "companyName": "윈스",
-        "companyLogo": "https://logo.clearbit.com/wins21.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=wins21.co.kr&sz=128",
         "title": "[윈스 커널 드라이버 분석팀] 보안 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -16258,7 +16258,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 351,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[PUBG 슈팅 액션팀] 게임 개발 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -16304,7 +16304,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 352,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[PUBG 차세대 그래픽스셀] 게임 개발 개발자",
         "location": "서울",
         "district": "강남구",
@@ -16350,7 +16350,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 353,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[PUBG 렌더링 파이프라인팀] 게임 개발 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -16396,7 +16396,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 354,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[PUBG 안티치트 서버팀] 게임 개발 전문가",
         "location": "서울",
         "district": "강남구",
@@ -16443,7 +16443,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 355,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[PUBG UI/UX 클라이언트 파트] 게임 개발 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -16489,7 +16489,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 356,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[로스트아크 레이드 전투팀] 게임 개발 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -16535,7 +16535,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 357,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[로스트아크 서버 아키텍처셀] 게임 개발 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -16581,7 +16581,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 358,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[로스트아크 Slate UI 파트] 게임 개발 담당자",
         "location": "서울",
         "district": "강남구",
@@ -16627,7 +16627,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 359,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[로스트아크 엔진 최적화팀] 게임 개발 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -16673,7 +16673,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 360,
         "companyName": "크래프톤",
-        "companyLogo": "https://logo.clearbit.com/krafton.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=krafton.com&sz=128",
         "title": "[로스트아크 멀티콘솔 파트] 게임 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -16719,7 +16719,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 361,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[붉은사막 자체엔진 파트] 게임 개발 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -16765,7 +16765,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 362,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[붉은사막 물리 시뮬레이션셀] 게임 개발 개발자",
         "location": "경기",
         "district": "성남시",
@@ -16811,7 +16811,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 363,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[붉은사막 3D 그래픽스 파트] 게임 개발 리드 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -16857,7 +16857,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 364,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[붉은사막 AI NPC 파트] 게임 개발 전문가",
         "location": "경기",
         "district": "성남시",
@@ -16904,7 +16904,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 365,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[검은사막 모바일 클라이언트팀] 게임 개발 코어 개발자",
         "location": "경기",
         "district": "성남시",
@@ -16950,7 +16950,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 366,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[세븐나이츠 RE:BOOT 개발팀] 게임 개발 수석 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -16996,7 +16996,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 367,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[넷마블 Monster Studio 셀] 게임 개발 테크 리드",
         "location": "경기",
         "district": "성남시",
@@ -17042,7 +17042,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 368,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[넷마블 언리얼 5 액션팀] 게임 개발 담당자",
         "location": "경기",
         "district": "성남시",
@@ -17088,7 +17088,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 369,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[넷마블 글로벌 캐주얼 게임셀] 게임 개발 아키텍트",
         "location": "경기",
         "district": "성남시",
@@ -17134,7 +17134,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 370,
         "companyName": "스마일게이트",
-        "companyLogo": "https://logo.clearbit.com/smilegate.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=smilegate.com&sz=128",
         "title": "[넷마블 서버 최적화 파트] 게임 개발 플랫폼 엔지니어",
         "location": "경기",
         "district": "성남시",
@@ -17180,7 +17180,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 371,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[쿠키런: 오븐브레이크 클라이언트] 게임 개발 엔지니어",
         "location": "경기",
         "district": "안양시",
@@ -17226,7 +17226,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 372,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[쿠키런: 킹덤 엔진팀] 게임 개발 개발자",
         "location": "경기",
         "district": "안양시",
@@ -17272,7 +17272,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 373,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[쿠키런 실시간 동기화셀] 게임 개발 리드 엔지니어",
         "location": "경기",
         "district": "안양시",
@@ -17318,7 +17318,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 374,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[데브시스터즈 3D 그래픽스 파트] 게임 개발 전문가",
         "location": "경기",
         "district": "안양시",
@@ -17365,7 +17365,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 375,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[데브시스터즈 캐주얼 UX셀] 게임 개발 코어 개발자",
         "location": "경기",
         "district": "안양시",
@@ -17411,7 +17411,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 376,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[PUBG 슈팅 액션팀] 게임 개발 수석 엔지니어",
         "location": "경기",
         "district": "안양시",
@@ -17457,7 +17457,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 377,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[PUBG 차세대 그래픽스셀] 게임 개발 테크 리드",
         "location": "경기",
         "district": "안양시",
@@ -17503,7 +17503,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 378,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[PUBG 렌더링 파이프라인팀] 게임 개발 담당자",
         "location": "경기",
         "district": "안양시",
@@ -17549,7 +17549,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 379,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[PUBG 안티치트 서버팀] 게임 개발 아키텍트",
         "location": "경기",
         "district": "안양시",
@@ -17595,7 +17595,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 380,
         "companyName": "펄어비스",
-        "companyLogo": "https://logo.clearbit.com/pearlabyss.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=pearlabyss.com&sz=128",
         "title": "[PUBG UI/UX 클라이언트 파트] 게임 개발 플랫폼 엔지니어",
         "location": "경기",
         "district": "안양시",
@@ -17641,7 +17641,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 381,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[로스트아크 레이드 전투팀] 게임 개발 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -17687,7 +17687,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 382,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[로스트아크 서버 아키텍처셀] 게임 개발 개발자",
         "location": "서울",
         "district": "구로구",
@@ -17733,7 +17733,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 383,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[로스트아크 Slate UI 파트] 게임 개발 리드 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -17779,7 +17779,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 384,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[로스트아크 엔진 최적화팀] 게임 개발 전문가",
         "location": "서울",
         "district": "구로구",
@@ -17826,7 +17826,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 385,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[로스트아크 멀티콘솔 파트] 게임 개발 코어 개발자",
         "location": "서울",
         "district": "구로구",
@@ -17872,7 +17872,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 386,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[붉은사막 자체엔진 파트] 게임 개발 수석 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -17918,7 +17918,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 387,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[붉은사막 물리 시뮬레이션셀] 게임 개발 테크 리드",
         "location": "서울",
         "district": "구로구",
@@ -17964,7 +17964,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 388,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[붉은사막 3D 그래픽스 파트] 게임 개발 담당자",
         "location": "서울",
         "district": "구로구",
@@ -18010,7 +18010,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 389,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[붉은사막 AI NPC 파트] 게임 개발 아키텍트",
         "location": "서울",
         "district": "구로구",
@@ -18056,7 +18056,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 390,
         "companyName": "넷마블",
-        "companyLogo": "https://logo.clearbit.com/netmarble.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=netmarble.com&sz=128",
         "title": "[검은사막 모바일 클라이언트팀] 게임 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -18102,7 +18102,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 391,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[세븐나이츠 RE:BOOT 개발팀] 게임 개발 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -18148,7 +18148,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 392,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[넷마블 Monster Studio 셀] 게임 개발 개발자",
         "location": "서울",
         "district": "강남구",
@@ -18194,7 +18194,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 393,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[넷마블 언리얼 5 액션팀] 게임 개발 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -18240,7 +18240,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 394,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[넷마블 글로벌 캐주얼 게임셀] 게임 개발 전문가",
         "location": "서울",
         "district": "강남구",
@@ -18287,7 +18287,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 395,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[넷마블 서버 최적화 파트] 게임 개발 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -18333,7 +18333,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 396,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[쿠키런: 오븐브레이크 클라이언트] 게임 개발 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -18379,7 +18379,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 397,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[쿠키런: 킹덤 엔진팀] 게임 개발 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -18425,7 +18425,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 398,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[쿠키런 실시간 동기화셀] 게임 개발 담당자",
         "location": "서울",
         "district": "강남구",
@@ -18471,7 +18471,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 399,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[데브시스터즈 3D 그래픽스 파트] 게임 개발 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -18517,7 +18517,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 400,
         "companyName": "데브시스터즈",
-        "companyLogo": "https://logo.clearbit.com/devsisters.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=devsisters.com&sz=128",
         "title": "[데브시스터즈 캐주얼 UX셀] 게임 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -18563,7 +18563,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 401,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[당근 iOS 중고거래팀] 앱 개발 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -18609,7 +18609,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 402,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[당근 Android 동네생활셀] 앱 개발 개발자",
         "location": "서울",
         "district": "구로구",
@@ -18655,7 +18655,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 403,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[당근 Flutter 모바일팀] 앱 개발 리드 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -18701,7 +18701,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 404,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[당근 로컬 커머스 앱 파트] 앱 개발 전문가",
         "location": "서울",
         "district": "구로구",
@@ -18747,7 +18747,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 405,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[당근 모바일 디자인시스템실] 앱 개발 코어 개발자",
         "location": "서울",
         "district": "구로구",
@@ -18793,7 +18793,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 406,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[토스뱅크 iOS 코어뱅킹팀] 앱 개발 수석 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -18839,7 +18839,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 407,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[토스뱅크 Android 여신/수신셀] 앱 개발 테크 리드",
         "location": "서울",
         "district": "구로구",
@@ -18885,7 +18885,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 408,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[토스뱅크 모바일 보안셀] 앱 개발 담당자",
         "location": "서울",
         "district": "구로구",
@@ -18931,7 +18931,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 409,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[토스뱅크 모바일 아키텍처팀] 앱 개발 아키텍트",
         "location": "서울",
         "district": "구로구",
@@ -18977,7 +18977,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 410,
         "companyName": "당근마켓",
-        "companyLogo": "https://logo.clearbit.com/daangn.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         "title": "[토스뱅크 UI 반응형 파트] 앱 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "구로구",
@@ -19023,7 +19023,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 411,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[뱅크샐러드 iOS 자산관리팀] 앱 개발 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -19069,7 +19069,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 412,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[뱅크샐러드 Android 금융지표셀] 앱 개발 개발자",
         "location": "서울",
         "district": "강남구",
@@ -19115,7 +19115,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 413,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[뱅크샐러드 모바일 성능최적화팀] 앱 개발 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -19161,7 +19161,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 414,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[뱅크샐러드 하이브리드 앱 파트] 앱 개발 전문가",
         "location": "서울",
         "district": "강남구",
@@ -19207,7 +19207,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 415,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[뱅크샐러드 데이터비주얼 모바일] 앱 개발 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -19253,7 +19253,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 416,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[아자르(Azar) iOS 비디오팀] 앱 개발 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -19299,7 +19299,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 417,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[아자르 Android RTC엔진셀] 앱 개발 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -19345,7 +19345,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 418,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[하이퍼커넥트 모바일 AI비전팀] 앱 개발 담당자",
         "location": "서울",
         "district": "강남구",
@@ -19391,7 +19391,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 419,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[하이퍼커넥트 Flutter 글로벌팀] 앱 개발 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -19437,7 +19437,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 420,
         "companyName": "토스뱅크",
-        "companyLogo": "https://logo.clearbit.com/tossbank.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=tossbank.com&sz=128",
         "title": "[하이퍼커넥트 모바일 렌더링 파트] 앱 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -19483,7 +19483,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 421,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[29CM iOS 커머스 파트] 앱 개발 엔지니어",
         "location": "서울",
         "district": "여의도",
@@ -19529,7 +19529,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 422,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[29CM Android 스토어셀] 앱 개발 개발자",
         "location": "서울",
         "district": "여의도",
@@ -19575,7 +19575,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 423,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[29CM React Native 모바일팀] 앱 개발 리드 엔지니어",
         "location": "서울",
         "district": "여의도",
@@ -19621,7 +19621,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 424,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[29CM 모바일 UX 모션팀] 앱 개발 전문가",
         "location": "서울",
         "district": "여의도",
@@ -19667,7 +19667,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 425,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[29CM 모바일 앱결제 파트] 앱 개발 코어 개발자",
         "location": "서울",
         "district": "여의도",
@@ -19713,7 +19713,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 426,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[당근 iOS 중고거래팀] 앱 개발 수석 엔지니어",
         "location": "서울",
         "district": "여의도",
@@ -19759,7 +19759,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 427,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[당근 Android 동네생활셀] 앱 개발 테크 리드",
         "location": "서울",
         "district": "여의도",
@@ -19805,7 +19805,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 428,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[당근 Flutter 모바일팀] 앱 개발 담당자",
         "location": "서울",
         "district": "여의도",
@@ -19851,7 +19851,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 429,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[당근 로컬 커머스 앱 파트] 앱 개발 아키텍트",
         "location": "서울",
         "district": "여의도",
@@ -19897,7 +19897,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 430,
         "companyName": "뱅크샐러드",
-        "companyLogo": "https://logo.clearbit.com/banksalad.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=banksalad.com&sz=128",
         "title": "[당근 모바일 디자인시스템실] 앱 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "여의도",
@@ -19943,7 +19943,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 431,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[토스뱅크 iOS 코어뱅킹팀] 앱 개발 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -19989,7 +19989,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 432,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[토스뱅크 Android 여신/수신셀] 앱 개발 개발자",
         "location": "서울",
         "district": "강남구",
@@ -20035,7 +20035,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 433,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[토스뱅크 모바일 보안셀] 앱 개발 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -20081,7 +20081,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 434,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[토스뱅크 모바일 아키텍처팀] 앱 개발 전문가",
         "location": "서울",
         "district": "강남구",
@@ -20127,7 +20127,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 435,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[토스뱅크 UI 반응형 파트] 앱 개발 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -20173,7 +20173,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 436,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[뱅크샐러드 iOS 자산관리팀] 앱 개발 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -20219,7 +20219,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 437,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[뱅크샐러드 Android 금융지표셀] 앱 개발 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -20265,7 +20265,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 438,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[뱅크샐러드 모바일 성능최적화팀] 앱 개발 담당자",
         "location": "서울",
         "district": "강남구",
@@ -20311,7 +20311,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 439,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[뱅크샐러드 하이브리드 앱 파트] 앱 개발 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -20357,7 +20357,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 440,
         "companyName": "하이퍼커넥트",
-        "companyLogo": "https://logo.clearbit.com/hyperconnect.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=hyperconnect.com&sz=128",
         "title": "[뱅크샐러드 데이터비주얼 모바일] 앱 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -20403,7 +20403,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 441,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[아자르(Azar) iOS 비디오팀] 앱 개발 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -20449,7 +20449,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 442,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[아자르 Android RTC엔진셀] 앱 개발 개발자",
         "location": "서울",
         "district": "성동구",
@@ -20495,7 +20495,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 443,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[하이퍼커넥트 모바일 AI비전팀] 앱 개발 리드 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -20541,7 +20541,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 444,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[하이퍼커넥트 Flutter 글로벌팀] 앱 개발 전문가",
         "location": "서울",
         "district": "성동구",
@@ -20587,7 +20587,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 445,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[하이퍼커넥트 모바일 렌더링 파트] 앱 개발 코어 개발자",
         "location": "서울",
         "district": "성동구",
@@ -20633,7 +20633,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 446,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[29CM iOS 커머스 파트] 앱 개발 수석 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -20679,7 +20679,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 447,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[29CM Android 스토어셀] 앱 개발 테크 리드",
         "location": "서울",
         "district": "성동구",
@@ -20725,7 +20725,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 448,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[29CM React Native 모바일팀] 앱 개발 담당자",
         "location": "서울",
         "district": "성동구",
@@ -20771,7 +20771,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 449,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[29CM 모바일 UX 모션팀] 앱 개발 아키텍트",
         "location": "서울",
         "district": "성동구",
@@ -20817,7 +20817,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 450,
         "companyName": "29CM(무신사)",
-        "companyLogo": "https://logo.clearbit.com/29cm.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=29cm.co.kr&sz=128",
         "title": "[29CM 모바일 앱결제 파트] 앱 개발 플랫폼 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -20863,7 +20863,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 451,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[그린카 차량 관제 데이터팀] 데이터 분석 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -20910,7 +20910,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 452,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[그린카 수요 예측 애널리틱스셀] 데이터 분석 개발자",
         "location": "서울",
         "district": "성동구",
@@ -20957,7 +20957,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 453,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[그린카 고객 LTV 분석 파트] 데이터 분석 리드 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -21004,7 +21004,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 454,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[그린카 요금 최적화 팀] 데이터 분석 전문가",
         "location": "서울",
         "district": "성동구",
@@ -21051,7 +21051,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 455,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[그린카 데이터 파이프라인셀] 데이터 분석 코어 개발자",
         "location": "서울",
         "district": "성동구",
@@ -21098,7 +21098,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 456,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[11번가 커머스 데이터 파트] 데이터 분석 수석 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -21145,7 +21145,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 457,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[11번가 프로모션 A/B실험셀] 데이터 분석 테크 리드",
         "location": "서울",
         "district": "성동구",
@@ -21192,7 +21192,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 458,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[11번가 고객 행동분석팀] 데이터 분석 담당자",
         "location": "서울",
         "district": "성동구",
@@ -21239,7 +21239,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 459,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[11번가 검색지표 애널리틱스] 데이터 분석 아키텍트",
         "location": "서울",
         "district": "성동구",
@@ -21286,7 +21286,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 460,
         "companyName": "그린카",
-        "companyLogo": "https://logo.clearbit.com/greencar.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=greencar.co.kr&sz=128",
         "title": "[11번가 정산 데이터 파트] 데이터 분석 플랫폼 엔지니어",
         "location": "서울",
         "district": "성동구",
@@ -21333,7 +21333,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 461,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[G마켓 빅데이터 분석실] 데이터 분석 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -21380,7 +21380,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 462,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[G마켓 구매 전환율(CVR)셀] 데이터 분석 개발자",
         "location": "서울",
         "district": "중구",
@@ -21427,7 +21427,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 463,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[G마켓 광고 데이터 파트] 데이터 분석 리드 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -21474,7 +21474,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 464,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[G마켓 서치 지표팀] 데이터 분석 전문가",
         "location": "서울",
         "district": "중구",
@@ -21521,7 +21521,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 465,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[G마켓 고객 코호트 셀] 데이터 분석 코어 개발자",
         "location": "서울",
         "district": "중구",
@@ -21568,7 +21568,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 466,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[롯데온 통합 데이터 애널리틱스] 데이터 분석 수석 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -21615,7 +21615,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 467,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[롯데온 유저 퍼널 분석팀] 데이터 분석 테크 리드",
         "location": "서울",
         "district": "중구",
@@ -21662,7 +21662,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 468,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[롯데온 물류 지표 파트] 데이터 분석 담당자",
         "location": "서울",
         "district": "중구",
@@ -21709,7 +21709,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 469,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[롯데온 VIP Retention 셀] 데이터 분석 아키텍트",
         "location": "서울",
         "district": "중구",
@@ -21756,7 +21756,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 470,
         "companyName": "11번가",
-        "companyLogo": "https://logo.clearbit.com/11st.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=11st.co.kr&sz=128",
         "title": "[롯데온 BI 대시보드 팀] 데이터 분석 플랫폼 엔지니어",
         "location": "서울",
         "district": "중구",
@@ -21803,7 +21803,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 471,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[컬리 수요예측 데이터셀] 데이터 분석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -21850,7 +21850,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 472,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[컬리 신선식품 재고 분석팀] 데이터 분석 개발자",
         "location": "서울",
         "district": "강남구",
@@ -21897,7 +21897,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 473,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[컬리 물류동선 데이터 파트] 데이터 분석 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -21944,7 +21944,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 474,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[컬리 장바구니 전환팀] 데이터 분석 전문가",
         "location": "서울",
         "district": "강남구",
@@ -21991,7 +21991,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 475,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[컬리 A/B 테스트 코어팀] 데이터 분석 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -22038,7 +22038,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 476,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[그린카 차량 관제 데이터팀] 데이터 분석 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -22085,7 +22085,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 477,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[그린카 수요 예측 애널리틱스셀] 데이터 분석 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -22132,7 +22132,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 478,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[그린카 고객 LTV 분석 파트] 데이터 분석 담당자",
         "location": "서울",
         "district": "강남구",
@@ -22179,7 +22179,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 479,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[그린카 요금 최적화 팀] 데이터 분석 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -22226,7 +22226,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 480,
         "companyName": "G마켓",
-        "companyLogo": "https://logo.clearbit.com/gmarket.co.kr",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=gmarket.co.kr&sz=128",
         "title": "[그린카 데이터 파이프라인셀] 데이터 분석 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -22273,7 +22273,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 481,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[11번가 커머스 데이터 파트] 데이터 분석 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -22320,7 +22320,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 482,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[11번가 프로모션 A/B실험셀] 데이터 분석 개발자",
         "location": "서울",
         "district": "송파구",
@@ -22367,7 +22367,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 483,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[11번가 고객 행동분석팀] 데이터 분석 리드 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -22414,7 +22414,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 484,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[11번가 검색지표 애널리틱스] 데이터 분석 전문가",
         "location": "서울",
         "district": "송파구",
@@ -22461,7 +22461,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 485,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[11번가 정산 데이터 파트] 데이터 분석 코어 개발자",
         "location": "서울",
         "district": "송파구",
@@ -22508,7 +22508,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 486,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[G마켓 빅데이터 분석실] 데이터 분석 수석 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -22555,7 +22555,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 487,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[G마켓 구매 전환율(CVR)셀] 데이터 분석 테크 리드",
         "location": "서울",
         "district": "송파구",
@@ -22602,7 +22602,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 488,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[G마켓 광고 데이터 파트] 데이터 분석 담당자",
         "location": "서울",
         "district": "송파구",
@@ -22649,7 +22649,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 489,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[G마켓 서치 지표팀] 데이터 분석 아키텍트",
         "location": "서울",
         "district": "송파구",
@@ -22696,7 +22696,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 490,
         "companyName": "롯데온",
-        "companyLogo": "https://logo.clearbit.com/lotteon.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=lotteon.com&sz=128",
         "title": "[G마켓 고객 코호트 셀] 데이터 분석 플랫폼 엔지니어",
         "location": "서울",
         "district": "송파구",
@@ -22743,7 +22743,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 491,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[롯데온 통합 데이터 애널리틱스] 데이터 분석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -22790,7 +22790,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 492,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[롯데온 유저 퍼널 분석팀] 데이터 분석 개발자",
         "location": "서울",
         "district": "강남구",
@@ -22837,7 +22837,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 493,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[롯데온 물류 지표 파트] 데이터 분석 리드 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -22884,7 +22884,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 494,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[롯데온 VIP Retention 셀] 데이터 분석 전문가",
         "location": "서울",
         "district": "강남구",
@@ -22931,7 +22931,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 495,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[롯데온 BI 대시보드 팀] 데이터 분석 코어 개발자",
         "location": "서울",
         "district": "강남구",
@@ -22978,7 +22978,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 496,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[컬리 수요예측 데이터셀] 데이터 분석 수석 엔지니어",
         "location": "서울",
         "district": "강남구",
@@ -23025,7 +23025,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 497,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[컬리 신선식품 재고 분석팀] 데이터 분석 테크 리드",
         "location": "서울",
         "district": "강남구",
@@ -23072,7 +23072,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 498,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[컬리 물류동선 데이터 파트] 데이터 분석 담당자",
         "location": "서울",
         "district": "강남구",
@@ -23119,7 +23119,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 499,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[컬리 장바구니 전환팀] 데이터 분석 아키텍트",
         "location": "서울",
         "district": "강남구",
@@ -23166,7 +23166,7 @@ export const MOCK_POSTS: Post[] = [
     {
         "id": 500,
         "companyName": "컬리(마켓컬리)",
-        "companyLogo": "https://logo.clearbit.com/kurly.com",
+        "companyLogo": "https://www.google.com/s2/favicons?domain=kurly.com&sz=128",
         "title": "[컬리 A/B 테스트 코어팀] 데이터 분석 플랫폼 엔지니어",
         "location": "서울",
         "district": "강남구",

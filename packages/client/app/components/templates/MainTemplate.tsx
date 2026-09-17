@@ -33,7 +33,7 @@ const RECOMMENDED_PREVIEW_JOBS: PreviewJob[] = [
     {
         id: 1,
         companyName: "비바리퍼블리카(토스)",
-        companyLogo: "https://logo.clearbit.com/toss.im",
+        companyLogo: "https://www.google.com/s2/favicons?domain=toss.im&sz=128",
         title: "[토스뱅크 뱅킹플랫폼팀] 프론트엔드 엔지니어",
         techStack: ["React", "TypeScript"],
         location: "서울 강남구",
@@ -44,7 +44,7 @@ const RECOMMENDED_PREVIEW_JOBS: PreviewJob[] = [
     {
         id: 11,
         companyName: "카카오",
-        companyLogo: "https://logo.clearbit.com/kakaocorp.com",
+        companyLogo: "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         title: "[카카오페이 프론트엔드팀] 프론트엔드 엔지니어",
         techStack: ["Vue.js", "TypeScript"],
         location: "경기 성남시",
@@ -55,7 +55,7 @@ const RECOMMENDED_PREVIEW_JOBS: PreviewJob[] = [
     {
         id: 31,
         companyName: "당근",
-        companyLogo: "https://logo.clearbit.com/daangn.com",
+        companyLogo: "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         title: "[중고거래 서비스팀] 프론트엔드 엔지니어",
         techStack: ["React", "Next.js"],
         location: "서울 구로구",

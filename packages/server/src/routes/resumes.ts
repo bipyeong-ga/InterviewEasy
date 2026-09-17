@@ -542,9 +542,15 @@ JSON 구조:
                 [resumeId],
             )
 
+            // Use the uploaded file's name as the document title instead of
+            // the auto-generated "자기소개서 01" placeholder.
+            const titleFromFilename =
+                originalName.replace(/\.pdf$/i, "").trim() || originalName
+
             const updateResult = await pool.query(
-                "UPDATE resumes SET raw_text = $1, summary = $2, improvements = $3, recommended_jobs = $4, citations = $5, pdf_file = $6, pdf_name = $7, updated_at = CURRENT_TIMESTAMP WHERE id = $8 RETURNING *",
+                "UPDATE resumes SET title = $1, raw_text = $2, summary = $3, improvements = $4, recommended_jobs = $5, citations = $6, pdf_file = $7, pdf_name = $8, updated_at = CURRENT_TIMESTAMP WHERE id = $9 RETURNING *",
                 [
+                    titleFromFilename,
                     extractedText,
                     summary,
                     improvements,
