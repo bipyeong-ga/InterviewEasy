@@ -242,6 +242,16 @@ function getProviderConfig(provider: string) {
     return null
 }
 
+function getRedirectUri(req: Request, redirectPath: string) {
+    if (process.env.BACKEND_URL) {
+        return `${process.env.BACKEND_URL}${redirectPath}`
+    }
+    const host = req.get("host") || "localhost:3000"
+    // Vite 프록시 등에 의해 127.0.0.1로 전달되는 경우 localhost로 정규화
+    const normalizedHost = host.replace("127.0.0.1", "localhost")
+    return `${req.protocol}://${normalizedHost}${redirectPath}`
+}
+
 router.get("/oauth/:provider", (req: Request, res: Response) => {
     const rawProvider = req.params.provider
     const provider = Array.isArray(rawProvider) ? rawProvider[0] : rawProvider
@@ -256,7 +266,7 @@ router.get("/oauth/:provider", (req: Request, res: Response) => {
     // store state in cookie for verification
     res.cookie("oauth_state", state, { httpOnly: true, sameSite: "lax" })
 
-    const redirectUri = `${req.protocol}://${req.get("host")}${cfg.redirectPath}`
+    const redirectUri = getRedirectUri(req, cfg.redirectPath)
 
     if (provider === "github") {
         const params = new URLSearchParams({
@@ -310,42 +320,83 @@ router.get("/oauth/:provider/callback", async (req: Request, res: Response) => {
                 client_id: cfg.clientId,
                 client_secret: cfg.clientSecret,
                 code,
-                redirect_uri: `${req.protocol}://${req.get("host")}${cfg.redirectPath}`,
+                redirect_uri: getRedirectUri(req, cfg.redirectPath),
             })
             const tokenResp = await fetch(cfg.tokenUrl, {
                 method: "POST",
-                headers: { Accept: "application/json" },
+                headers: { 
+                    Accept: "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
                 body: params.toString(),
             })
             const tokenJson = (await tokenResp.json()) as any
+            console.log("[SERVER OAuth GitHub] tokenJson:", tokenJson)
             accessToken = tokenJson?.access_token
+
+            if (!accessToken) {
+                console.error("[SERVER OAuth GitHub] Access token missing. tokenJson:", tokenJson)
+                return res.status(400).json({
+                    error: "Failed to obtain access token from GitHub",
+                    details: tokenJson
+                })
+            }
 
             // fetch user
             const userResp = await fetch(cfg.userUrl as string, {
                 headers: {
-                    Authorization: `token ${accessToken}`,
+                    Authorization: `Bearer ${accessToken}`,
                     Accept: "application/vnd.github.v3+json",
+                    "User-Agent": "InterviewEasy-App",
                 },
             })
             const userJson = (await userResp.json()) as any
+            console.log("[SERVER OAuth GitHub] userJson:", userJson)
 
             // fetch emails to get primary email
             let email = userJson.email
             if (!email) {
-                const emailsResp = await fetch(cfg.userEmailsUrl as string, {
-                    headers: {
-                        Authorization: `token ${accessToken}`,
-                        Accept: "application/vnd.github.v3+json",
-                    },
-                })
-                const emailsJson = (await emailsResp.json()) as any
-                const primary = Array.isArray(emailsJson)
-                    ? emailsJson.find((e: any) => e.primary && e.verified)
-                    : null
-                email = primary?.email || (emailsJson[0] && emailsJson[0].email)
+                try {
+                    const emailsResp = await fetch(cfg.userEmailsUrl as string, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            Accept: "application/vnd.github.v3+json",
+                            "User-Agent": "InterviewEasy-App",
+                        },
+                    })
+                    const emailsJson = (await emailsResp.json()) as any
+                    console.log("[SERVER OAuth GitHub] emailsJson:", emailsJson)
+                    if (Array.isArray(emailsJson)) {
+                        const primary = emailsJson.find(
+                            (e: any) => e.primary && e.verified,
+                        )
+                        const anyVerified = emailsJson.find((e: any) => e.verified)
+                        email =
+                            primary?.email ||
+                            anyVerified?.email ||
+                            (emailsJson[0] && emailsJson[0].email)
+                    }
+                } catch (emailErr) {
+                    console.warn("[SERVER OAuth GitHub] Failed to fetch emails API:", emailErr)
+                }
             }
 
+            // GitHub 비공개 이메일 설정 등으로 이메일을 가져올 수 없는 경우 고유 로그인 식별자 기반 Fallback 이메일 생성
             if (!email) {
+                if (userJson.login) {
+                    email = `${userJson.login}@users.noreply.github.com`
+                } else if (userJson.id) {
+                    email = `github_${userJson.id}@intervieweasy.internal`
+                }
+            }
+
+            console.log("[SERVER OAuth GitHub] Final chosen email:", email)
+
+            if (!email) {
+                console.error(
+                    "[SERVER OAuth GitHub] Failed to obtain email for user:",
+                    userJson,
+                )
                 return res
                     .status(400)
                     .json({ error: "Email not available from provider" })
@@ -388,7 +439,7 @@ router.get("/oauth/:provider/callback", async (req: Request, res: Response) => {
                 code: code || "",
                 client_id: cfg.clientId as string,
                 client_secret: cfg.clientSecret as string,
-                redirect_uri: `${req.protocol}://${req.get("host")}${cfg.redirectPath}`,
+                redirect_uri: getRedirectUri(req, cfg.redirectPath),
                 grant_type: "authorization_code",
             })
 
@@ -400,24 +451,40 @@ router.get("/oauth/:provider/callback", async (req: Request, res: Response) => {
                 body: params.toString(),
             })
             const tokenJson = (await tokenResp.json()) as any
+            console.log("[SERVER OAuth Google] tokenJson:", tokenJson)
             accessToken = tokenJson?.access_token
 
             if (!accessToken) {
+                console.error(
+                    "[SERVER OAuth Google] Access token missing. tokenJson:",
+                    tokenJson,
+                )
                 return res
                     .status(400)
-                    .json({ error: "Failed to obtain access token" })
+                    .json({
+                        error: "Failed to obtain access token from Google",
+                        details: tokenJson,
+                    })
             }
 
             const userResp = await fetch(cfg.userUrl + "?alt=json", {
                 headers: { Authorization: `Bearer ${accessToken}` },
             })
             const userJson = (await userResp.json()) as any
+            console.log("[SERVER OAuth Google] userJson:", userJson)
 
             const email = userJson.email
             if (!email) {
+                console.error(
+                    "[SERVER OAuth Google] Failed to obtain email. userJson:",
+                    userJson,
+                )
                 return res
                     .status(400)
-                    .json({ error: "Email not available from provider" })
+                    .json({
+                        error: "Email not available from provider",
+                        details: userJson,
+                    })
             }
             const name = userJson.name || userJson.email
             const profile_image_url = userJson.picture
