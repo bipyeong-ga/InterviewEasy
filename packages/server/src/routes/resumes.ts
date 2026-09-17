@@ -4,6 +4,7 @@ import pool from "../db"
 import { authMiddleware } from "../middleware/auth"
 import multer from "multer"
 import { PDFParse } from "pdf-parse"
+import OpenAI from "openai"
 
 const router = Router()
 
@@ -43,6 +44,38 @@ router.get("/:id", async (req: Request, res: ExpressResponse) => {
         res.json(result.rows[0])
     } catch (error) {
         console.error("Failed to fetch resume:", error)
+        res.status(500).json({ error: "Internal server error" })
+    }
+})
+
+// 2-1. Get raw PDF file of a resume
+router.get("/:id/pdf", async (req: Request, res: ExpressResponse) => {
+    try {
+        const userId = req.user?.id
+        const resumeId = parseInt(req.params.id as string, 10)
+
+        const result = await pool.query(
+            "SELECT pdf_file, pdf_name FROM resumes WHERE id = $1 AND user_id = $2",
+            [resumeId, userId],
+        )
+
+        if (result.rows.length === 0 || !result.rows[0].pdf_file) {
+            return res
+                .status(404)
+                .json({ error: "PDF 파일을 찾을 수 없습니다." })
+        }
+
+        const { pdf_file, pdf_name } = result.rows[0]
+        const encodedName = encodeURIComponent(pdf_name || "resume.pdf")
+
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename="${encodedName}"; filename*=UTF-8''${encodedName}`,
+        )
+        res.send(pdf_file)
+    } catch (error) {
+        console.error("Failed to fetch resume PDF:", error)
         res.status(500).json({ error: "Internal server error" })
     }
 })
@@ -224,45 +257,20 @@ ${currentContent || "(없음)"}
 ${prompt}
 `
 
-        const geminiApiKey = process.env.GEMINI_API_KEY
+        const apiKey = process.env.OPENAI_API_KEY
         let generatedText = ""
 
-        if (geminiApiKey) {
+        if (apiKey && apiKey.trim() !== "") {
             try {
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            contents: [
-                                {
-                                    parts: [
-                                        {
-                                            text: promptText,
-                                        },
-                                    ],
-                                },
-                            ],
-                        }),
-                    },
-                )
-
-                if (!response.ok) {
-                    const errBody = await response.text()
-                    throw new Error(
-                        `Gemini API error: ${response.status} - ${errBody}`,
-                    )
-                }
-
-                const data = (await response.json()) as any
-                generatedText =
-                    data.candidates?.[0]?.content?.parts?.[0]?.text || ""
+                const openai = new OpenAI({ apiKey })
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-5",
+                    messages: [{ role: "user", content: promptText }],
+                })
+                generatedText = completion.choices[0]?.message?.content || ""
                 generatedText = generatedText.trim()
             } catch (apiError) {
-                console.error("Error calling Gemini API:", apiError)
+                console.error("Error calling OpenAI API in /ai:", apiError)
                 generatedText = generateFallbackResume(prompt)
             }
         } else {
@@ -353,7 +361,7 @@ async function callOpenAI(
             Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model: "gpt-5",
             messages,
             ...(isJson ? { response_format: { type: "json_object" } } : {}),
         }),
@@ -439,73 +447,8 @@ router.post(
 
             if (apiKey && apiKey.trim() !== "") {
                 try {
-                    const postsResult = await pool.query(
-                        "SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100",
-                    )
-                    const postsList = postsResult.rows
-                        .map(
-                            (p) =>
-                                `- [${p.company}] ${p.job_title} (기술스택: ${p.tech_stack.join(", ")})`,
-                        )
-                        .join("\n")
-
-                    const systemPrompt = `
-너는 대한민국 최고의 개발자 채용 및 커리어 컨설턴트 AI이다.
-제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 항목들을 제공해라.
-
-[CRITICAL: 참조(Citations) 및 인용문(Quote) 생성 원칙 - 매우 중요]
-1. 인용할 문장(quote)은 반드시 아래 제공된 [이력서 본문]에 실제로 한 글자도 틀리지 않고 정확히 존재하는 실제 문장(Exact Substring)이어야 한다.
-2. 절대로 원본에 없는 문장을 임의로 지어내거나, 요약하거나, 문맥을 바꾸어 가짜로 인용하지 마라.
-3. 분석 절차:
-   - 1단계: 먼저 이력서 본문에서 강점, 프로젝트, 개선이 필요한 근거가 되는 실제 문장들을 검색하여 citations 배열의 quote로 발췌한다.
-   - 2단계: 추출한 실제 인용구를 기반으로 요약(summary), 개선할 점(improvements)을 작성하고 각 글머리 끝에 [1], [2] 등의 참조 번호를 연결한다.
-
-[항목별 작성 가이드]
-1. 이력서 요약(summary): 인재의 핵심 강점, 주요 스택, 프로젝트 요약을 전문성 있게 작성. (각 항목 끝에 참조한 원본 문장의 번호 [1], [2] 등을 표기할 것)
-2. 개선할 점(improvements): 면접에서 아쉬울 수 있는 부분이나 보강이 필요한 내용(수치화, 근거 부족 등)을 지적하고 구체적 개선 조언 제공. (참조한 원본 문장의 번호 [3], [4] 등을 표기할 것)
-3. 추천 공고(recommended_jobs): 반드시 아래의 [실제 채용 공고 목록] 안에서만 이 이력서를 가진 지원자에게 가장 적합한 공고를 3~5개 골라 추천해라.
-4. 참조 출처(citations): 본문에서 [1], [2], [3] 등으로 인용한 원본 텍스트의 상세 정보를 담은 배열.
-
-[실제 채용 공고 목록]
-${postsList}
-
-[규칙]
-- 반드시 한국어로 대답해라.
-- summary, improvements 응답은 반드시 마크다운 글머리 기호(각 줄이 "-"로 시작) 목록 형태로 작성해라.
-- citations의 quote는 본문에 존재하는 실제 문자열을 그대로 복사해서 넣어라.
-- 반드시 다음 구조의 JSON 형태로만 응답해라. 다른 서론/설명은 절대 포함하지 마라.
-
-JSON 구조:
-{
-  "summary": "- **보유 역량 및 스택:** ... [1]\\n- **프로젝트 성과:** ... [2]",
-  "improvements": "- **정량적 성과 보강:** ... [3]\\n- **문제 해결 디테일:** ... [4]",
-  "recommended_jobs": [
-    { "job_title": "프론트엔드 개발자 (React)", "company": "네이버웹툰", "reason": "React 및 성능 최적화 경험이 돋보임" }
-  ],
-  "citations": [
-    {
-      "id": 1,
-      "title": "핵심 기술 역량",
-      "filename": "${originalName}",
-      "keywords": "기술 스택, 핵심 역량",
-      "published": "2026. 03. 29",
-      "objective": "요약 1번 항목의 근거 원문",
-      "quote": "이력서 원본에 존재하는 실제 문장",
-      "section": "이력서 본문"
-    }
-  ]
-}
-`
-                    const responseText = await callOpenAI(
-                        systemPrompt,
-                        extractedText,
-                        true,
-                    )
-                    const parsedResponse = JSON.parse(responseText)
-                    summary = parsedResponse.summary || ""
-                    improvements = parsedResponse.improvements || ""
-                    recommendedJobs = JSON.stringify(
-                        parsedResponse.recommended_jobs || [],
+                    console.log(
+                        `[Resume Upload] Starting AI analysis for "${originalName}" with GPT-5...`,
                     )
                     const analysisResult = await analyzeResumeText(
                         extractedText,
@@ -516,6 +459,9 @@ JSON 구조:
                     improvements = analysisResult.improvements
                     recommendedJobs = analysisResult.recommendedJobs
                     citations = analysisResult.citations
+                    console.log(
+                        `[Resume Upload] AI analysis finished successfully for "${originalName}"`,
+                    )
                 } catch (openaiErr: any) {
                     console.error("OpenAI analysis failed:", openaiErr)
                     const fallback = generateMockPDFAnalysis(
@@ -589,7 +535,9 @@ router.post("/:id/reanalyze", async (req: Request, res: ExpressResponse) => {
         const pdfName = resumeResult.rows[0].pdf_name || "자소서 원본"
 
         if (!rawText || !rawText.trim()) {
-            return res.status(400).json({ error: "이력서 원본 텍스트가 없습니다. 먼저 PDF를 업로드해주세요." })
+            return res.status(400).json({
+                error: "이력서 원본 텍스트가 없습니다. 먼저 PDF를 업로드해주세요.",
+            })
         }
 
         const apiKey = process.env.OPENAI_API_KEY
@@ -637,6 +585,9 @@ async function analyzeResumeText(
     originalName: string,
     apiKey: string,
 ) {
+    console.log(
+        `[Resume Analysis] 1/3 Querying job postings for RAG matching...`,
+    )
     const postsResult = await pool.query(
         "SELECT id, title as job_title, company_name as company, tech_stack FROM posts LIMIT 100",
     )
@@ -647,6 +598,9 @@ async function analyzeResumeText(
         )
         .join("\n")
 
+    console.log(
+        `[Resume Analysis] 2/3 Invoking OpenAI GPT-5 for deep evaluation and citations extraction...`,
+    )
     const systemPrompt = `
 너는 대한민국 최고의 개발자 채용 및 커리어 컨설턴트 AI이다.
 제공된 이력서/자기소개서 본문을 꼼꼼히 분석하여 다음 항목들을 제공해라.
@@ -697,10 +651,9 @@ JSON 구조:
   ]
 }
 `
-    const responseText = await callOpenAI(
-        systemPrompt,
-        extractedText,
-        true,
+    const responseText = await callOpenAI(systemPrompt, extractedText, true)
+    console.log(
+        `[Resume Analysis] 3/3 Normalizing citations and generating final report...`,
     )
     const parsedResponse = JSON.parse(responseText)
     const rawSummary = parsedResponse.summary || ""
@@ -718,6 +671,9 @@ JSON 구조:
         originalName,
     )
 
+    console.log(
+        `[Resume Analysis] Completed successfully! Citations count: ${citations.length}`,
+    )
     return {
         summary,
         improvements,
@@ -742,7 +698,7 @@ router.get("/:id/messages", async (req: Request, res: ExpressResponse) => {
         }
 
         const result = await pool.query(
-            "SELECT id, resume_id, sender, message, citations, recommended_jobs, created_at FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
+            "SELECT id, resume_id, sender, message, citations, recommended_jobs, thought_process, created_at FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
             [resumeId],
         )
         res.json(result.rows)
@@ -752,7 +708,509 @@ router.get("/:id/messages", async (req: Request, res: ExpressResponse) => {
     }
 })
 
-// 9. Send a message to AI assistant
+// 9. AI 어시스턴트 실시간 스트리밍 질의응답 (생각 과정 포함)
+router.post(
+    "/:id/messages/stream",
+    async (req: Request, res: ExpressResponse) => {
+        res.writeHead(200, {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+            "X-Accel-Buffering": "no",
+        })
+
+        let isClientConnected = true
+        req.on("close", () => {
+            isClientConnected = false
+        })
+
+        const sendEvent = (data: any) => {
+            if (!isClientConnected || res.writableEnded) return
+            try {
+                res.write(`data: ${JSON.stringify(data)}\n\n`)
+            } catch (err) {
+                console.warn("Client connection closed during write:", err)
+            }
+        }
+
+        try {
+            const userId = req.user?.id
+            const resumeId = parseInt(req.params.id as string, 10)
+            const { message } = req.body
+
+            if (
+                !message ||
+                typeof message !== "string" ||
+                message.trim() === ""
+            ) {
+                sendEvent({ type: "error", error: "Message is required" })
+                if (isClientConnected && !res.writableEnded) res.end()
+                return
+            }
+
+            // 소유권 확인 및 이력서 컨텍스트 조회
+            const resumeResult = await pool.query(
+                "SELECT raw_text, title, pdf_name, citations FROM resumes WHERE id = $1 AND user_id = $2",
+                [resumeId, userId],
+            )
+            if (resumeResult.rows.length === 0) {
+                sendEvent({ type: "error", error: "Resume not found" })
+                res.end()
+                return
+            }
+
+            const rawText = resumeResult.rows[0].raw_text || ""
+            const pdfName = resumeResult.rows[0].pdf_name || "자소서 원본"
+
+            // 채용 공고 목록 조회
+            const postsResult = await pool.query(
+                "SELECT id, title as job_title, company_name as company, company_logo, location, district, job_category, tech_stack, experience, salary, deadline, description, responsibilities, requirements, preferred_requirements FROM posts ORDER BY id ASC",
+            )
+            const availablePosts = postsResult.rows
+
+            // 이전 채팅 히스토리 조회
+            const historyResult = await pool.query(
+                "SELECT sender, message FROM resume_messages WHERE resume_id = $1 ORDER BY id ASC",
+                [resumeId],
+            )
+            const history = historyResult.rows
+
+            // 사용자 메시지 DB 저장 및 SSE 전송
+            const userMsgResult = await pool.query(
+                "INSERT INTO resume_messages (resume_id, sender, message) VALUES ($1, 'user', $2) RETURNING *",
+                [resumeId, message],
+            )
+            sendEvent({ type: "user_message", message: userMsgResult.rows[0] })
+
+            // 사용자의 질문이 채용 공고/포지션 추천 관련 질문인지 감지
+            const isJobRecommendationQuestion =
+                /추천|공고|채용|포지션|일자리|이직|지원|기업|회사|직무/i.test(
+                    message,
+                )
+
+            // 채용 공고 데이터 최적화 (토큰 절약 및 속도 향상: 질문에 부합하는 상위 15개 요약본만 추출)
+            let relevantPostsSummary: any[] = []
+            if (isJobRecommendationQuestion && availablePosts.length > 0) {
+                const lowerResume = (rawText + " " + message).toLowerCase()
+                const scored = availablePosts.map((post: any) => {
+                    let score = 0
+                    const techList: string[] = Array.isArray(post.tech_stack)
+                        ? post.tech_stack
+                        : typeof post.tech_stack === "string"
+                          ? JSON.parse(post.tech_stack || "[]")
+                          : []
+                    for (const t of techList) {
+                        if (lowerResume.includes(t.toLowerCase())) score += 3
+                    }
+                    if (
+                        post.job_category &&
+                        lowerResume.includes(post.job_category.toLowerCase())
+                    )
+                        score += 2
+                    if (
+                        post.job_title &&
+                        lowerResume.includes(post.job_title.toLowerCase())
+                    )
+                        score += 2
+                    return {
+                        id: post.id,
+                        company: post.company || post.company_name,
+                        job_title: post.job_title || post.title,
+                        location: post.location || "서울",
+                        district: post.district || "",
+                        tech_stack: techList,
+                        score,
+                    }
+                })
+                scored.sort((a: any, b: any) => b.score - a.score)
+                relevantPostsSummary = scored
+                    .slice(0, 15)
+                    .map(
+                        ({
+                            id,
+                            company,
+                            job_title,
+                            location,
+                            district,
+                            tech_stack,
+                        }: any) => ({
+                            id,
+                            company,
+                            job_title,
+                            location,
+                            district,
+                            tech_stack,
+                        }),
+                    )
+            }
+
+            const apiKey = process.env.OPENAI_API_KEY
+            let finalThought = ""
+            let finalAnswer = ""
+            let finalCitations: any[] = []
+            let finalRecommendedJobs: any[] = []
+
+            if (apiKey && apiKey.trim() !== "") {
+                try {
+                    const openai = new OpenAI({ apiKey })
+                    const systemPrompt = `
+너는 대한민국 최고의 개발자 채용 플랫폼 "InterviewEasy"의 전문 취업 코칭 및 이력서 분석 AI 어시스턴트이다.
+구직자의 질문에 맞춰 친절하고 지능적이며 구체적으로 답변해라.
+
+[출력 형식 규칙 - 매우 중요]
+답변은 반드시 다음 4가지 XML 스타일 태그 블록 순서로만 작성해야 한다:
+
+<thought>
+(여기에 AI가 사용자 질문을 분석하고 최종 답변을 도출하기까지의 솔직하고 구체적인 생각 과정을 상세히 작성한다:
+1. 사용자 질문의 핵심 의도 파악
+2. 질문 유형(자기소개/인사, 이력서 분석/첨삭, 면접 질문 대비, 채용 공고 추천 등) 분류
+3. 이력서 본문 관련 내용 및 핵심 키워드 대조
+4. 인용구(Quote) 및 추천 공고가 필요한지 판단
+5. 답변 구성 전략 수립
+- 친절하고 전문적이며 체계적인 한국어로 서술해라.)
+</thought>
+
+<answer>
+(여기에 사용자에게 전달할 최종 답변 마크다운을 작성한다.
+- 이력서 본문에서 인용한 내용은 문장 뒤에 [1], [2]와 같이 참조 번호를 명시해라.
+- 단순 인사나 자기소개 질문인 경우 참조 번호 없이 친절히 설명해라.)
+</answer>
+
+<citations>
+[
+  {
+    "id": 1,
+    "title": "관련 원본 내용",
+    "filename": "${pdfName}",
+    "keywords": "키워드1, 키워드2",
+    "published": "2026. 03. 29",
+    "objective": "답변의 근거가 되는 원문 발췌",
+    "quote": "이력서 본문에 존재하는 실제 문장",
+    "section": "이력서 본문"
+  }
+]
+</citations>
+
+<recommended_jobs>
+[
+  {
+    "id": 1,
+    "company": "회사명",
+    "job_title": "공고 제목",
+    "location": "서울",
+    "district": "강남구",
+    "tech_stack": ["React", "TypeScript"],
+    "reason": "추천 사유",
+    "company_logo": "로고 URL"
+  }
+]
+</recommended_jobs>
+
+[질문 유형별 세부 처리 지침]
+1. 인사 / 정체성 / 일반 안내 질문 (예: "넌 누구야?", "안녕", "무슨 일 해?", "어떤 걸 할 수 있어?"):
+   - 자신을 InterviewEasy의 전문 취업 코칭 AI 어시스턴트라고 소개하고, 이력서 분석/첨삭, 모의 면접 대비, 기술 스택 맞춤 공고 추천 등의 주요 기능을 친절히 안내해라.
+   - 인용구와 공고 추천이 불필요하므로 citations는 [], recommended_jobs는 []로 작성해라.
+2. 이력서 분석 / 보완점 / 면접 대비 질문:
+   - 반드시 아래 [이력서 본문]에 실제로 존재하는 문장을 그대로 quote로 발췌하여 citations에 담고, answer에서 [1], [2]로 명시해라.
+   - recommended_jobs는 []로 작성해라.
+3. 채용 공고 추천 질문:
+   - 아래 [선별된 채용 공고 목록] 중에서만 최대 5개를 골라 recommended_jobs에 담고, 추천 사유를 기술해라.
+   - citations는 공고 추천의 근거가 된 이력서 본문 문장을 발췌해라.
+
+[이력서 본문]
+${rawText}
+
+[선별된 채용 공고 목록]
+${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2) : "(채용 공고 추천 요청이 아니므로 공고 목록 생략)"}
+`
+
+                    const messages: any[] = [
+                        { role: "system", content: systemPrompt },
+                        ...history.map((h: any) => ({
+                            role: h.sender === "user" ? "user" : "assistant",
+                            content: h.message,
+                        })),
+                        { role: "user", content: message },
+                    ]
+
+                    const stream = await openai.chat.completions.create({
+                        model: "gpt-5",
+                        messages,
+                        stream: true,
+                    })
+
+                    let fullText = ""
+                    let thoughtSentIndex = 0
+                    let answerSentIndex = 0
+
+                    for await (const chunk of stream) {
+                        const delta = chunk.choices[0]?.delta?.content || ""
+                        if (!delta) continue
+
+                        fullText += delta
+
+                        // 1. thought 영역 스트리밍 처리
+                        const thoughtStartIdx = fullText.indexOf("<thought>")
+                        const thoughtEndIdx = fullText.indexOf("</thought>")
+
+                        if (thoughtStartIdx !== -1) {
+                            const startContentIdx =
+                                thoughtStartIdx + "<thought>".length
+                            const endContentIdx =
+                                thoughtEndIdx !== -1
+                                    ? thoughtEndIdx
+                                    : fullText.length
+                            if (
+                                endContentIdx > startContentIdx &&
+                                endContentIdx >
+                                    thoughtSentIndex + startContentIdx
+                            ) {
+                                const newThoughtText = fullText.slice(
+                                    startContentIdx + thoughtSentIndex,
+                                    endContentIdx,
+                                )
+                                thoughtSentIndex += newThoughtText.length
+                                if (newThoughtText) {
+                                    sendEvent({
+                                        type: "thought",
+                                        text: newThoughtText,
+                                    })
+                                }
+                            }
+                        }
+
+                        // 2. answer 영역 스트리밍 처리
+                        const answerStartIdx = fullText.indexOf("<answer>")
+                        const answerEndIdx = fullText.indexOf("</answer>")
+
+                        if (answerStartIdx !== -1) {
+                            const startContentIdx =
+                                answerStartIdx + "<answer>".length
+                            const endContentIdx =
+                                answerEndIdx !== -1
+                                    ? answerEndIdx
+                                    : fullText.length
+                            if (
+                                endContentIdx > startContentIdx &&
+                                endContentIdx >
+                                    answerSentIndex + startContentIdx
+                            ) {
+                                const newAnswerText = fullText.slice(
+                                    startContentIdx + answerSentIndex,
+                                    endContentIdx,
+                                )
+                                answerSentIndex += newAnswerText.length
+                                if (newAnswerText) {
+                                    sendEvent({
+                                        type: "answer",
+                                        text: newAnswerText,
+                                    })
+                                }
+                            }
+                        } else if (
+                            thoughtEndIdx !== -1 &&
+                            fullText.length >
+                                thoughtEndIdx + "</thought>".length + 10 &&
+                            !fullText.includes("<answer>")
+                        ) {
+                            const remaining = fullText.slice(
+                                thoughtEndIdx + "</thought>".length,
+                            )
+                            if (remaining.length > answerSentIndex) {
+                                const newAnswerText =
+                                    remaining.slice(answerSentIndex)
+                                answerSentIndex += newAnswerText.length
+                                sendEvent({
+                                    type: "answer",
+                                    text: newAnswerText,
+                                })
+                            }
+                        }
+                    }
+
+                    // 전체 수신 완료 후 파싱
+                    const thoughtMatch = fullText.match(
+                        /<thought>([\s\S]*?)<\/thought>/i,
+                    )
+                    finalThought = thoughtMatch ? thoughtMatch[1].trim() : ""
+
+                    const answerMatch = fullText.match(
+                        /<answer>([\s\S]*?)<\/answer>/i,
+                    )
+                    if (answerMatch) {
+                        finalAnswer = answerMatch[1].trim()
+                    } else {
+                        finalAnswer = fullText
+                            .replace(/<thought>[\s\S]*?<\/thought>/gi, "")
+                            .replace(/<citations>[\s\S]*?<\/citations>/gi, "")
+                            .replace(
+                                /<recommended_jobs>[\s\S]*?<\/recommended_jobs>/gi,
+                                "",
+                            )
+                            .replace(/<\/?answer>/gi, "")
+                            .trim()
+                    }
+
+                    // citations 파싱
+                    const citMatch = fullText.match(
+                        /<citations>([\s\S]*?)<\/citations>/i,
+                    )
+                    if (citMatch && citMatch[1]) {
+                        try {
+                            const parsedCits = JSON.parse(citMatch[1].trim())
+                            if (Array.isArray(parsedCits)) {
+                                finalCitations = parsedCits
+                            }
+                        } catch (e) {
+                            console.warn("Failed to parse citations:", e)
+                        }
+                    }
+
+                    // recommended_jobs 파싱
+                    const jobsMatch = fullText.match(
+                        /<recommended_jobs>([\s\S]*?)<\/recommended_jobs>/i,
+                    )
+                    if (jobsMatch && jobsMatch[1]) {
+                        try {
+                            const parsedJobs = JSON.parse(jobsMatch[1].trim())
+                            if (Array.isArray(parsedJobs)) {
+                                finalRecommendedJobs = parsedJobs
+                            }
+                        } catch (e) {
+                            console.warn("Failed to parse recommended jobs:", e)
+                        }
+                    }
+
+                    // 공고 데이터 검증 및 매핑
+                    finalRecommendedJobs = finalRecommendedJobs
+                        .slice(0, 5)
+                        .map((job: any) => {
+                            const matched = availablePosts.find(
+                                (p: any) =>
+                                    p.id === job.id ||
+                                    (p.job_title === job.job_title &&
+                                        p.company === job.company),
+                            )
+                            return {
+                                id: matched ? matched.id : job.id,
+                                company: matched
+                                    ? matched.company
+                                    : job.company,
+                                job_title: matched
+                                    ? matched.job_title
+                                    : job.job_title,
+                                company_logo: matched
+                                    ? matched.company_logo
+                                    : job.company_logo || "",
+                                location: matched
+                                    ? matched.location
+                                    : job.location || "",
+                                district: matched
+                                    ? matched.district
+                                    : job.district || "",
+                                tech_stack: matched
+                                    ? Array.isArray(matched.tech_stack)
+                                        ? matched.tech_stack
+                                        : JSON.parse(matched.tech_stack || "[]")
+                                    : job.tech_stack || [],
+                                reason:
+                                    job.reason ||
+                                    "이력서의 직무 역량 및 프로젝트 경험과 일치하여 추천합니다.",
+                            }
+                        })
+
+                    // 인용구 중복 제거 및 리매핑
+                    const remapped = deduplicateAndRemapMessage(
+                        finalAnswer,
+                        finalCitations,
+                        rawText,
+                        pdfName,
+                    )
+                    finalAnswer = remapped.answer
+                    finalCitations = remapped.citations
+                } catch (openaiErr: any) {
+                    console.error("OpenAI streaming failed:", openaiErr)
+                    const isIdentityQuestion =
+                        /누구|안녕|소개|뭐해|무슨 일/i.test(message)
+                    if (isIdentityQuestion) {
+                        finalThought = `1. 사용자 질문 "${message}" 분석: AI 어시스턴트의 역할 및 정체성 문의\n2. InterviewEasy의 핵심 서비스(이력서 분석, 모의면접 질문 도출, 맞춤 공고 추천) 정리\n3. 친절하고 신뢰감 있는 자기소개 및 사용 안내 답변 구성 완료`
+                    } else if (isJobRecommendationQuestion) {
+                        finalThought = `1. 사용자 질문 "${message}" 분석: 채용 공고 및 직무 추천 요청\n2. 이력서 원본 기술 스택 및 실무 경험 키워드 매칭\n3. 적합한 상위 채용 공고 선별 및 추천 사유 작성 완료`
+                    } else {
+                        finalThought = `1. 사용자 질문 "${message}" 분석\n2. 이력서 원본 프로젝트 및 핵심 역량 대조\n3. 전문적인 취업 코칭 및 피드백 답변 구성 완료`
+                    }
+                    sendEvent({ type: "thought", text: finalThought })
+
+                    const mock = generateMockQA(
+                        message,
+                        rawText,
+                        pdfName,
+                        availablePosts,
+                    )
+                    finalAnswer = mock.answer
+                    finalCitations = mock.citations
+                    finalRecommendedJobs = mock.recommended_jobs || []
+                    sendEvent({ type: "answer", text: finalAnswer })
+                }
+            } else {
+                const isIdentityQuestion = /누구|안녕|소개|뭐해|무슨 일/i.test(
+                    message,
+                )
+                if (isIdentityQuestion) {
+                    finalThought = `1. 사용자 질문 "${message}" 분석: AI 어시스턴트의 역할 및 정체성 문의\n2. InterviewEasy의 핵심 서비스(이력서 분석, 모의면접 질문 도출, 맞춤 공고 추천) 정리\n3. 친절하고 신뢰감 있는 자기소개 및 사용 안내 답변 구성 완료`
+                } else if (isJobRecommendationQuestion) {
+                    finalThought = `1. 사용자 질문 "${message}" 분석: 채용 공고 및 직무 추천 요청\n2. 이력서 원본 기술 스택 및 실무 경험 키워드 매칭\n3. 적합한 상위 채용 공고 선별 및 추천 사유 작성 완료`
+                } else {
+                    finalThought = `1. 사용자 질문 "${message}" 분석\n2. 이력서 원본 프로젝트 및 핵심 역량 대조\n3. 전문적인 취업 코칭 및 피드백 답변 구성 완료`
+                }
+                sendEvent({ type: "thought", text: finalThought })
+
+                const mock = generateMockQA(
+                    message,
+                    rawText,
+                    pdfName,
+                    availablePosts,
+                )
+                finalAnswer = mock.answer
+                finalCitations = mock.citations
+                finalRecommendedJobs = mock.recommended_jobs || []
+                sendEvent({ type: "answer", text: finalAnswer })
+            }
+
+            // 어시스턴트 메시지 및 생각 과정 DB 저장 (연결 끊김 여부와 관계없이 100% 저장 보장)
+            const aiMsgResult = await pool.query(
+                "INSERT INTO resume_messages (resume_id, sender, message, citations, recommended_jobs, thought_process) VALUES ($1, 'assistant', $2, $3, $4, $5) RETURNING *",
+                [
+                    resumeId,
+                    finalAnswer,
+                    JSON.stringify(finalCitations),
+                    JSON.stringify(finalRecommendedJobs),
+                    finalThought,
+                ],
+            )
+
+            if (isClientConnected && !res.writableEnded) {
+                sendEvent({
+                    type: "done",
+                    assistantMessage: aiMsgResult.rows[0],
+                })
+                try {
+                    res.end()
+                } catch (e) {}
+            }
+        } catch (error) {
+            console.error("Streaming Q&A failed:", error)
+            if (isClientConnected && !res.writableEnded) {
+                sendEvent({ type: "error", error: "Internal server error" })
+                try {
+                    res.end()
+                } catch (e) {}
+            }
+        }
+    },
+)
+
+// 10. Send a message to AI assistant (기존 비스트리밍 유지)
 router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
     try {
         const userId = req.user?.id
@@ -777,7 +1235,7 @@ router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
 
         // Fetch all job postings from posts table so AI can search the entire database
         const postsResult = await pool.query(
-            "SELECT id, title as job_title, company_name as company, company_logo, location, district, job_category, tech_stack, experience, salary, deadline, description, responsibilities, requirements, preferred_requirements FROM posts ORDER BY id ASC"
+            "SELECT id, title as job_title, company_name as company, company_logo, location, district, job_category, tech_stack, experience, salary, deadline, description, responsibilities, requirements, preferred_requirements FROM posts ORDER BY id ASC",
         )
         const availablePosts = postsResult.rows
 
@@ -865,20 +1323,39 @@ ${JSON.stringify(availablePosts, null, 2)}
                 const parsed = JSON.parse(rawJson)
                 const rawAnswer = parsed.answer || ""
                 const rawCits = parsed.citations || []
-                let rawJobs = Array.isArray(parsed.recommended_jobs) ? parsed.recommended_jobs : []
-                
+                let rawJobs = Array.isArray(parsed.recommended_jobs)
+                    ? parsed.recommended_jobs
+                    : []
+
                 // Enforce maximum 5 jobs & validate against availablePosts
                 rawJobs = rawJobs.slice(0, 5).map((job: any) => {
-                    const matched = availablePosts.find((p: any) => p.id === job.id || (p.job_title === job.job_title && p.company === job.company))
+                    const matched = availablePosts.find(
+                        (p: any) =>
+                            p.id === job.id ||
+                            (p.job_title === job.job_title &&
+                                p.company === job.company),
+                    )
                     return {
                         id: matched ? matched.id : job.id,
                         company: matched ? matched.company : job.company,
                         job_title: matched ? matched.job_title : job.job_title,
-                        company_logo: matched ? matched.company_logo : (job.company_logo || ""),
-                        location: matched ? matched.location : (job.location || ""),
-                        district: matched ? matched.district : (job.district || ""),
-                        tech_stack: matched ? (Array.isArray(matched.tech_stack) ? matched.tech_stack : JSON.parse(matched.tech_stack || "[]")) : (job.tech_stack || []),
-                        reason: job.reason || "이력서의 직무 역량 및 프로젝트 경험과 일치하여 추천합니다.",
+                        company_logo: matched
+                            ? matched.company_logo
+                            : job.company_logo || "",
+                        location: matched
+                            ? matched.location
+                            : job.location || "",
+                        district: matched
+                            ? matched.district
+                            : job.district || "",
+                        tech_stack: matched
+                            ? Array.isArray(matched.tech_stack)
+                                ? matched.tech_stack
+                                : JSON.parse(matched.tech_stack || "[]")
+                            : job.tech_stack || [],
+                        reason:
+                            job.reason ||
+                            "이력서의 직무 역량 및 프로젝트 경험과 일치하여 추천합니다.",
                     }
                 })
 
@@ -893,13 +1370,23 @@ ${JSON.stringify(availablePosts, null, 2)}
                 messageRecommendedJobs = rawJobs
             } catch (openaiErr: any) {
                 console.error("OpenAI Q&A failed:", openaiErr)
-                const mock = generateMockQA(message, rawText, pdfName, availablePosts)
+                const mock = generateMockQA(
+                    message,
+                    rawText,
+                    pdfName,
+                    availablePosts,
+                )
                 aiResponseText = mock.answer
                 messageCitations = mock.citations
                 messageRecommendedJobs = mock.recommended_jobs || []
             }
         } else {
-            const mock = generateMockQA(message, rawText, pdfName, availablePosts)
+            const mock = generateMockQA(
+                message,
+                rawText,
+                pdfName,
+                availablePosts,
+            )
             aiResponseText = mock.answer
             messageCitations = mock.citations
             messageRecommendedJobs = mock.recommended_jobs || []
@@ -908,7 +1395,12 @@ ${JSON.stringify(availablePosts, null, 2)}
         // Save Assistant Message
         const aiMsgResult = await pool.query(
             "INSERT INTO resume_messages (resume_id, sender, message, citations, recommended_jobs) VALUES ($1, 'assistant', $2, $3, $4) RETURNING *",
-            [resumeId, aiResponseText, JSON.stringify(messageCitations), JSON.stringify(messageRecommendedJobs)],
+            [
+                resumeId,
+                aiResponseText,
+                JSON.stringify(messageCitations),
+                JSON.stringify(messageRecommendedJobs),
+            ],
         )
 
         res.json({
@@ -1037,14 +1529,21 @@ function deduplicateAndRemapCitations(
     sourceText: string,
     filename: string,
 ): { summary: string; improvements: string; citations: any[] } {
-    const validated = validateAndAlignCitations(rawCitations, sourceText, filename)
+    const validated = validateAndAlignCitations(
+        rawCitations,
+        sourceText,
+        filename,
+    )
 
     const uniqueMap = new Map<string, any>()
     const oldIdToNewId = new Map<number, number>()
     let nextId = 1
 
     for (const cit of validated) {
-        const quoteKey = (cit.quote || "").trim().toLowerCase().replace(/\s+/g, " ")
+        const quoteKey = (cit.quote || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, " ")
         if (!quoteKey) continue
 
         if (uniqueMap.has(quoteKey)) {
@@ -1086,14 +1585,21 @@ function deduplicateAndRemapMessage(
     sourceText: string,
     filename: string,
 ): { answer: string; citations: any[] } {
-    const validated = validateAndAlignCitations(rawCitations, sourceText, filename)
+    const validated = validateAndAlignCitations(
+        rawCitations,
+        sourceText,
+        filename,
+    )
 
     const uniqueMap = new Map<string, any>()
     const oldIdToNewId = new Map<number, number>()
     let nextId = 1
 
     for (const cit of validated) {
-        const quoteKey = (cit.quote || "").trim().toLowerCase().replace(/\s+/g, " ")
+        const quoteKey = (cit.quote || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, " ")
         if (!quoteKey) continue
 
         if (uniqueMap.has(quoteKey)) {
@@ -1156,7 +1662,8 @@ function generateMockPDFAnalysis(
                 published: "2026. 03. 29",
                 objective: "이력서 요약 1번 항목의 근거 원문",
                 quote: quote1,
-                feedback: "서술된 프로젝트 성과에 구체적인 수치(개선율, 처리 시간 등)를 추가하면 설득력이 더욱 높아집니다.",
+                feedback:
+                    "서술된 프로젝트 성과에 구체적인 수치(개선율, 처리 시간 등)를 추가하면 설득력이 더욱 높아집니다.",
                 section: "이력서 본문",
             },
             {
@@ -1167,7 +1674,8 @@ function generateMockPDFAnalysis(
                 published: "2026. 03. 29",
                 objective: "이력서 요약 2번 항목의 근거 원문",
                 quote: quote2,
-                feedback: "발생했던 문제 상황과 이를 해결하기 위한 기술적 의사결정 과정을 단계별로 서술해 보세요.",
+                feedback:
+                    "발생했던 문제 상황과 이를 해결하기 위한 기술적 의사결정 과정을 단계별로 서술해 보세요.",
                 section: "이력서 본문",
             },
             {
@@ -1178,7 +1686,8 @@ function generateMockPDFAnalysis(
                 published: "2026. 03. 29",
                 objective: "이력서 요약 3번 항목의 근거 원문",
                 quote: quote3,
-                feedback: "협업 과정에서 본인이 주도한 역할과 동료들에게 미친 긍정적 영향을 구체화해 보세요.",
+                feedback:
+                    "협업 과정에서 본인이 주도한 역할과 동료들에게 미친 긍정적 영향을 구체화해 보세요.",
                 section: "이력서 본문",
             },
         ],
@@ -1203,6 +1712,28 @@ function generateMockQA(
         "예기치 못한 프론트엔드 에러 발생 시 앱이 완전히 멈추지 않도록 Error Boundary를 설계합니다."
 
     const msg = userMessage.toLowerCase()
+
+    if (
+        msg.includes("누구") ||
+        msg.includes("안녕") ||
+        msg.includes("소개") ||
+        msg.includes("뭐해") ||
+        msg.includes("무슨 일")
+    ) {
+        return {
+            answer: `안녕하세요! 저는 구직자님의 성공적인 취업을 돕는 **InterviewEasy 취업 전문 AI 어시스턴트**입니다.
+
+작성하신 이력서와 희망 직무를 바탕으로 다음과 같은 도움을 드릴 수 있습니다:
+
+1. **이력서 정밀 분석 및 첨삭:** 기술 스택, 핵심 성과, 보완이 필요한 부분을 짚어드립니다.
+2. **실전 면접 질문 예측:** 이력서 기반 기술 면접 및 인성 면접 예상 질문을 도출해 드립니다.
+3. **맞춤형 채용 공고 추천:** 이력서의 프로젝트 경험과 기술 스택에 가장 잘 맞는 채용 공고를 매칭해 드립니다.
+
+궁금하신 점이나 분석하고 싶은 내용이 있다면 언제든 편하게 질문해 주세요!`,
+            citations: [],
+            recommended_jobs: [],
+        }
+    }
 
     if (
         msg.includes("공고") ||
@@ -1236,14 +1767,28 @@ function generateMockQA(
             const techList: string[] = Array.isArray(post.tech_stack)
                 ? post.tech_stack
                 : typeof post.tech_stack === "string"
-                ? JSON.parse(post.tech_stack || "[]")
-                : []
+                  ? JSON.parse(post.tech_stack || "[]")
+                  : []
             for (const t of techList) {
                 if (lowerResume.includes(t.toLowerCase())) score += 3
             }
-            if (post.job_category && lowerResume.includes(post.job_category.toLowerCase())) score += 1
-            if (post.job_title && lowerResume.includes(post.job_title.toLowerCase())) score += 1
-            if (post.description && lowerResume.includes(post.description.slice(0, 30).toLowerCase())) score += 1
+            if (
+                post.job_category &&
+                lowerResume.includes(post.job_category.toLowerCase())
+            )
+                score += 1
+            if (
+                post.job_title &&
+                lowerResume.includes(post.job_title.toLowerCase())
+            )
+                score += 1
+            if (
+                post.description &&
+                lowerResume.includes(
+                    post.description.slice(0, 30).toLowerCase(),
+                )
+            )
+                score += 1
             return { post, score, techList }
         })
 

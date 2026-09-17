@@ -42,6 +42,13 @@ import {
     RefreshCw,
     Briefcase,
     Sparkles,
+    ChevronDown,
+    ChevronUp,
+    Loader2,
+    BrainCircuit,
+    ExternalLink,
+    Download,
+    CheckCircle2,
 } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import remarkMath from "remark-math"
@@ -300,6 +307,665 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     )
 }
 
+const ThinkingProcessCard: React.FC<{
+    thought: string
+    isLive?: boolean
+    duration?: number | null
+}> = ({ thought, isLive = false, duration }) => {
+    const [isExpanded, setIsExpanded] = useState(isLive)
+
+    useEffect(() => {
+        if (isLive) {
+            setIsExpanded(true)
+        }
+    }, [isLive])
+
+    if (!thought || thought.trim() === "") return null
+
+    return (
+        <Box
+            mb={3}
+            borderRadius="xl"
+            border="1px solid"
+            borderColor={isLive ? "blue.200" : "gray.200"}
+            bg={isLive ? "blue.50/50" : "gray.50/70"}
+            overflow="hidden"
+            transition="all 0.2s ease"
+            _hover={{
+                borderColor: isLive ? "blue.300" : "gray.300",
+            }}
+        >
+            <Flex
+                align="center"
+                justify="space-between"
+                px={3.5}
+                py={2.5}
+                cursor="pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+                userSelect="none"
+                bg={isLive ? "blue.50/80" : "gray.100/50"}
+            >
+                <HStack gap={2}>
+                    <Box
+                        color={isLive ? "blue.500" : "gray.500"}
+                        display="flex"
+                        alignItems="center"
+                    >
+                        <Sparkles
+                            size={13}
+                            className={isLive ? "animate-pulse" : ""}
+                        />
+                    </Box>
+                    <Text
+                        fontSize="xs"
+                        fontWeight="semibold"
+                        color={isLive ? "blue.700" : "gray.700"}
+                    >
+                        {isLive ? "AI 생각 과정..." : "AI 생각 과정"}
+                    </Text>
+                    {duration !== undefined &&
+                        duration !== null &&
+                        duration > 0 &&
+                        !isLive && (
+                            <Badge
+                                size="xs"
+                                variant="subtle"
+                                colorPalette="gray"
+                                fontSize="10px"
+                                borderRadius="full"
+                                px={2}
+                            >
+                                {duration}초 소요
+                            </Badge>
+                        )}
+                    {isLive && (
+                        <Spinner
+                            size="inherit"
+                            color="blue.500"
+                            width="10px"
+                            height="10px"
+                        />
+                    )}
+                </HStack>
+
+                <HStack gap={1} color="gray.500" fontSize="xs">
+                    <Text fontSize="11px">
+                        {isExpanded ? "접기" : "펼치기"}
+                    </Text>
+                    {isExpanded ? (
+                        <ChevronUp size={13} />
+                    ) : (
+                        <ChevronDown size={13} />
+                    )}
+                </HStack>
+            </Flex>
+
+            {isExpanded && (
+                <Box
+                    px={3.5}
+                    py={3}
+                    borderTop="1px solid"
+                    borderColor={isLive ? "blue.100" : "gray.200"}
+                    fontSize="xs"
+                    color="gray.600"
+                    lineHeight="1.6"
+                    whiteSpace="pre-wrap"
+                    bg="white"
+                    maxH="240px"
+                    overflowY="auto"
+                >
+                    {thought}
+                </Box>
+            )}
+        </Box>
+    )
+}
+
+interface ResumeAnalysisInlineProgressProps {
+    isOpen: boolean
+    isReanalyze?: boolean
+    minH?: string | number
+    h?: string | number
+}
+
+const ResumeAnalysisInlineProgress: React.FC<
+    ResumeAnalysisInlineProgressProps
+> = ({ isOpen, isReanalyze = false, minH = "150px", h = "auto" }) => {
+    const [currentStep, setCurrentStep] = useState(1)
+    const [progress, setProgress] = useState(18)
+    const [elapsedSeconds, setElapsedSeconds] = useState(0)
+    const [isExiting, setIsExiting] = useState(false)
+    const [isRendered, setIsRendered] = useState(isOpen)
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsRendered(true)
+            setIsExiting(false)
+            setCurrentStep(1)
+            setProgress(18)
+            setElapsedSeconds(0)
+
+            const timer = setInterval(() => {
+                setElapsedSeconds((prev) => prev + 1)
+            }, 1000)
+
+            const step1 = setTimeout(() => {
+                setCurrentStep(2)
+                setProgress(38)
+            }, 1200)
+
+            const step2 = setTimeout(() => {
+                setCurrentStep(3)
+                setProgress(62)
+            }, 4500)
+
+            const step3 = setTimeout(() => {
+                setCurrentStep(4)
+                setProgress(82)
+            }, 8500)
+
+            const step4 = setTimeout(() => {
+                setCurrentStep(5)
+                setProgress(95)
+            }, 12500)
+
+            return () => {
+                clearInterval(timer)
+                clearTimeout(step1)
+                clearTimeout(step2)
+                clearTimeout(step3)
+                clearTimeout(step4)
+            }
+        } else {
+            // 완료되어 넘어갈 때 부드러운 전환을 위해 100% 도달 후 400ms 동안 페이드아웃
+            setProgress(100)
+            setIsExiting(true)
+            const exitTimer = setTimeout(() => {
+                setIsRendered(false)
+                setIsExiting(false)
+            }, 400)
+            return () => clearTimeout(exitTimer)
+        }
+    }, [isOpen])
+
+    if (!isRendered) return null
+
+    const stepLabels = [
+        isReanalyze
+            ? "이력서 원본 데이터 확인 중"
+            : "PDF 텍스트 데이터 파싱 중",
+        "역량 심층 진단 및 강점 도출 중",
+        "이력서 원문 대조 및 인용구 매핑 중",
+        "실시간 채용 공고 적합도 선별 중",
+        "맞춤형 AI 분석 리포트 반영 중",
+    ]
+
+    const totalSteps = stepLabels.length
+    const currentIndex = Math.min(Math.max(currentStep - 1, 0), totalSteps - 1)
+
+    // 모듈로 순환을 제거하여 마지막 단계에서 첫 단계가 맨 밑에 나타나는 오류 방지
+    const prevLabel = isExiting
+        ? "분석 완료"
+        : currentIndex === 0
+          ? "데이터 분석 엔진 초기화 완료"
+          : stepLabels[currentIndex - 1]
+
+    const currentLabel = isExiting
+        ? "AI 맞춤 분석 리포트 생성 완료!"
+        : stepLabels[currentIndex]
+
+    const nextLabel = isExiting
+        ? "화면으로 전환 중..."
+        : currentIndex === totalSteps - 1
+          ? "최종 리포트 조율 및 반영 대기"
+          : stepLabels[currentIndex + 1]
+
+    return (
+        <Box
+            w="100%"
+            h={h}
+            position="relative"
+            bg="white"
+            border="1px solid"
+            borderColor="gray.200"
+            borderRadius="3xl"
+            boxShadow="0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 10px -2px rgba(0, 0, 0, 0.02)"
+            overflow="hidden"
+            opacity={isExiting ? 0 : 1}
+            transform={
+                isExiting
+                    ? "translateY(-6px) scale(0.99)"
+                    : "translateY(0) scale(1)"
+            }
+            transition="all 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+            minH={minH}
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+        >
+            <style>{`
+                @keyframes spin {
+                    from {
+                        transform: rotate(0deg);
+                    }
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+                .animate-spin {
+                    animation: spin 0.9s linear infinite;
+                }
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(6px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes progressShimmer {
+                    0% {
+                        background-position: 200% 0;
+                    }
+                    100% {
+                        background-position: -200% 0;
+                    }
+                }
+            `}</style>
+
+            {/* 카드 내부 좌우 분할 컨텐츠 */}
+            <Flex
+                w="100%"
+                direction={{ base: "column", md: "row" }}
+                align="center"
+                justify="space-between"
+                px={{ base: 6, md: 12 }}
+                py={{ base: 7, md: 8 }}
+                gap={{ base: 6, md: 8 }}
+            >
+                {/* 좌측: 큼직한 진행률(%) 및 경과 시간 디스플레이 */}
+                <VStack
+                    align={{ base: "center", md: "flex-start" }}
+                    gap={0.5}
+                    flexShrink={0}
+                >
+                    <HStack align="baseline" gap={1}>
+                        <Text
+                            fontSize={{ base: "5xl", md: "7xl" }}
+                            fontWeight="black"
+                            color="blue.600"
+                            letterSpacing="-0.04em"
+                            lineHeight="0.95"
+                        >
+                            {progress}
+                        </Text>
+                        <Text
+                            fontSize={{ base: "3xl", md: "4xl" }}
+                            fontWeight="extrabold"
+                            color="blue.400"
+                            letterSpacing="-0.02em"
+                        >
+                            %
+                        </Text>
+                    </HStack>
+                    <Text
+                        fontSize="xs"
+                        color="gray.400"
+                        fontWeight="medium"
+                        letterSpacing="-0.01em"
+                        mt={1}
+                    >
+                        {isExiting ? "분석 완료" : `${elapsedSeconds}초 경과`}
+                    </Text>
+                </VStack>
+
+                {/* 우측 메인 3단 롤러 영역: 시안과 동일하게 우측 정렬 */}
+                <Flex
+                    direction="column"
+                    align={{ base: "center", md: "flex-end" }}
+                    justify="center"
+                    gap={3}
+                    flex={1}
+                >
+                    {/* 1단: 이전 단계 (작은 글씨, 옅은 투명도) */}
+                    <Text
+                        key={`prev-${currentIndex}-${isExiting}`}
+                        fontSize={{ base: "xs", md: "sm" }}
+                        color="gray.400"
+                        opacity={0.6}
+                        fontWeight="normal"
+                        textAlign={{ base: "center", md: "right" }}
+                        letterSpacing="-0.01em"
+                        userSelect="none"
+                        transition="all 0.4s ease"
+                        style={{
+                            animation: "fadeInUp 0.35s ease-out forwards",
+                        }}
+                    >
+                        {prevLabel}
+                    </Text>
+
+                    {/* 2단: 현재 진행 단계 (굵은 글씨, 진한 톤, 좌측 회전 스피너 하이라이트) */}
+                    <HStack
+                        key={`curr-${currentIndex}-${isExiting}`}
+                        gap={2.5}
+                        align="center"
+                        justify={{ base: "center", md: "flex-end" }}
+                        transition="all 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+                        style={{
+                            animation: "fadeInUp 0.35s ease-out forwards",
+                        }}
+                    >
+                        <Box
+                            color={isExiting ? "green.500" : "blue.500"}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                            flexShrink={0}
+                        >
+                            {isExiting ? (
+                                <CheckCircle2 size={19} />
+                            ) : (
+                                <Loader2
+                                    size={18}
+                                    className="animate-spin"
+                                    strokeWidth={2.5}
+                                    style={{
+                                        animation: "spin 0.9s linear infinite",
+                                    }}
+                                />
+                            )}
+                        </Box>
+                        <Text
+                            fontSize={{ base: "sm", md: "md" }}
+                            fontWeight="bold"
+                            color={isExiting ? "green.700" : "gray.900"}
+                            textAlign={{ base: "center", md: "right" }}
+                            letterSpacing="-0.02em"
+                        >
+                            {currentLabel}
+                        </Text>
+                    </HStack>
+
+                    {/* 3단: 다음 단계 (작은 글씨, 옅은 투명도) */}
+                    <Text
+                        key={`next-${currentIndex}-${isExiting}`}
+                        fontSize={{ base: "xs", md: "sm" }}
+                        color="gray.400"
+                        opacity={0.6}
+                        fontWeight="normal"
+                        textAlign={{ base: "center", md: "right" }}
+                        letterSpacing="-0.01em"
+                        userSelect="none"
+                        transition="all 0.4s ease"
+                        style={{
+                            animation: "fadeInUp 0.4s ease-out forwards",
+                        }}
+                    >
+                        {nextLabel}
+                    </Text>
+                </Flex>
+            </Flex>
+
+            {/* 하단 매립형 파란색 무빙 셔머 프로그레스 바 */}
+            <Box
+                w="100%"
+                h="4px"
+                bg="blue.50"
+                position="absolute"
+                bottom={0}
+                left={0}
+                overflow="hidden"
+            >
+                <Box
+                    h="100%"
+                    w={`${progress}%`}
+                    bg="linear-gradient(90deg, #2563EB 0%, #60A5FA 25%, #93C5FD 50%, #60A5FA 75%, #2563EB 100%)"
+                    transition="width 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+                    style={{
+                        backgroundSize: "200% 100%",
+                        animation: "progressShimmer 1.5s linear infinite",
+                    }}
+                />
+            </Box>
+        </Box>
+    )
+}
+
+interface PdfViewerProps {
+    resumeId: number
+    pdfName?: string
+    onUploadClick?: () => void
+}
+
+const PdfViewer: React.FC<PdfViewerProps> = ({
+    resumeId,
+    pdfName,
+    onUploadClick,
+}) => {
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    const loadPdf = async () => {
+        setIsLoading(true)
+        setError(null)
+        try {
+            const token = localStorage.getItem("token")
+            const resp = await fetch(`/api/resumes/${resumeId}/pdf`, {
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+            })
+
+            if (!resp.ok) {
+                if (resp.status === 404) {
+                    setError("이 자소서에 등록된 PDF 원본 파일이 없습니다.")
+                } else {
+                    setError("PDF 파일을 불러오지 못했습니다.")
+                }
+                setPdfUrl(null)
+                return
+            }
+
+            const blob = await resp.blob()
+            const url = URL.createObjectURL(blob)
+            setPdfUrl(url)
+        } catch (err: any) {
+            console.error("PDF load error:", err)
+            setError("PDF 문서를 로드하는 중 오류가 발생했습니다.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        loadPdf()
+        return () => {
+            if (pdfUrl) {
+                URL.revokeObjectURL(pdfUrl)
+            }
+        }
+    }, [resumeId])
+
+    if (isLoading) {
+        return (
+            <Flex
+                w="100%"
+                h="100%"
+                minH="450px"
+                direction="column"
+                align="center"
+                justify="center"
+                gap={3}
+                bg="white"
+                borderRadius="xl"
+            >
+                <Spinner size="lg" color="blue.500" />
+                <Text fontSize="xs" fontWeight="medium" color="gray.500">
+                    PDF 원본 문서를 불러오는 중입니다...
+                </Text>
+            </Flex>
+        )
+    }
+
+    if (error || !pdfUrl) {
+        return (
+            <Flex
+                w="100%"
+                h="100%"
+                minH="450px"
+                direction="column"
+                align="center"
+                justify="center"
+                gap={4}
+                bg="white"
+                borderRadius="xl"
+                p={8}
+                textAlign="center"
+            >
+                <Box
+                    w="48px"
+                    h="48px"
+                    borderRadius="full"
+                    bg="gray.100"
+                    color="gray.500"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                >
+                    <FileText size={24} />
+                </Box>
+                <VStack gap={1}>
+                    <Heading size="xs" color="gray.700">
+                        {error || "PDF 원본 파일이 없습니다"}
+                    </Heading>
+                    <Text fontSize="2xs" color="gray.500">
+                        새 이력서 PDF를 업로드하면 여기서 원본 문서를 바로
+                        열람할 수 있습니다.
+                    </Text>
+                </VStack>
+                {onUploadClick && (
+                    <Button
+                        size="xs"
+                        colorPalette="blue"
+                        onClick={onUploadClick}
+                    >
+                        <UploadCloud size={13} style={{ marginRight: 4 }} />
+                        PDF 업로드하기
+                    </Button>
+                )}
+            </Flex>
+        )
+    }
+
+    return (
+        <Flex
+            direction="column"
+            w="100%"
+            h="100%"
+            bg="white"
+            borderRadius="xl"
+            overflow="hidden"
+            border="1px solid"
+            borderColor="gray.200"
+        >
+            {/* Top Toolbar */}
+            <Flex
+                align="center"
+                justify="space-between"
+                px={4}
+                py={2.5}
+                bg="gray.50"
+                borderBottom="1px solid"
+                borderColor="gray.200"
+                wrap="wrap"
+                gap={2}
+            >
+                <HStack gap={2} minW={0}>
+                    <FileText size={15} color="#3182ce" />
+                    <Text
+                        fontSize="xs"
+                        fontWeight="semibold"
+                        color="gray.700"
+                        lineClamp={1}
+                    >
+                        {pdfName || "이력서 원본.pdf"}
+                    </Text>
+                </HStack>
+
+                <HStack gap={2}>
+                    <Button
+                        size="xs"
+                        variant="outline"
+                        h="26px"
+                        fontSize="2xs"
+                        onClick={loadPdf}
+                        title="새로고침"
+                    >
+                        <RefreshCw size={12} style={{ marginRight: 4 }} />
+                        새로고침
+                    </Button>
+                    <Button
+                        size="xs"
+                        variant="outline"
+                        h="26px"
+                        fontSize="2xs"
+                        onClick={() => {
+                            const a = document.createElement("a")
+                            a.href = pdfUrl
+                            a.download = pdfName || "resume.pdf"
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                        }}
+                        title="다운로드"
+                    >
+                        <Download size={12} style={{ marginRight: 4 }} />
+                        다운로드
+                    </Button>
+                    <Button
+                        size="xs"
+                        colorPalette="blue"
+                        h="26px"
+                        fontSize="2xs"
+                        onClick={() => {
+                            window.open(pdfUrl, "_blank")
+                        }}
+                        title="새 창에서 열기"
+                    >
+                        <ExternalLink size={12} style={{ marginRight: 4 }} />새
+                        창으로 보기
+                    </Button>
+                </HStack>
+            </Flex>
+
+            {/* Embedded PDF iframe */}
+            <Box
+                flex={1}
+                w="100%"
+                h="calc(100% - 45px)"
+                minH="600px"
+                bg="gray.100"
+            >
+                <iframe
+                    src={pdfUrl}
+                    title="PDF Viewer"
+                    width="100%"
+                    height="100%"
+                    style={{
+                        border: "none",
+                        display: "block",
+                        minHeight: "650px",
+                    }}
+                />
+            </Box>
+        </Flex>
+    )
+}
+
 const handleJsonResponse = async (resp: Response) => {
     const contentType = resp.headers.get("content-type")
     if (!contentType || !contentType.includes("application/json")) {
@@ -320,20 +986,42 @@ const ApplicationTemplate: React.FC = () => {
     const [isFetchingResumes, setIsFetchingResumes] = useState(true)
     const [isUploading, setIsUploading] = useState(false)
     const [isReanalyzing, setIsReanalyzing] = useState(false)
+    const [uploadingFileName, setUploadingFileName] = useState("")
     const [isGenerating, setIsGenerating] = useState(false)
+    const [streamingThought, setStreamingThought] = useState("")
+    const [streamingAnswer, setStreamingAnswer] = useState("")
+    const [isThinking, setIsThinking] = useState(false)
+    const [thinkingDuration, setThinkingDuration] = useState<number | null>(
+        null,
+    )
     const [prompt, setPrompt] = useState("")
 
     const [isEditingTitle, setIsEditingTitle] = useState(false)
     const [editTitleText, setEditTitleText] = useState("")
 
-    const [rawTextViewMode, setRawTextViewMode] = useState<"inline" | "raw">(
-        "inline",
-    )
+    const [rawTextViewMode, setRawTextViewMode] = useState<
+        "inline" | "raw" | "pdf"
+    >("inline")
     const [messages, setMessages] = useState<any[]>([])
     const [likedJobs, setLikedJobs] = useState<any[]>([])
     const [highlightedText, setHighlightedText] = useState<string | null>(null)
     const highlightTimerRef = useRef<any>(null)
     const chatEndRef = useRef<HTMLDivElement>(null)
+    const pollingTimerRef = useRef<any>(null)
+
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isGenerating) {
+                e.preventDefault()
+                e.returnValue = ""
+            }
+        }
+        window.addEventListener("beforeunload", handleBeforeUnload)
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload)
+            if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current)
+        }
+    }, [isGenerating])
 
     const handleViewSource = (citation: any) => {
         if (!citation) return
@@ -536,27 +1224,53 @@ const ApplicationTemplate: React.FC = () => {
             .filter((l) => l.length > 0)
 
         // 문맥 및 인용구 분석을 통해 "어떻게 보완하면 더 좋은지" 첨삭 가이드 생성 도우미
-        const getActionableFeedback = (quote: string, candidateText?: string): string => {
+        const getActionableFeedback = (
+            quote: string,
+            candidateText?: string,
+        ): string => {
             const trimmedCandidate = (candidateText || "").trim()
 
             // 1. 이미 개선 조언 형태인 경우 (~좋아요, ~보강, ~추가, ~설득력, ~하세요 등)
-            const isAdvicePattern = /(보강|추가|설명|서술|구체화|강조|작성|제시|언급|좋아요|있어요|높아집니다|돋보여요|해 보세요|바랍니다)/.test(trimmedCandidate)
-            const isJustFact = /(달성|확보|구축|진행|완료|수행|사용함|개발함|기여함|수준 확보)/.test(trimmedCandidate) && !isAdvicePattern
+            const isAdvicePattern =
+                /(보강|추가|설명|서술|구체화|강조|작성|제시|언급|좋아요|있어요|높아집니다|돋보여요|해 보세요|바랍니다)/.test(
+                    trimmedCandidate,
+                )
+            const isJustFact =
+                /(달성|확보|구축|진행|완료|수행|사용함|개발함|기여함|수준 확보)/.test(
+                    trimmedCandidate,
+                ) && !isAdvicePattern
 
-            if (trimmedCandidate && isAdvicePattern && !isJustFact && trimmedCandidate.length > 8) {
+            if (
+                trimmedCandidate &&
+                isAdvicePattern &&
+                !isJustFact &&
+                trimmedCandidate.length > 8
+            ) {
                 return trimmedCandidate
             }
 
             // 2. 본문 인용구(quote)의 내용에 따라 맞춤형 첨삭 피드백 생성
             const lowerQuote = (quote || "").toLowerCase()
 
-            if (/데이터셋|dataset|이미지|image|yolo|모델|실험|학습|epoch/i.test(lowerQuote)) {
+            if (
+                /데이터셋|dataset|이미지|image|yolo|모델|실험|학습|epoch/i.test(
+                    lowerQuote,
+                )
+            ) {
                 return "데이터셋을 구축하고 반복 개선하는 과정에서 겪은 문제점(라벨링 오차, 불균형 등)과 이를 해결한 접근 방식을 함께 서술하면 문제 해결력이 훨씬 돋보여요"
             }
-            if (/map|fps|속도|지연|성능|최적화|초과|달성|latency|throughput/i.test(lowerQuote)) {
+            if (
+                /map|fps|속도|지연|성능|최적화|초과|달성|latency|throughput/i.test(
+                    lowerQuote,
+                )
+            ) {
                 return "달성한 수치 지표와 더불어, 실제 서비스 환경의 요구 조건을 어떻게 충족했는지 또는 성능 병목을 해결한 기술적 과정을 덧붙이면 더 설득력 있어요"
             }
-            if (/react|typescript|javascript|spring|node|docker|db|sql|아키텍처|라이브러리/i.test(lowerQuote)) {
+            if (
+                /react|typescript|javascript|spring|node|docker|db|sql|아키텍처|라이브러리/i.test(
+                    lowerQuote,
+                )
+            ) {
                 return "단순 기술 스택 나열을 넘어, 해당 기술을 선택한 타당한 이유와 기존 방식 대비 어떤 개선을 이끌어냈는지 구체화하면 좋아요"
             }
             if (/팀|협업|동료|커뮤니케이션|리뷰|기여/i.test(lowerQuote)) {
@@ -589,7 +1303,10 @@ const ApplicationTemplate: React.FC = () => {
                         feedbackItems.push({
                             id: cid,
                             quote: citeObj.quote,
-                            feedbackText: getActionableFeedback(citeObj.quote, rawFeedback || citeObj.feedback),
+                            feedbackText: getActionableFeedback(
+                                citeObj.quote,
+                                rawFeedback || citeObj.feedback,
+                            ),
                             title,
                         })
                     }
@@ -598,7 +1315,10 @@ const ApplicationTemplate: React.FC = () => {
                 feedbackItems.push({
                     id: citations[idx].id || idx + 1,
                     quote: citations[idx].quote,
-                    feedbackText: getActionableFeedback(citations[idx].quote, rawFeedback || citations[idx].feedback),
+                    feedbackText: getActionableFeedback(
+                        citations[idx].quote,
+                        rawFeedback || citations[idx].feedback,
+                    ),
                     title,
                 })
             }
@@ -611,7 +1331,10 @@ const ApplicationTemplate: React.FC = () => {
                     feedbackItems.push({
                         id: c.id,
                         quote: c.quote,
-                        feedbackText: getActionableFeedback(c.quote, c.feedback),
+                        feedbackText: getActionableFeedback(
+                            c.quote,
+                            c.feedback,
+                        ),
                         title: c.title,
                     })
                 }
@@ -772,7 +1495,7 @@ const ApplicationTemplate: React.FC = () => {
                     fontWeight="semibold"
                     display="inline"
                     boxDecorationBreak="clone"
-                    WebkitBoxDecorationBreak="clone"
+                    style={{ WebkitBoxDecorationBreak: "clone" }}
                     fontSize="sm"
                     lineHeight="1.7"
                 >
@@ -1306,24 +2029,52 @@ const ApplicationTemplate: React.FC = () => {
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (!file || !selectedResume) return
+        if (!file) return
 
+        setUploadingFileName(file.name)
         setIsUploading(true)
         const formData = new FormData()
         formData.append("file", file)
 
         try {
             const token = localStorage.getItem("token")
-            const resp = await fetch(
-                `/api/resumes/${selectedResume.id}/upload`,
-                {
+            let targetResume = selectedResume
+
+            // If no resume is currently selected, automatically create a new one first
+            if (!targetResume) {
+                const titleFromFilename =
+                    file.name.replace(/\.pdf$/i, "").trim() ||
+                    `자기소개서 ${resumes.length + 1}`
+                const createResp = await fetch("/api/resumes", {
                     method: "POST",
                     headers: {
+                        "Content-Type": "application/json",
                         ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
-                    body: formData,
+                    body: JSON.stringify({
+                        title: titleFromFilename,
+                    }),
+                })
+
+                if (!createResp.ok) {
+                    const errData = await handleJsonResponse(createResp)
+                    throw new Error(
+                        errData.error || "자기소개서 생성에 실패했습니다.",
+                    )
+                }
+
+                targetResume = await handleJsonResponse(createResp)
+                setResumes((prev) => [targetResume, ...prev])
+                setSelectedResume(targetResume)
+            }
+
+            const resp = await fetch(`/api/resumes/${targetResume.id}/upload`, {
+                method: "POST",
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
-            )
+                body: formData,
+            })
 
             if (!resp.ok) {
                 const errData = await handleJsonResponse(resp)
@@ -1353,12 +2104,18 @@ const ApplicationTemplate: React.FC = () => {
             })
         } finally {
             setIsUploading(false)
+            if (e.target) {
+                e.target.value = ""
+            }
         }
     }
 
     const handleReanalyze = async () => {
         if (!selectedResume || isReanalyzing) return
 
+        setUploadingFileName(
+            selectedResume.pdf_name || selectedResume.title || "이력서 원본",
+        )
         setIsReanalyzing(true)
         try {
             const token = localStorage.getItem("token")
@@ -1401,7 +2158,7 @@ const ApplicationTemplate: React.FC = () => {
         }
     }
 
-    const fetchMessages = async (resumeId: number) => {
+    const fetchMessages = async (resumeId: number, retryCount = 0) => {
         try {
             const token = localStorage.getItem("token")
             const resp = await fetch(`/api/resumes/${resumeId}/messages`, {
@@ -1416,8 +2173,34 @@ const ApplicationTemplate: React.FC = () => {
 
             const data = await handleJsonResponse(resp)
             setMessages(data)
+
+            // 새로고침 직후 복구 로직: 마지막 메시지가 유저 메시지이고 최근 45초 이내인 경우 AI가 백그라운드에서 답변 생성 중일 수 있음
+            if (Array.isArray(data) && data.length > 0) {
+                const lastMsg = data[data.length - 1]
+                if (lastMsg.sender === "user" && retryCount < 8) {
+                    const msgTime = new Date(lastMsg.created_at).getTime()
+                    const isRecent =
+                        !isNaN(msgTime) && Date.now() - msgTime < 45000
+                    if (isRecent) {
+                        setIsGenerating(true)
+                        if (pollingTimerRef.current)
+                            clearTimeout(pollingTimerRef.current)
+                        pollingTimerRef.current = setTimeout(() => {
+                            fetchMessages(resumeId, retryCount + 1)
+                        }, 1500)
+                        return
+                    }
+                }
+            }
+
+            if (retryCount > 0) {
+                setIsGenerating(false)
+            }
         } catch (err: any) {
             console.error(err)
+            if (retryCount > 0) {
+                setIsGenerating(false)
+            }
         }
     }
 
@@ -1430,15 +2213,21 @@ const ApplicationTemplate: React.FC = () => {
             setPrompt("")
         }
 
-        // Optimistically append user message
+        // 임시 사용자 메시지 추가
         const tempUserMsg = { sender: "user", message: userMsgText }
         setMessages((prev) => [...prev, tempUserMsg])
         setIsGenerating(true)
+        setIsThinking(true)
+        setStreamingThought("")
+        setStreamingAnswer("")
+        setThinkingDuration(null)
+
+        const startTime = Date.now()
 
         try {
             const token = localStorage.getItem("token")
             const resp = await fetch(
-                `/api/resumes/${selectedResume.id}/messages`,
+                `/api/resumes/${selectedResume.id}/messages/stream`,
                 {
                     method: "POST",
                     headers: {
@@ -1453,12 +2242,74 @@ const ApplicationTemplate: React.FC = () => {
                 throw new Error("AI 응답을 생성하는 중에 오류가 발생했습니다.")
             }
 
-            const reply = await handleJsonResponse(resp)
-            setMessages((prev) => [
-                ...prev.slice(0, -1),
-                reply.userMessage,
-                reply.assistantMessage,
-            ])
+            if (!resp.body) {
+                throw new Error("스트리밍 응답을 읽을 수 없습니다.")
+            }
+
+            const reader = resp.body.getReader()
+            const decoder = new TextDecoder("utf-8")
+            let buffer = ""
+            let firstAnswerReceived = false
+
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                buffer += decoder.decode(value, { stream: true })
+                const lines = buffer.split("\n\n")
+                buffer = lines.pop() || ""
+
+                for (const line of lines) {
+                    const trimmed = line.trim()
+                    if (!trimmed.startsWith("data:")) continue
+
+                    const jsonStr = trimmed.replace(/^data:\s*/, "")
+                    try {
+                        const eventData = JSON.parse(jsonStr)
+
+                        if (eventData.type === "thought") {
+                            setStreamingThought((prev) => prev + eventData.text)
+                        } else if (eventData.type === "answer") {
+                            if (!firstAnswerReceived) {
+                                firstAnswerReceived = true
+                                setIsThinking(false)
+                                const durationSec = Math.max(
+                                    1,
+                                    Math.round((Date.now() - startTime) / 1000),
+                                )
+                                setThinkingDuration(durationSec)
+                            }
+                            setStreamingAnswer((prev) => prev + eventData.text)
+                        } else if (eventData.type === "user_message") {
+                            setMessages((prev) => [
+                                ...prev.slice(0, -1),
+                                eventData.message,
+                            ])
+                        } else if (eventData.type === "done") {
+                            const durationSec = Math.max(
+                                1,
+                                Math.round((Date.now() - startTime) / 1000),
+                            )
+                            const assistantMsg = {
+                                ...eventData.assistantMessage,
+                                thinkingDuration: durationSec,
+                            }
+                            setMessages((prev) => [...prev, assistantMsg])
+                            setStreamingThought("")
+                            setStreamingAnswer("")
+                            setIsThinking(false)
+                            setThinkingDuration(null)
+                        } else if (eventData.type === "error") {
+                            throw new Error(
+                                eventData.error ||
+                                    "AI 스트리밍 중 오류가 발생했습니다.",
+                            )
+                        }
+                    } catch (parseErr) {
+                        console.error("SSE parse error:", parseErr, jsonStr)
+                    }
+                }
+            }
         } catch (err: any) {
             toaster.create({
                 title: "채팅 오류",
@@ -1467,6 +2318,10 @@ const ApplicationTemplate: React.FC = () => {
             })
         } finally {
             setIsGenerating(false)
+            setIsThinking(false)
+            setStreamingThought("")
+            setStreamingAnswer("")
+            setThinkingDuration(null)
         }
     }
 
@@ -2109,6 +2964,58 @@ const ApplicationTemplate: React.FC = () => {
                                                     >
                                                         원본 텍스트
                                                     </Button>
+                                                    <Button
+                                                        size="xs"
+                                                        variant="ghost"
+                                                        bg={
+                                                            rawTextViewMode ===
+                                                            "pdf"
+                                                                ? "white"
+                                                                : "transparent"
+                                                        }
+                                                        color={
+                                                            rawTextViewMode ===
+                                                            "pdf"
+                                                                ? "blue.600"
+                                                                : "gray.600"
+                                                        }
+                                                        fontWeight={
+                                                            rawTextViewMode ===
+                                                            "pdf"
+                                                                ? "bold"
+                                                                : "medium"
+                                                        }
+                                                        shadow={
+                                                            rawTextViewMode ===
+                                                            "pdf"
+                                                                ? "xs"
+                                                                : "none"
+                                                        }
+                                                        onClick={() =>
+                                                            setRawTextViewMode(
+                                                                "pdf",
+                                                            )
+                                                        }
+                                                        h="24px"
+                                                        fontSize="2xs"
+                                                        px={2.5}
+                                                        borderRadius="md"
+                                                        _hover={{
+                                                            bg:
+                                                                rawTextViewMode ===
+                                                                "pdf"
+                                                                    ? "white"
+                                                                    : "gray.200/80",
+                                                        }}
+                                                    >
+                                                        <FileText
+                                                            size={11}
+                                                            style={{
+                                                                marginRight: 4,
+                                                            }}
+                                                        />
+                                                        PDF 원본 뷰어
+                                                    </Button>
                                                 </HStack>
                                             </HStack>
                                             {highlightedText && (
@@ -2121,16 +3028,32 @@ const ApplicationTemplate: React.FC = () => {
                                                 </Text>
                                             )}
                                         </Flex>
-                                        {rawTextViewMode === "inline"
-                                            ? renderInlineFeedbackView(
-                                                  selectedResume.raw_text,
-                                                  selectedResume.improvements,
-                                                  selectedResume.citations,
-                                              )
-                                            : renderRawTextWithHighlight(
-                                                  selectedResume.raw_text,
-                                                  highlightedText,
-                                              )}
+                                        {rawTextViewMode === "inline" ? (
+                                            renderInlineFeedbackView(
+                                                selectedResume.raw_text,
+                                                selectedResume.improvements,
+                                                selectedResume.citations,
+                                            )
+                                        ) : rawTextViewMode === "raw" ? (
+                                            renderRawTextWithHighlight(
+                                                selectedResume.raw_text,
+                                                highlightedText,
+                                            )
+                                        ) : (
+                                            <PdfViewer
+                                                resumeId={selectedResume.id}
+                                                pdfName={
+                                                    selectedResume.pdf_name
+                                                }
+                                                onUploadClick={() =>
+                                                    document
+                                                        .getElementById(
+                                                            "pdf-file-input-re",
+                                                        )
+                                                        ?.click()
+                                                }
+                                            />
+                                        )}
                                     </Box>
 
                                     {/* AI 피드백 & 대화 */}
@@ -2150,34 +3073,6 @@ const ApplicationTemplate: React.FC = () => {
                                             mb={4}
                                             position="relative"
                                         >
-                                            {(isUploading || isReanalyzing) && (
-                                                <Flex
-                                                    position="absolute"
-                                                    inset={0}
-                                                    bg="white/80"
-                                                    align="center"
-                                                    justify="center"
-                                                    zIndex={10}
-                                                    backdropFilter="blur(2px)"
-                                                >
-                                                    <VStack gap={3}>
-                                                        <Spinner
-                                                            size="lg"
-                                                            color="blue.600"
-                                                        />
-                                                        <Text
-                                                            fontSize="sm"
-                                                            fontWeight="medium"
-                                                            color="blue.700"
-                                                        >
-                                                            {isUploading
-                                                                ? "새 이력서 PDF를 업로드하고 분석하고 있습니다..."
-                                                                : "PDF 원본 대조를 거쳐 AI 분석 및 정밀 참조를 다시 실행하고 있습니다..."}
-                                                        </Text>
-                                                    </VStack>
-                                                </Flex>
-                                            )}
-
                                             <VStack align="stretch" gap={8}>
                                                 {/* Analysis Content */}
                                                 <VStack align="stretch" gap={6}>
@@ -2346,6 +3241,16 @@ const ApplicationTemplate: React.FC = () => {
                                                                                     1
                                                                                 }
                                                                             >
+                                                                                {msg.thought_process && (
+                                                                                    <ThinkingProcessCard
+                                                                                        thought={
+                                                                                            msg.thought_process
+                                                                                        }
+                                                                                        duration={
+                                                                                            msg.thinkingDuration
+                                                                                        }
+                                                                                    />
+                                                                                )}
                                                                                 <MarkdownRenderer
                                                                                     content={
                                                                                         msg.message
@@ -2454,6 +3359,7 @@ const ApplicationTemplate: React.FC = () => {
                                                         gap={3}
                                                         align="start"
                                                         pt={4}
+                                                        w="100%"
                                                     >
                                                         <Box
                                                             bg="blue.50"
@@ -2461,16 +3367,104 @@ const ApplicationTemplate: React.FC = () => {
                                                             borderRadius="lg"
                                                             color="blue.600"
                                                             mt={1.5}
+                                                            flexShrink={0}
                                                         >
-                                                            <FileText
-                                                                size={10}
+                                                            <Sparkles
+                                                                size={14}
+                                                                className="animate-pulse"
                                                             />
                                                         </Box>
-                                                        <Box pt={2.5}>
-                                                            <Spinner
-                                                                size="xs"
-                                                                color="blue.600"
-                                                            />
+                                                        <Box flex={1} pt={1}>
+                                                            {/* 실시간 생각 과정 스트리밍 */}
+                                                            {streamingThought ? (
+                                                                <ThinkingProcessCard
+                                                                    thought={
+                                                                        streamingThought
+                                                                    }
+                                                                    isLive={
+                                                                        isThinking
+                                                                    }
+                                                                    duration={
+                                                                        thinkingDuration
+                                                                    }
+                                                                />
+                                                            ) : (
+                                                                isThinking && (
+                                                                    <HStack
+                                                                        gap={2}
+                                                                        mb={3}
+                                                                        p={2.5}
+                                                                        bg="blue.50/50"
+                                                                        borderRadius="lg"
+                                                                        border="1px dashed"
+                                                                        borderColor="blue.200"
+                                                                    >
+                                                                        <Spinner
+                                                                            size="xs"
+                                                                            color="blue.600"
+                                                                        />
+                                                                        <Text
+                                                                            fontSize="xs"
+                                                                            color="blue.700"
+                                                                            fontWeight="medium"
+                                                                        >
+                                                                            AI
+                                                                            어시스턴트가
+                                                                            이력서와
+                                                                            채용
+                                                                            공고를
+                                                                            분석하며
+                                                                            답변을
+                                                                            생각하는
+                                                                            중입니다...
+                                                                        </Text>
+                                                                    </HStack>
+                                                                )
+                                                            )}
+
+                                                            {/* 실시간 답변 스트리밍 */}
+                                                            {streamingAnswer ? (
+                                                                <Box>
+                                                                    <MarkdownRenderer
+                                                                        content={
+                                                                            streamingAnswer
+                                                                        }
+                                                                        citations={[]}
+                                                                        onViewSource={
+                                                                            handleViewSource
+                                                                        }
+                                                                    />
+                                                                    <Box
+                                                                        display="inline-block"
+                                                                        w="6px"
+                                                                        h="14px"
+                                                                        bg="blue.500"
+                                                                        ml={1}
+                                                                        className="animate-pulse"
+                                                                        verticalAlign="middle"
+                                                                    />
+                                                                </Box>
+                                                            ) : (
+                                                                !isThinking && (
+                                                                    <HStack
+                                                                        gap={2}
+                                                                        pt={2}
+                                                                    >
+                                                                        <Spinner
+                                                                            size="xs"
+                                                                            color="blue.600"
+                                                                        />
+                                                                        <Text
+                                                                            fontSize="xs"
+                                                                            color="gray.500"
+                                                                        >
+                                                                            답변을
+                                                                            작성하고
+                                                                            있습니다...
+                                                                        </Text>
+                                                                    </HStack>
+                                                                )
+                                                            )}
                                                         </Box>
                                                     </Flex>
                                                 )}
@@ -2479,183 +3473,217 @@ const ApplicationTemplate: React.FC = () => {
                                         </Box>
 
                                         {/* Prompt/Chat Input Box */}
-                                        <Box mt="auto" pt={2}>
-                                            {/* Quick Action Suggestion Buttons (Shown only at the beginning of chat) */}
-                                            {messages.length === 0 && (
-                                                <HStack
-                                                    gap={2}
-                                                    mb={2.5}
-                                                    wrap="wrap"
-                                                >
-                                                    <Button
-                                                        size="xs"
-                                                        variant="subtle"
-                                                        color="blue.700"
-                                                        bg="blue.50"
-                                                        border="1px solid"
-                                                        borderColor="blue.200"
-                                                        borderRadius="full"
-                                                        px={3}
-                                                        py={1.5}
-                                                        _hover={{
-                                                            bg: "blue.100",
-                                                            borderColor:
-                                                                "blue.300",
-                                                            transform:
-                                                                "translateY(-1px)",
-                                                            shadow: "xs",
-                                                        }}
-                                                        transition="all 0.15s ease"
-                                                        disabled={
-                                                            isGenerating ||
-                                                            isUploading ||
-                                                            isReanalyzing
-                                                        }
-                                                        onClick={() =>
-                                                            handleSendPromptOrChat(
-                                                                "이력서 요약해줘",
-                                                            )
-                                                        }
-                                                    >
-                                                        <HStack gap={1.5}>
-                                                            <FileText
-                                                                size={11}
-                                                                color="var(--chakra-colors-blue-600)"
-                                                            />
-                                                            <Text
-                                                                fontWeight="semibold"
-                                                                fontSize="xs"
-                                                            >
-                                                                이력서 요약해줘
-                                                            </Text>
-                                                        </HStack>
-                                                    </Button>
-                                                    <Button
-                                                        size="xs"
-                                                        variant="subtle"
-                                                        color="blue.700"
-                                                        bg="blue.50"
-                                                        border="1px solid"
-                                                        borderColor="blue.200"
-                                                        borderRadius="full"
-                                                        px={3}
-                                                        py={1.5}
-                                                        _hover={{
-                                                            bg: "blue.100",
-                                                            borderColor:
-                                                                "blue.300",
-                                                            transform:
-                                                                "translateY(-1px)",
-                                                            shadow: "xs",
-                                                        }}
-                                                        transition="all 0.15s ease"
-                                                        disabled={
-                                                            isGenerating ||
-                                                            isUploading ||
-                                                            isReanalyzing
-                                                        }
-                                                        onClick={() =>
-                                                            handleSendPromptOrChat(
-                                                                "관련 공고 추천해줘",
-                                                            )
-                                                        }
-                                                    >
-                                                        <HStack gap={1.5}>
-                                                            <Briefcase
-                                                                size={11}
-                                                                color="var(--chakra-colors-blue-600)"
-                                                            />
-                                                            <Text
-                                                                fontWeight="semibold"
-                                                                fontSize="xs"
-                                                            >
-                                                                관련 공고
-                                                                추천해줘
-                                                            </Text>
-                                                        </HStack>
-                                                    </Button>
-                                                </HStack>
-                                            )}
-
-                                            <Flex
-                                                position="relative"
-                                                align="center"
-                                                border="1px solid"
-                                                borderColor="gray.200"
-                                                borderRadius="2xl"
-                                                p={1.5}
-                                                bg="white"
-                                                shadow="sm"
-                                                _focusWithin={{
-                                                    borderColor: "blue.400",
-                                                    boxShadow:
-                                                        "0 0 0 1px blue.600",
-                                                }}
-                                            >
-                                                <Input
-                                                    value={prompt}
-                                                    onChange={(e) =>
-                                                        setPrompt(
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    onKeyDown={(e) => {
-                                                        if (
-                                                            e.key === "Enter" &&
-                                                            !isGenerating
-                                                        ) {
-                                                            handleSendPromptOrChat()
-                                                        }
-                                                    }}
-                                                    placeholder="무엇이든 질문하세요"
-                                                    fontSize="sm"
-                                                    border="none"
-                                                    outline="none"
-                                                    _focus={{
-                                                        outline: "none",
-                                                        boxShadow: "none",
-                                                    }}
-                                                    pl={4}
-                                                    pr={12}
-                                                    disabled={
-                                                        isGenerating ||
-                                                        isUploading
-                                                    }
-                                                />
-                                                <Button
-                                                    onClick={() =>
-                                                        handleSendPromptOrChat()
-                                                    }
-                                                    position="absolute"
-                                                    right="1.5"
-                                                    w="9"
-                                                    h="9"
-                                                    minW="9"
-                                                    p={0}
-                                                    borderRadius="full"
-                                                    bg="gray.100"
-                                                    color="gray.600"
-                                                    display="flex"
-                                                    alignItems="center"
-                                                    justifyContent="center"
-                                                    _hover={{
-                                                        bg: "blue.50",
-                                                        color: "blue.600",
-                                                    }}
-                                                    _disabled={{
-                                                        opacity: 0.5,
-                                                        cursor: "not-allowed",
-                                                    }}
-                                                    disabled={
-                                                        isGenerating ||
+                                        <Box
+                                            mt="auto"
+                                            pt={2}
+                                            position="relative"
+                                            w="100%"
+                                        >
+                                            {isUploading || isReanalyzing ? (
+                                                <ResumeAnalysisInlineProgress
+                                                    isOpen={
                                                         isUploading ||
-                                                        prompt.trim() === ""
+                                                        isReanalyzing
                                                     }
-                                                    transition="all 0.2s"
-                                                >
-                                                    <ArrowRight size={12} />
-                                                </Button>
-                                            </Flex>
+                                                    isReanalyze={isReanalyzing}
+                                                />
+                                            ) : (
+                                                <>
+                                                    {/* Quick Action Suggestion Buttons (Shown only at the beginning of chat) */}
+                                                    {messages.length === 0 && (
+                                                        <HStack
+                                                            gap={2}
+                                                            mb={2.5}
+                                                            wrap="wrap"
+                                                        >
+                                                            <Button
+                                                                size="xs"
+                                                                variant="subtle"
+                                                                color="blue.700"
+                                                                bg="blue.50"
+                                                                border="1px solid"
+                                                                borderColor="blue.200"
+                                                                borderRadius="full"
+                                                                px={3}
+                                                                py={1.5}
+                                                                _hover={{
+                                                                    bg: "blue.100",
+                                                                    borderColor:
+                                                                        "blue.300",
+                                                                    transform:
+                                                                        "translateY(-1px)",
+                                                                    shadow: "xs",
+                                                                }}
+                                                                transition="all 0.15s ease"
+                                                                disabled={
+                                                                    isGenerating ||
+                                                                    isUploading ||
+                                                                    isReanalyzing
+                                                                }
+                                                                onClick={() =>
+                                                                    handleSendPromptOrChat(
+                                                                        "이력서 요약해줘",
+                                                                    )
+                                                                }
+                                                            >
+                                                                <HStack
+                                                                    gap={1.5}
+                                                                >
+                                                                    <FileText
+                                                                        size={
+                                                                            11
+                                                                        }
+                                                                        color="var(--chakra-colors-blue-600)"
+                                                                    />
+                                                                    <Text
+                                                                        fontWeight="semibold"
+                                                                        fontSize="xs"
+                                                                    >
+                                                                        이력서
+                                                                        요약해줘
+                                                                    </Text>
+                                                                </HStack>
+                                                            </Button>
+                                                            <Button
+                                                                size="xs"
+                                                                variant="subtle"
+                                                                color="blue.700"
+                                                                bg="blue.50"
+                                                                border="1px solid"
+                                                                borderColor="blue.200"
+                                                                borderRadius="full"
+                                                                px={3}
+                                                                py={1.5}
+                                                                _hover={{
+                                                                    bg: "blue.100",
+                                                                    borderColor:
+                                                                        "blue.300",
+                                                                    transform:
+                                                                        "translateY(-1px)",
+                                                                    shadow: "xs",
+                                                                }}
+                                                                transition="all 0.15s ease"
+                                                                disabled={
+                                                                    isGenerating ||
+                                                                    isUploading ||
+                                                                    isReanalyzing
+                                                                }
+                                                                onClick={() =>
+                                                                    handleSendPromptOrChat(
+                                                                        "관련 공고 추천해줘",
+                                                                    )
+                                                                }
+                                                            >
+                                                                <HStack
+                                                                    gap={1.5}
+                                                                >
+                                                                    <Briefcase
+                                                                        size={
+                                                                            11
+                                                                        }
+                                                                        color="var(--chakra-colors-blue-600)"
+                                                                    />
+                                                                    <Text
+                                                                        fontWeight="semibold"
+                                                                        fontSize="xs"
+                                                                    >
+                                                                        관련
+                                                                        공고
+                                                                        추천해줘
+                                                                    </Text>
+                                                                </HStack>
+                                                            </Button>
+                                                        </HStack>
+                                                    )}
+
+                                                    <Flex
+                                                        position="relative"
+                                                        align="center"
+                                                        border="1px solid"
+                                                        borderColor="gray.200"
+                                                        borderRadius="2xl"
+                                                        p={1.5}
+                                                        bg="white"
+                                                        shadow="sm"
+                                                        _focusWithin={{
+                                                            borderColor:
+                                                                "blue.400",
+                                                            boxShadow:
+                                                                "0 0 0 1px blue.600",
+                                                        }}
+                                                    >
+                                                        <Input
+                                                            value={prompt}
+                                                            onChange={(e) =>
+                                                                setPrompt(
+                                                                    e.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            onKeyDown={(e) => {
+                                                                if (
+                                                                    e.key ===
+                                                                        "Enter" &&
+                                                                    !isGenerating
+                                                                ) {
+                                                                    handleSendPromptOrChat()
+                                                                }
+                                                            }}
+                                                            placeholder="무엇이든 질문하세요"
+                                                            fontSize="sm"
+                                                            border="none"
+                                                            outline="none"
+                                                            _focus={{
+                                                                outline: "none",
+                                                                boxShadow:
+                                                                    "none",
+                                                            }}
+                                                            pl={4}
+                                                            pr={12}
+                                                            disabled={
+                                                                isGenerating ||
+                                                                isUploading
+                                                            }
+                                                        />
+                                                        <Button
+                                                            onClick={() =>
+                                                                handleSendPromptOrChat()
+                                                            }
+                                                            position="absolute"
+                                                            right="1.5"
+                                                            w="9"
+                                                            h="9"
+                                                            minW="9"
+                                                            p={0}
+                                                            borderRadius="full"
+                                                            bg="gray.100"
+                                                            color="gray.600"
+                                                            display="flex"
+                                                            alignItems="center"
+                                                            justifyContent="center"
+                                                            _hover={{
+                                                                bg: "blue.50",
+                                                                color: "blue.600",
+                                                            }}
+                                                            _disabled={{
+                                                                opacity: 0.5,
+                                                                cursor: "not-allowed",
+                                                            }}
+                                                            disabled={
+                                                                isGenerating ||
+                                                                isUploading ||
+                                                                prompt.trim() ===
+                                                                    ""
+                                                            }
+                                                            transition="all 0.2s"
+                                                        >
+                                                            <ArrowRight
+                                                                size={12}
+                                                            />
+                                                        </Button>
+                                                    </Flex>
+                                                </>
+                                            )}
                                         </Box>
                                     </Box>
                                 </Flex>
@@ -2669,57 +3697,51 @@ const ApplicationTemplate: React.FC = () => {
                                     h="100%"
                                     w="100%"
                                 >
-                                    <Flex
-                                        direction="column"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                        w="100%"
-                                        h="340px"
-                                        border="1px dashed"
-                                        borderColor="gray.200"
-                                        borderRadius="2xl"
-                                        p={10}
-                                        bg="white"
-                                        shadow="sm"
-                                        _hover={{
-                                            bg: "blue.50/5",
-                                            borderColor: "blue.400",
-                                            shadow: "md",
-                                        }}
-                                        transition="all 0.3s ease"
-                                        cursor="pointer"
-                                        onClick={() =>
-                                            document
-                                                .getElementById(
-                                                    "pdf-file-input",
-                                                )
-                                                ?.click()
-                                        }
-                                        position="relative"
-                                    >
-                                        <input
-                                            id="pdf-file-input"
-                                            type="file"
-                                            accept=".pdf"
-                                            style={{ display: "none" }}
-                                            onChange={handleFileUpload}
-                                        />
-                                        {isUploading ? (
-                                            <VStack gap={4}>
-                                                <Spinner
-                                                    size="lg"
-                                                    color="blue.500"
-                                                />
-                                                <Text
-                                                    fontWeight="medium"
-                                                    color="blue.700"
-                                                    fontSize="xs"
-                                                >
-                                                    이력서 PDF를 분석하고
-                                                    요약하는 중입니다...
-                                                </Text>
-                                            </VStack>
-                                        ) : (
+                                    {isUploading ? (
+                                        <Box w="100%" h="340px">
+                                            <ResumeAnalysisInlineProgress
+                                                isOpen={isUploading}
+                                                isReanalyze={false}
+                                                h="340px"
+                                                minH="340px"
+                                            />
+                                        </Box>
+                                    ) : (
+                                        <Flex
+                                            direction="column"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            w="100%"
+                                            h="340px"
+                                            border="1px dashed"
+                                            borderColor="gray.200"
+                                            borderRadius="2xl"
+                                            p={10}
+                                            bg="white"
+                                            shadow="sm"
+                                            _hover={{
+                                                bg: "blue.50/5",
+                                                borderColor: "blue.400",
+                                                shadow: "md",
+                                            }}
+                                            transition="all 0.3s ease"
+                                            cursor="pointer"
+                                            onClick={() =>
+                                                document
+                                                    .getElementById(
+                                                        "pdf-file-input",
+                                                    )
+                                                    ?.click()
+                                            }
+                                            position="relative"
+                                        >
+                                            <input
+                                                id="pdf-file-input"
+                                                type="file"
+                                                accept=".pdf"
+                                                style={{ display: "none" }}
+                                                onChange={handleFileUpload}
+                                            />
                                             <VStack gap={5} textAlign="center">
                                                 <Box
                                                     bg="gray.50"
@@ -2775,8 +3797,8 @@ const ApplicationTemplate: React.FC = () => {
                                                     파일 선택
                                                 </Button>
                                             </VStack>
-                                        )}
-                                    </Flex>
+                                        </Flex>
+                                    )}
                                 </Box>
                             )}
                         </>

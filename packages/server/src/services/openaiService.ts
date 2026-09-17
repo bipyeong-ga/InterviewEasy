@@ -179,7 +179,7 @@ ${params.resumeText || "(이력서 미등록 - 일반 직무 질문)"}
 `
 
         const response = await client.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-5.6-luna",
             messages: [
                 {
                     role: "system",
@@ -471,7 +471,7 @@ ${params.job || "소프트웨어 엔지니어"}
 }
 `
         const response = await client.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-5",
             messages: [
                 {
                     role: "system",
@@ -592,7 +592,7 @@ ${JSON.stringify(params.results, null, 2)}
 }
 `
         const response = await client.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-5",
             messages: [
                 {
                     role: "system",
@@ -696,7 +696,7 @@ export async function generateTtsAudio(text: string): Promise<string> {
 export async function analyzeCoverLetter(coverLetter: string): Promise<string> {
     try {
         const response = await client.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-5",
             messages: [
                 {
                     role: "system",
@@ -720,7 +720,7 @@ export async function analyzeCoverLetter(coverLetter: string): Promise<string> {
 export async function analyzeResume(resumeText: string): Promise<string> {
     try {
         const response = await client.chat.completions.create({
-            model: "gpt-4o",
+            model: "gpt-5",
             messages: [
                 {
                     role: "system",

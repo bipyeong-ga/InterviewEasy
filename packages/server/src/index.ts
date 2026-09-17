@@ -39,7 +39,7 @@ app.use(
 
 const port = process.env.PORT || 3000
 
-// 마이그레이션 실행
+// 데이터베이스 마이그레이션 순차 실행
 async function runMigrations() {
     try {
         const migrationsDir = path.join(__dirname, "../migrations")

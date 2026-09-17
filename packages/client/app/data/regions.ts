@@ -222,7 +222,7 @@ export function getRegionsWithCounts(
             if (
                 p.district &&
                 !districts.some(
-                    (d) => d.name === p.district || p.district.includes(d.name),
+                    (d) => d.name === p.district || Boolean(p.district?.includes(d.name)),
                 )
             ) {
                 const count = regionPosts.filter(
