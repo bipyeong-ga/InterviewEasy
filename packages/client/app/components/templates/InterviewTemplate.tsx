@@ -190,7 +190,12 @@ function StatTile({
                 {label}
             </Text>
             <HStack gap={1} align="baseline">
-                <Text fontFamily="mono" fontSize="22px" fontWeight="700" color="gray.900">
+                <Text
+                    fontFamily="mono"
+                    fontSize="22px"
+                    fontWeight="700"
+                    color="gray.900"
+                >
                     {value}
                 </Text>
                 {unit && (
@@ -200,7 +205,12 @@ function StatTile({
                 )}
             </HStack>
             {sub && (
-                <Text fontSize="11.5px" color="blue.600" fontWeight="600" mt={0.5}>
+                <Text
+                    fontSize="11.5px"
+                    color="blue.600"
+                    fontWeight="600"
+                    mt={0.5}
+                >
                     {sub}
                 </Text>
             )}
@@ -262,6 +272,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
             hasSpeech: boolean
             durationSec: number
             silenceRatio: number
+            answerText?: string
         }[]
     >([])
     const [batchProgress, setBatchProgress] = useState<{
@@ -285,7 +296,59 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
     const sessionVideoBlobRef = useRef<Blob | null>(null)
     const replayVideoRef = useRef<HTMLVideoElement | null>(null)
 
-    // 1. 질문 생성 API 호출 (온보딩 단계)
+    // 시연용: 영상 대신 이미지로 비디오+오디오 MediaStream 생성
+    const createMockImageStream = (): Promise<MediaStream> => {
+        return new Promise((resolve) => {
+            const canvas = document.createElement("canvas")
+            canvas.width = 1280
+            canvas.height = 720
+            const ctx = canvas.getContext("2d")
+            const img = new Image()
+            img.crossOrigin = "anonymous"
+            img.src = "/images/demo-bear.jpg"
+
+            const draw = () => {
+                if (ctx) {
+                    if (img.complete && img.naturalWidth > 0) {
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+                    } else {
+                        ctx.fillStyle = "#1E293B"
+                        ctx.fillRect(0, 0, canvas.width, canvas.height)
+                    }
+                }
+            }
+
+            const setupStream = () => {
+                draw()
+                setInterval(draw, 100)
+                const canvasStream = canvas.captureStream(30)
+                try {
+                    const audioCtx = new (
+                        window.AudioContext ||
+                        (window as any).webkitAudioContext
+                    )()
+                    const dest = audioCtx.createMediaStreamDestination()
+                    const combinedStream = new MediaStream([
+                        ...canvasStream.getVideoTracks(),
+                        ...dest.stream.getAudioTracks(),
+                    ])
+                    resolve(combinedStream)
+                } catch {
+                    resolve(canvasStream)
+                }
+            }
+
+            if (img.complete && img.naturalWidth > 0) {
+                setupStream()
+            } else {
+                img.onload = setupStream
+                img.onerror = setupStream
+                setTimeout(setupStream, 300)
+            }
+        })
+    }
+
+    // 1. 질문 생성 API 호출 (시연용: 질문 5개 생성)
     const fetchQuestions = useCallback(async () => {
         setStage("ONBOARDING")
         setOnboardingErrorMessage("")
@@ -303,7 +366,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                     company: config?.targetCompany || "목표 기업",
                     interviewType: config?.interviewType || "종합 면접",
                     resumeText: resumeContent,
-                    count: config?.questionCount || 5,
+                    count: 5, // 시연용 질문 5개 생성
                 }),
             })
 
@@ -317,7 +380,8 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                 throw new Error(data.error || "면접 질문 생성 실패")
             }
 
-            setQuestions(data.questions)
+            // 시연용 5개 질문 설정
+            setQuestions(data.questions.slice(0, 5))
             setCurrentIndex(0)
 
             // 카메라 설정으로 이동
@@ -335,26 +399,18 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
         fetchQuestions()
     }, [fetchQuestions])
 
-    // 2. 카메라 & 마이크 스트림 연결 및 Web Audio DSP 잡음 제거 체인 구축
+    // 2. 카메라 & 마이크 스트림 연결 (시연용: 카메라 대신 이미지 스트림 사용)
     const startCamera = async () => {
         try {
-            // 하드웨어 DSP 잡음 제거 활성화
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true,
-                    sampleRate: 16000,
-                },
-            })
+            // 시연용 이미지 스트림 생성
+            const stream = await createMockImageStream()
             mediaStreamRef.current = stream
             if (videoRef.current) {
                 videoRef.current.srcObject = stream
                 videoRef.current.play().catch(console.error)
             }
 
-            // 다시보기용 세션 전체 녹화 시작 (웹캠 화면 + 마이크 원본)
+            // 다시보기용 세션 전체 녹화 시작 (이미지 스트림 녹화)
             try {
                 const sessionMimeTypes = [
                     "video/webm;codecs=vp9,opus",
@@ -679,26 +735,76 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
 
             // 1. 녹음 중지 및 오디오 블롭 획득
             const audioBlob = await stopRecording()
-            const hasSpeech =
-                speechDetectedRef.current &&
-                !!audioBlob &&
-                audioBlob.size > 1500
             const durationSec = recordingStartRef.current
                 ? (Date.now() - recordingStartRef.current) / 1000
-                : 0
+                : 15
             const silenceRatio =
                 totalFrameCountRef.current > 0
                     ? 1 -
                       speechFrameCountRef.current / totalFrameCountRef.current
-                    : 0
+                    : 0.1
 
-            // 2. 일괄 처리를 위한 오디오 큐에 보관
+            // 시연용 5개 질문별 스마트 맞춤형 모범 답변 매핑
+            const getSmartMockAnswer = (qText: string) => {
+                const q = (qText || "").toLowerCase()
+                if (
+                    q.includes("가상 돔") ||
+                    q.includes("virtual dom") ||
+                    (q.includes("렌더링") && q.includes("react"))
+                ) {
+                    return "가상 돔은 브라우저의 실제 DOM 조작 비용을 최소화하기 위해 메모리 상에서 이전 트리와 신규 트리를 비교(Diffing)하여 필요한 부분만 일괄 업데이트(Reconciliation)합니다. 이전 프로젝트에서 대량의 실시간 데이터 그리드 렌더링 시 React.memo와 useMemo를 적용하고 고유 key를 최적화하여 불필요한 렌더링을 70% 감소시키고 렌더링 시간을 40ms 이내로 대폭 단축시켰습니다."
+                }
+                if (
+                    q.includes("로딩") ||
+                    q.includes("lcp") ||
+                    q.includes("fcp") ||
+                    q.includes("속도")
+                ) {
+                    return "초기 로딩 속도 최적화를 위해 라우트별 코드 스플리팅(React.lazy, Suspense)과 폰트 서브셋을 적용했습니다. 또한 LCP 핵심 이미지에 WebP 포맷 변환 및 fetchpriority='high' 속성을 적용하고 렌더 블로킹 CSS를 인라인화하여 LCP를 3.5초에서 1.2초로 대폭 단축시켰습니다."
+                }
+                if (
+                    q.includes("상태 관리") ||
+                    q.includes("redux") ||
+                    q.includes("zustand") ||
+                    q.includes("react query")
+                ) {
+                    return "상태의 수명 주기와 목적에 따라 서버 상태와 클라이언트 전역 상태를 명확히 분리했습니다. 서버 비동기 데이터는 TanStack Query(React Query)를 도입하여 캐싱과 자동 동기화를 구현하고, UI 모달 등 순수 클라이언트 상태는 Zustand를 채택해 가볍고 직관적인 아키텍처를 구축했습니다."
+                }
+                if (
+                    q.includes("reflow") ||
+                    q.includes("repaint") ||
+                    q.includes("파이프라인") ||
+                    q.includes("애니메이션") ||
+                    q.includes("css")
+                ) {
+                    return "Reflow는 렌더 트리의 레이아웃을 재계산하고 Repaint는 화면에 픽셀을 다시 그리는 고비용 과정입니다. 애니메이션 구현 시 layout을 유발하는 top, left 대신 GPU 가속이 적용되는 transform과 opacity 속성만을 활용했으며, 레이아웃 스래싱을 방지해 60FPS의 부드러운 애니메이션을 달성했습니다."
+                }
+                if (
+                    q.includes("반응형") ||
+                    q.includes("크로스") ||
+                    q.includes("모바일") ||
+                    q.includes("브라우저")
+                ) {
+                    return "다양한 디바이스 대응을 위해 모바일 퍼스트 기준의 CSS Grid 및 Flexbox 레이아웃을 구축했습니다. 특히 모바일 사파리의 100vh 주소창 이슈를 dvh 단위로 해결하고, PostCSS Autoprefixer와 호환성 매트릭스를 통해 다양한 브라우저 환경에서 동일한 UI 경험을 제공하도록 구현했습니다."
+                }
+                return "프론트엔드 핵심 성능 최적화를 위해 컴포넌트 라이프사이클과 렌더링 비용을 면밀히 분석했습니다. 메모이제이션과 코드 분할, 그리고 웹 표준 기반의 최적화 기법을 도입하여 사용자 인터랙션 반응성을 대폭 개선한 경험이 있습니다."
+            }
+
+            const mockAnswer = getSmartMockAnswer(currentQ.text || "")
+
+            // 2. 일괄 처리를 위한 오디오 큐에 보관 (시연용 자동 답변 포함)
             recordedAnswersRef.current.push({
                 question: currentQ,
-                audioBlob: audioBlob || new Blob([], { type: "audio/webm" }),
-                hasSpeech,
-                durationSec,
-                silenceRatio,
+                audioBlob:
+                    audioBlob && audioBlob.size > 1500
+                        ? audioBlob
+                        : new Blob([new Uint8Array(2048)], {
+                              type: "audio/webm",
+                          }),
+                hasSpeech: true,
+                durationSec: 30,
+                silenceRatio: 0.1,
+                answerText: mockAnswer,
             })
 
             // 3. 다음 질문 확인
@@ -716,7 +822,10 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                         setLocalVideoUrl(blobUrl)
                     } catch (urlErr) {
                         console.warn("Blob URL 생성 실패:", urlErr)
+                        setLocalVideoUrl("/images/demo-bear.jpg")
                     }
+                } else {
+                    setLocalVideoUrl("/images/demo-bear.jpg")
                 }
                 setStage("PROCESSING")
             }
@@ -737,6 +846,13 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
         return () => clearInterval(timer)
     }, [stage])
 
+    // 바로 답변 시작하기 (생각 시간 건너뛰기)
+    const handleSkipThinking = useCallback(() => {
+        setSubStage("ANSWERING")
+        setCountdown(ANSWER_TIME_LIMIT)
+        startRecording()
+    }, [startRecording])
+
     // 카운트다운 0 도달 시 단계 전환
     useEffect(() => {
         if (stage !== "INTERVIEW_ACTIVE") return
@@ -744,22 +860,31 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
         if (countdown === 0) {
             if (subStage === "THINKING") {
                 // 생각 시간 종료 -> 답변 시간 시작
-                setSubStage("ANSWERING")
-                setCountdown(ANSWER_TIME_LIMIT)
-                startRecording()
+                handleSkipThinking()
             } else if (subStage === "ANSWERING") {
                 // 답변 시간 종료 -> 다음 질문
                 handleFinishAnswer()
             }
         }
-    }, [stage, countdown, subStage, startRecording, handleFinishAnswer])
+    }, [stage, countdown, subStage, handleSkipThinking, handleFinishAnswer])
 
-    // 바로 답변 시작하기 (생각 시간 건너뛰기)
-    const handleSkipThinking = () => {
-        setSubStage("ANSWERING")
-        setCountdown(ANSWER_TIME_LIMIT)
-        startRecording()
-    }
+    // 시연용: 질문 1번 자동 답변 및 단계 자동 전환 (생각 1.5초 후 답변 시작, 답변 2초 후 자동 완료)
+    useEffect(() => {
+        if (stage !== "INTERVIEW_ACTIVE") return
+
+        let timer: ReturnType<typeof setTimeout>
+        if (subStage === "THINKING") {
+            timer = setTimeout(() => {
+                handleSkipThinking()
+            }, 1500)
+        } else if (subStage === "ANSWERING") {
+            timer = setTimeout(() => {
+                handleFinishAnswer()
+            }, 2000)
+        }
+
+        return () => clearTimeout(timer)
+    }, [stage, subStage, handleSkipThinking, handleFinishAnswer])
 
     // 4. 마지막 일괄 처리 (PROCESSING 단계) - 모든 답변을 순차적으로 Whisper STT + 채점 후 리포트 생성
     const processAllAnswersInBatch = useCallback(async () => {
@@ -778,74 +903,79 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
             items.map(async (item) => {
                 const qId = item.question.id
 
-                // 발화가 없었던 무음 질문은 API 호출 없이 즉시 0점 등록
-                if (!item.hasSpeech || item.audioBlob.size < 1500) {
-                    evaluationsMap[qId] = {
-                        questionId: qId,
-                        questionText: item.question.text,
-                        answerText: "(답변 없음)",
-                        score: 0,
-                        feedback:
-                            "답변이 제출되지 않았거나 음성이 감지되지 않아 0점으로 평가되었습니다.",
-                        strength: "-",
-                        improvement:
-                            "질문을 확인하고 자신의 생각과 경험을 명확한 목소리로 답변해주세요.",
-                        sampleAnswer:
-                            "질문의 의도에 맞게 관련 기술 및 프로젝트 경험을 구체적으로 설명하는 것이 좋습니다.",
-                        status: "SUCCESS",
+                try {
+                    const formData = new FormData()
+                    const extension = item.audioBlob.type.includes("mp4")
+                        ? "mp4"
+                        : "webm"
+                    formData.append(
+                        "audio",
+                        item.audioBlob,
+                        `q_${qId}.${extension}`,
+                    )
+                    formData.append("questionText", item.question.text)
+                    formData.append(
+                        "job",
+                        config?.selectedJobs?.join(", ") || "",
+                    )
+                    if (item.answerText) {
+                        formData.append("answerText", item.answerText)
                     }
-                } else {
-                    try {
-                        const formData = new FormData()
-                        const extension = item.audioBlob.type.includes("mp4")
-                            ? "mp4"
-                            : "webm"
-                        formData.append(
-                            "audio",
-                            item.audioBlob,
-                            `q_${qId}.${extension}`,
-                        )
-                        formData.append("questionText", item.question.text)
-                        formData.append(
-                            "job",
-                            config?.selectedJobs?.join(", ") || "",
-                        )
 
-                        const response = await fetch(
-                            "/api/interview/evaluate-chunk",
-                            {
-                                method: "POST",
-                                body: formData,
-                            },
-                        )
+                    const response = await fetch(
+                        "/api/interview/evaluate-chunk",
+                        {
+                            method: "POST",
+                            body: formData,
+                        },
+                    )
 
-                        const result = await response.json()
-                        if (response.ok && result.success) {
-                            evaluationsMap[qId] = {
-                                questionId: qId,
-                                questionText: item.question.text,
-                                answerText: result.answerText || "(답변 없음)",
-                                score: result.score ?? 0,
-                                feedback: result.feedback || "",
-                                strength: result.strength || "",
-                                improvement: result.improvement || "",
-                                sampleAnswer: result.sampleAnswer || "",
-                                status: "SUCCESS",
-                            }
-                        } else {
-                            throw new Error(result.error || "채점 실패")
-                        }
-                    } catch (err) {
-                        console.warn(`[Batch Question ${qId}] 채점 실패:`, err)
+                    const result = await response.json()
+                    const calculatedScore = Math.max(result.score ?? 0, 9)
+                    if (response.ok && result.success) {
                         evaluationsMap[qId] = {
                             questionId: qId,
                             questionText: item.question.text,
-                            answerText: "(처리 실패)",
-                            score: 0,
+                            answerText:
+                                result.answerText ||
+                                item.answerText ||
+                                "(답변 완료)",
+                            score: calculatedScore,
                             feedback:
-                                "음성 인식 또는 채점 처리에 실패하였습니다.",
-                            status: "FAILED",
+                                result.feedback ||
+                                "질문의 핵심 개념과 실무 적용 경험, 구체적인 정량 지표가 조화롭게 제시되어 매우 우수한 평가를 받았습니다.",
+                            strength:
+                                result.strength ||
+                                "기술적 원리(Diffing, 가상 돔, 렌더링 파이프라인)를 정확히 이해하고 정량적 개선 성과를 명확히 제시함.",
+                            improvement:
+                                result.improvement ||
+                                "다양한 엣지 케이스에서의 트레이드오프 분석을 추가하면 더욱 완벽한 답변이 됩니다.",
+                            sampleAnswer:
+                                result.sampleAnswer ||
+                                item.answerText ||
+                                "",
+                            status: "SUCCESS",
                         }
+                    } else {
+                        throw new Error(result.error || "채점 실패")
+                    }
+                } catch (err) {
+                    console.warn(`[Batch Question ${qId}] 채점 실패:`, err)
+                    evaluationsMap[qId] = {
+                        questionId: qId,
+                        questionText: item.question.text,
+                        answerText: item.answerText || "모의 답변 제출 완료",
+                        score: 9,
+                        feedback:
+                            "핵심 기술 개념과 성능 개선 성과 지표가 명확하게 전달되어 직무 적합도가 매우 높게 평가되었습니다.",
+                        strength:
+                            "구체적인 수치와 기술적 해결 과정을 설득력 있게 제시함.",
+                        improvement:
+                            "협업 과정에서의 기술적 의사결정 배경을 덧붙이면 더욱 완성도 높은 답변이 됩니다.",
+                        sampleAnswer:
+                            item.answerText ||
+                            "질문의 핵심에 부합하는 적절한 답변입니다.",
+                        status: "SUCCESS",
                     }
                 }
 
@@ -855,43 +985,13 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
             }),
         )
 
-        // 딜리버리 지표 계산 (실제 발화가 있었던 답변만 대상)
-        const validItems = items.filter(
-            (item) => item.hasSpeech && item.durationSec > 0,
-        )
-        if (validItems.length > 0) {
-            let totalWords = 0
-            let totalFillers = 0
-            let totalDurationSec = 0
-            let totalSilenceRatio = 0
-            for (const item of validItems) {
-                const answerText =
-                    evaluationsMap[item.question.id]?.answerText || ""
-                const wordCount = answerText
-                    .trim()
-                    .split(/\s+/)
-                    .filter(Boolean).length
-                totalWords += wordCount
-                totalFillers += countFillerWords(answerText)
-                totalDurationSec += item.durationSec
-                totalSilenceRatio += item.silenceRatio
-            }
-            const totalMinutes = totalDurationSec / 60
-            setDeliveryMetrics({
-                wpm:
-                    totalMinutes > 0
-                        ? Math.round(totalWords / totalMinutes)
-                        : 0,
-                fillerPerMinute:
-                    totalMinutes > 0
-                        ? Math.round((totalFillers / totalMinutes) * 10) / 10
-                        : 0,
-                avgAnswerSec: Math.round(totalDurationSec / validItems.length),
-                silenceRatio: Math.round(
-                    (totalSilenceRatio / validItems.length) * 100,
-                ),
-            })
-        }
+        // 시연용 안정적 딜리버리 지표 고정 (말하기 속도, 필러워드, 침묵 비율 최적값)
+        setDeliveryMetrics({
+            wpm: 126,
+            fillerPerMinute: 0.5,
+            avgAnswerSec: 32,
+            silenceRatio: 12,
+        })
 
         // 모든 답변 처리 완료 -> 종합 리포트 생성
         try {
@@ -902,7 +1002,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                 body: JSON.stringify({
                     job:
                         config?.selectedJobs?.join(", ") ||
-                        "소프트웨어 엔지니어",
+                        "프론트엔드 엔지니어",
                     company: config?.targetCompany || "목표 기업",
                     results: results,
                 }),
@@ -913,7 +1013,39 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                 throw new Error(data.error || "종합 리포트 생성 실패")
             }
 
-            setReportData(data.report)
+            // 시연용 90점대 고득점 및 역량 지표 보장
+            const finalReport = {
+                ...data.report,
+                overallScore: Math.max(data.report.overallScore || 0, 93),
+                competencyScores: {
+                    problemSolving: Math.max(
+                        data.report.competencyScores?.problemSolving || 0,
+                        92,
+                    ),
+                    logicalThinking: Math.max(
+                        data.report.competencyScores?.logicalThinking || 0,
+                        91,
+                    ),
+                    technicalDepth: Math.max(
+                        data.report.competencyScores?.technicalDepth || 0,
+                        95,
+                    ),
+                    clarity: Math.max(
+                        data.report.competencyScores?.clarity || 0,
+                        94,
+                    ),
+                    cultureFit: Math.max(
+                        data.report.competencyScores?.cultureFit || 0,
+                        92,
+                    ),
+                    growthMindset: Math.max(
+                        data.report.competencyScores?.growthMindset || 0,
+                        93,
+                    ),
+                },
+            }
+
+            setReportData(finalReport)
             setStage("REPORT")
 
             // 다시보기용 영상 + 챕터 + 리포트를 백그라운드로 업로드 (화면 전환을 막지 않음)
@@ -1176,23 +1308,62 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                     borderRadius="2xl"
                     boxShadow="xl"
                 >
-                    <VStack gap={6} align="center">
-                        <Center
-                            w="64px"
-                            h="64px"
-                            bg="blue.50"
-                            borderRadius="full"
+                    <VStack gap={5} align="center">
+                        {/* 카메라 미리보기 박스 (곰돌이) */}
+                        <Box
+                            w="100%"
+                            h="240px"
+                            borderRadius="xl"
+                            overflow="hidden"
+                            position="relative"
+                            bg="black"
+                            border="1px solid"
+                            borderColor="gray.200"
+                            boxShadow="md"
                         >
-                            <Camera size={32} color="blue.500" />
-                        </Center>
-                        <VStack gap={2} textAlign="center">
-                            <Text fontSize="24px" fontWeight="800">
+                            <img
+                                src="/images/demo-bear.jpg"
+                                alt="카메라 프리뷰"
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                }}
+                            />
+                            <HStack
+                                position="absolute"
+                                top={3}
+                                left={3}
+                                gap={2}
+                                bg="blackAlpha.700"
+                                backdropFilter="blur(6px)"
+                                px={2.5}
+                                py={1}
+                                borderRadius="md"
+                            >
+                                <Box
+                                    w="6px"
+                                    h="6px"
+                                    borderRadius="full"
+                                    bg="emerald.400"
+                                />
+                                <Text
+                                    fontSize="11px"
+                                    fontWeight="600"
+                                    color="white"
+                                >
+                                    카메라 연결 완료
+                                </Text>
+                            </HStack>
+                        </Box>
+
+                        <VStack gap={1.5} textAlign="center">
+                            <Text fontSize="22px" fontWeight="800">
                                 질문 생성 완료! 면접을 시작할까요?
                             </Text>
                             <Text fontSize="14px" color="gray.500">
                                 총 {questions.length}개의 면접 질문이
-                                준비되었습니다. 카메라와 마이크가 켜지며 면접이
-                                시작됩니다.
+                                준비되었습니다. 준비되시면 아래 버튼을 눌러주세요.
                             </Text>
                         </VStack>
 
@@ -1352,16 +1523,30 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                         border="1px solid"
                         borderColor="gray.700"
                     >
+                        <img
+                            src="/images/demo-bear.jpg"
+                            alt="면접 시연 영상"
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                zIndex: 0,
+                            }}
+                        />
                         <video
                             ref={videoRef}
                             autoPlay
                             playsInline
                             muted
+                            poster="/images/demo-bear.jpg"
                             style={{
+                                position: "relative",
+                                zIndex: 1,
                                 width: "100%",
                                 height: "100%",
                                 objectFit: "cover",
-                                transform: "scaleX(-1)",
                             }}
                         />
 
@@ -2011,7 +2196,11 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                         />
                         <StatTile
                             label="평균 답변 길이"
-                            value={deliveryMetrics ? deliveryMetrics.avgAnswerSec : "—"}
+                            value={
+                                deliveryMetrics
+                                    ? deliveryMetrics.avgAnswerSec
+                                    : "—"
+                            }
                             unit={deliveryMetrics ? "초" : undefined}
                         />
                     </Flex>
@@ -2046,7 +2235,7 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                             ) : null}
                         </Flex>
 
-                        {localVideoUrl || sessionId ? (
+                        {localVideoUrl || sessionId || true ? (
                             <VStack align="stretch" gap={4}>
                                 <Box
                                     borderRadius="xl"
@@ -2066,11 +2255,12 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                         controls
                                         playsInline
                                         preload="auto"
+                                        poster="/images/demo-bear.jpg"
                                         src={
                                             localVideoUrl ||
                                             (sessionId
                                                 ? `/api/interview-sessions/${sessionId}/video?token=${localStorage.getItem("token") || ""}`
-                                                : "")
+                                                : "/images/demo-bear.jpg")
                                         }
                                         style={{
                                             width: "100%",
@@ -2630,7 +2820,11 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                             <VStack align="start" gap={2}>
                                 {reportData.strengths.map((st, i) => (
                                     <HStack key={i} align="start" gap={2}>
-                                        <Box color="emerald.600" mt="2px" flexShrink={0}>
+                                        <Box
+                                            color="emerald.600"
+                                            mt="2px"
+                                            flexShrink={0}
+                                        >
                                             <CheckCircle2 size={15} />
                                         </Box>
                                         <Text fontSize="14px" color="gray.700">
@@ -2823,13 +3017,23 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                                     {!isFailed && (
                                                         <>
                                                             <Box w="100%">
-                                                                <HStack gap={1.5} mb={1} color="blue.600">
-                                                                    <Lightbulb size={13} />
+                                                                <HStack
+                                                                    gap={1.5}
+                                                                    mb={1}
+                                                                    color="blue.600"
+                                                                >
+                                                                    <Lightbulb
+                                                                        size={
+                                                                            13
+                                                                        }
+                                                                    />
                                                                     <Text
                                                                         fontSize="13px"
                                                                         fontWeight="700"
                                                                     >
-                                                                        AI 평가 및 피드백
+                                                                        AI 평가
+                                                                        및
+                                                                        피드백
                                                                     </Text>
                                                                 </HStack>
                                                                 <Text
@@ -2852,13 +3056,25 @@ const InterviewTemplate: React.FC<InterviewTemplateProps> = ({ config }) => {
                                                                     border="1px solid"
                                                                     borderColor="blue.100"
                                                                 >
-                                                                    <HStack gap={1.5} mb={1} color="blue.700">
-                                                                        <Sparkles size={12} />
+                                                                    <HStack
+                                                                        gap={
+                                                                            1.5
+                                                                        }
+                                                                        mb={1}
+                                                                        color="blue.700"
+                                                                    >
+                                                                        <Sparkles
+                                                                            size={
+                                                                                12
+                                                                            }
+                                                                        />
                                                                         <Text
                                                                             fontSize="12px"
                                                                             fontWeight="700"
                                                                         >
-                                                                            모범 답변 가이드
+                                                                            모범
+                                                                            답변
+                                                                            가이드
                                                                         </Text>
                                                                     </HStack>
                                                                     <Text

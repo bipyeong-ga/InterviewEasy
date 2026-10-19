@@ -450,9 +450,8 @@ const ResumeAnalysisInlineProgress: React.FC<
             const timer = setInterval(() => {
                 setElapsedSeconds((prev) => {
                     const next = prev + 1
-                    // 40초 이후에도 멈추지 않고 98%까지 부드럽게 점진 증가
-                    if (next >= 40) {
-                        setProgress((p) => Math.min(98, p + 0.3))
+                    if (next >= 40 && next % 3 === 0) {
+                        setProgress((p) => Math.min(98, Math.floor(p) + 1))
                     }
                     return next
                 })
@@ -615,7 +614,7 @@ const ResumeAnalysisInlineProgress: React.FC<
                             letterSpacing="-0.04em"
                             lineHeight="0.95"
                         >
-                            {progress}
+                            {Math.floor(progress)}
                         </Text>
                         <Text
                             fontSize={{ base: "3xl", md: "4xl" }}
@@ -737,7 +736,7 @@ const ResumeAnalysisInlineProgress: React.FC<
             >
                 <Box
                     h="100%"
-                    w={`${progress}%`}
+                    w={`${Math.floor(progress)}%`}
                     bg="linear-gradient(90deg, #2563EB 0%, #60A5FA 25%, #93C5FD 50%, #60A5FA 75%, #2563EB 100%)"
                     transition="width 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
                     style={{
