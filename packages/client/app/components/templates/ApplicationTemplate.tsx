@@ -44,6 +44,7 @@ import {
     Sparkles,
     ChevronDown,
     ChevronUp,
+    ChevronRight,
     Loader2,
     BrainCircuit,
     ExternalLink,
@@ -323,116 +324,93 @@ const ThinkingProcessCard: React.FC<{
     duration?: number | null
     defaultExpanded?: boolean
 }> = ({ thought, isLive = false, duration, defaultExpanded = false }) => {
-    const [isExpanded, setIsExpanded] = useState(isLive || defaultExpanded)
+    const [isExpanded, setIsExpanded] = useState(isLive ? true : false)
+    const wasLiveRef = useRef(isLive)
 
     useEffect(() => {
-        if (isLive) {
+        if (wasLiveRef.current && !isLive) {
+            // 생각 생성이 완료되면 자동으로 접음
+            setIsExpanded(false)
+        } else if (isLive) {
             setIsExpanded(true)
         }
+        wasLiveRef.current = isLive
     }, [isLive])
 
-    const hasThought = Boolean(thought && thought.trim() !== "")
+    const cleanThought = (thought || "")
+        .replace(
+            /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+            "",
+        )
+        .trim()
+    const hasThought = Boolean(cleanThought !== "")
     if (!hasThought) return null
 
+    // duration이 없을 경우 텍스트 길이에 기반하여 3~9초 사이의 자연스러운 초 표시
+    const displayDuration =
+        duration && duration > 0
+            ? duration
+            : Math.max(3, Math.min(9, Math.round(cleanThought.length / 25)))
+
     return (
-        <Box
-            mb={3}
-            borderRadius="xl"
-            border="1px solid"
-            borderColor={isLive ? "blue.200" : "gray.200"}
-            bg={isLive ? "blue.50/50" : "gray.50/70"}
-            overflow="hidden"
-            transition="all 0.2s ease"
-            _hover={{
-                borderColor: isLive ? "blue.300" : "gray.300",
-            }}
-        >
-            <Flex
+        <Box mb={2}>
+            <HStack
+                display="inline-flex"
+                gap={1.5}
                 align="center"
-                justify="space-between"
-                px={3.5}
-                py={2.5}
                 cursor="pointer"
                 onClick={() => setIsExpanded(!isExpanded)}
                 userSelect="none"
-                bg={isLive ? "blue.50/80" : "gray.100/50"}
+                color="gray.500"
+                _hover={{ color: "gray.700" }}
+                fontSize="13px"
+                fontWeight="medium"
+                py={0.5}
             >
-                <HStack gap={2}>
-                    <Box
-                        color={isLive ? "blue.500" : "gray.500"}
-                        display="flex"
-                        alignItems="center"
-                    >
-                        <Sparkles
-                            size={13}
-                            className={isLive ? "animate-pulse" : ""}
-                        />
-                    </Box>
-                    <Text
-                        fontSize="xs"
-                        fontWeight="semibold"
-                        color={isLive ? "blue.700" : "gray.700"}
-                    >
-                        {isLive ? "AI 생각 과정..." : "AI 생각 과정"}
-                    </Text>
-                    {duration !== undefined &&
-                        duration !== null &&
-                        duration > 0 &&
-                        !isLive && (
-                            <Badge
-                                size="xs"
-                                variant="subtle"
-                                colorPalette="gray"
-                                fontSize="10px"
-                                borderRadius="full"
-                                px={2}
-                            >
-                                {duration}초 소요
-                            </Badge>
-                        )}
-                    {isLive && (
-                        <Spinner
-                            size="inherit"
-                            color="blue.500"
-                            width="10px"
-                            height="10px"
-                        />
-                    )}
-                </HStack>
-
-                <HStack gap={1} color="gray.500" fontSize="xs">
-                    <Text fontSize="11px">
-                        {isExpanded ? "접기" : "펼치기"}
-                    </Text>
-                    {isExpanded ? (
-                        <ChevronUp size={13} />
-                    ) : (
-                        <ChevronDown size={13} />
-                    )}
-                </HStack>
-            </Flex>
+                {isLive && (
+                    <Spinner
+                        size="inherit"
+                        width="11px"
+                        height="11px"
+                        color="blue.500"
+                    />
+                )}
+                <Text>
+                    {isLive
+                        ? duration && duration > 0
+                            ? `생각 중 (${duration}초)...`
+                            : "생각 중..."
+                        : `${displayDuration}초 동안 생각함`}
+                </Text>
+                {isExpanded ? (
+                    <ChevronDown size={14} />
+                ) : (
+                    <ChevronRight size={14} />
+                )}
+            </HStack>
 
             {isExpanded && (
                 <Box
-                    px={3.5}
-                    py={3}
-                    borderTop="1px solid"
-                    borderColor={isLive ? "blue.100" : "gray.200"}
+                    mt={1.5}
+                    mb={2}
+                    pl={3}
+                    py={1}
+                    borderLeft="2px solid"
+                    borderColor="gray.200"
                     fontSize="xs"
                     color="gray.600"
                     lineHeight="1.6"
                     whiteSpace="pre-wrap"
-                    bg="white"
-                    maxH="240px"
+                    maxH="260px"
                     overflowY="auto"
                 >
-                    {thought}
+                    {cleanThought}
                     {isLive && (
                         <Box
                             as="span"
                             display="inline-block"
-                            w="6px"
-                            h="12px"
+                            w="4px"
+                            h="11px"
                             bg="blue.500"
                             ml={1}
                             className="animate-pulse"
@@ -466,32 +444,44 @@ const ResumeAnalysisInlineProgress: React.FC<
             setIsRendered(true)
             setIsExiting(false)
             setCurrentStep(1)
-            setProgress(18)
+            setProgress(15)
             setElapsedSeconds(0)
 
             const timer = setInterval(() => {
-                setElapsedSeconds((prev) => prev + 1)
+                setElapsedSeconds((prev) => {
+                    const next = prev + 1
+                    // 40초 이후에도 멈추지 않고 98%까지 부드럽게 점진 증가
+                    if (next >= 40) {
+                        setProgress((p) => Math.min(98, p + 0.3))
+                    }
+                    return next
+                })
             }, 1000)
 
             const step1 = setTimeout(() => {
                 setCurrentStep(2)
-                setProgress(38)
-            }, 1200)
+                setProgress(32)
+            }, 3500)
 
             const step2 = setTimeout(() => {
                 setCurrentStep(3)
-                setProgress(62)
-            }, 4500)
+                setProgress(50)
+            }, 10000)
 
             const step3 = setTimeout(() => {
                 setCurrentStep(4)
-                setProgress(82)
-            }, 8500)
+                setProgress(68)
+            }, 19000)
 
             const step4 = setTimeout(() => {
                 setCurrentStep(5)
-                setProgress(95)
-            }, 12500)
+                setProgress(84)
+            }, 29000)
+
+            const step5 = setTimeout(() => {
+                setCurrentStep(6)
+                setProgress(94)
+            }, 39000)
 
             return () => {
                 clearInterval(timer)
@@ -499,6 +489,7 @@ const ResumeAnalysisInlineProgress: React.FC<
                 clearTimeout(step2)
                 clearTimeout(step3)
                 clearTimeout(step4)
+                clearTimeout(step5)
             }
         } else {
             // 완료되어 넘어갈 때 부드러운 전환을 위해 100% 도달 후 400ms 동안 페이드아웃
@@ -518,10 +509,11 @@ const ResumeAnalysisInlineProgress: React.FC<
         isReanalyze
             ? "이력서 원본 데이터 확인 중"
             : "PDF 텍스트 데이터 파싱 중",
-        "역량 심층 진단 및 강점 도출 중",
-        "이력서 원문 대조 및 인용구 매핑 중",
-        "실시간 채용 공고 적합도 선별 중",
-        "맞춤형 AI 분석 리포트 반영 중",
+        "역량 심층 진단 및 핵심 강점 도출 중",
+        "이력서 원문 대조 및 인용구 정밀 매핑 중",
+        "실시간 채용 공고 적합도 및 스택 분석 중",
+        "맞춤형 AI 피드백 및 개선 가이드 생성 중",
+        "최종 분석 리포트 검증 및 조율 중",
     ]
 
     const totalSteps = stepLabels.length
@@ -1914,7 +1906,8 @@ const ApplicationTemplate: React.FC = () => {
     // Smart auto-scroll chat to bottom
     const handleChatScroll = () => {
         if (!chatContainerRef.current) return
-        const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current
+        const { scrollTop, scrollHeight, clientHeight } =
+            chatContainerRef.current
         const isAtBottom = scrollHeight - scrollTop - clientHeight <= 140
         isAutoScrollEnabledRef.current = isAtBottom
     }
@@ -3496,7 +3489,13 @@ const ApplicationTemplate: React.FC = () => {
                                                                                                 개)
                                                                                             </Text>
                                                                                         </HStack>
-                                                        <VStack align="stretch" gap={2.5} w="100%">
+                                                                                        <VStack
+                                                                                            align="stretch"
+                                                                                            gap={
+                                                                                                2.5
+                                                                                            }
+                                                                                            w="100%"
+                                                                                        >
                                                                                             {msgRecommendedJobs.map(
                                                                                                 (
                                                                                                     job: any,
@@ -3606,18 +3605,33 @@ const ApplicationTemplate: React.FC = () => {
                                                                     />
                                                                     {streamingMatchingStatus ? (
                                                                         <HStack
-                                                                            gap={2}
-                                                                            mt={3}
-                                                                            p={2.5}
+                                                                            gap={
+                                                                                2
+                                                                            }
+                                                                            mt={
+                                                                                3
+                                                                            }
+                                                                            p={
+                                                                                2.5
+                                                                            }
                                                                             bg="blue.50"
                                                                             borderRadius="md"
                                                                             borderWidth="1px"
                                                                             borderColor="blue.100"
                                                                             animation="pulse 2s infinite"
                                                                         >
-                                                                            <Spinner size="xs" color="blue.600" />
-                                                                            <Text fontSize="xs" fontWeight="medium" color="blue.700">
-                                                                                {streamingMatchingStatus}
+                                                                            <Spinner
+                                                                                size="xs"
+                                                                                color="blue.600"
+                                                                            />
+                                                                            <Text
+                                                                                fontSize="xs"
+                                                                                fontWeight="medium"
+                                                                                color="blue.700"
+                                                                            >
+                                                                                {
+                                                                                    streamingMatchingStatus
+                                                                                }
                                                                             </Text>
                                                                         </HStack>
                                                                     ) : null}

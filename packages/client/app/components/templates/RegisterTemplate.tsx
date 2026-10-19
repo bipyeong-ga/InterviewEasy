@@ -26,7 +26,9 @@ type FormValues = {
     confirmPassword: string
 }
 
-type FormErrors = Partial<Record<keyof FormValues, string>>
+type FormErrors = Partial<
+    Record<keyof FormValues | "terms1" | "terms2", string>
+>
 
 type ModalType = "terms1" | "terms2" | "terms3" | null
 
@@ -58,6 +60,11 @@ const RegisterTemplate: React.FC = () => {
 
     const [errors, setErrors] = useState<FormErrors>({})
     const [submitted, setSubmitted] = useState(false)
+    const [agreements, setAgreements] = useState({
+        terms1: false,
+        terms2: false,
+        terms3: false,
+    })
 
     const [isAgreementOpen, setAgreementOpen] = useState(false)
     const [modalType, setModalType] = useState<ModalType>(null)
@@ -67,7 +74,10 @@ const RegisterTemplate: React.FC = () => {
         setAgreementOpen(true)
     }
 
-    const validate = (nextValues: FormValues): FormErrors => {
+    const validate = (
+        nextValues: FormValues,
+        nextAgreements: typeof agreements,
+    ): FormErrors => {
         const nextErrors: FormErrors = {}
 
         if (!nextValues.name.trim()) {
@@ -91,23 +101,38 @@ const RegisterTemplate: React.FC = () => {
         } else if (nextValues.confirmPassword !== nextValues.password) {
             nextErrors.confirmPassword = "비밀번호가 일치하지 않아요"
         }
+        if (!nextAgreements.terms1) {
+            nextErrors.terms1 = "서비스 이용약관에 동의해주세요"
+        }
+        if (!nextAgreements.terms2) {
+            nextErrors.terms2 = "개인정보 수집 및 이용에 동의해주세요"
+        }
 
         return nextErrors
     }
 
     const handleChange =
         (field: keyof FormValues) =>
-            (event: React.ChangeEvent<HTMLInputElement>) => {
-                const nextValues = { ...values, [field]: event.target.value }
-                setValues(nextValues)
-                if (submitted) {
-                    setErrors(validate(nextValues))
-                }
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            const nextValues = { ...values, [field]: event.target.value }
+            setValues(nextValues)
+            if (submitted) {
+                setErrors(validate(nextValues, agreements))
             }
+        }
+
+    const handleAgreementChange =
+        (key: "terms1" | "terms2" | "terms3") => (checked: boolean) => {
+            const nextAgreements = { ...agreements, [key]: checked }
+            setAgreements(nextAgreements)
+            if (submitted) {
+                setErrors(validate(values, nextAgreements))
+            }
+        }
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
-        const nextErrors = validate(values)
+        const nextErrors = validate(values, agreements)
         setErrors(nextErrors)
         setSubmitted(true)
 
@@ -128,8 +153,8 @@ const RegisterTemplate: React.FC = () => {
                     if (!response.ok) {
                         return response.json().then((errorData) => {
                             const err = new Error("회원가입 실패")
-                                ; (err as any).code = response.status
-                                ; (err as any).body = errorData
+                            ;(err as any).code = response.status
+                            ;(err as any).body = errorData
                             throw err
                         })
                     }
@@ -273,85 +298,133 @@ const RegisterTemplate: React.FC = () => {
                                 )}
                             </Box>
 
-                            <VStack align="stretch">
-                                <HStack gap={1} align="center">
-                                    <Checkbox.Root>
-                                        <Checkbox.HiddenInput />
-                                        <Checkbox.Control
-                                            _checked={{
-                                                bg: "#2F6FED",
-                                                borderColor: "#2F6FED",
-                                                color: "white",
-                                            }}
+                            <VStack align="stretch" gap={2}>
+                                <Box>
+                                    <HStack gap={1} align="center">
+                                        <Checkbox.Root
+                                            checked={agreements.terms1}
+                                            onCheckedChange={(e) =>
+                                                handleAgreementChange("terms1")(
+                                                    !!e.checked,
+                                                )
+                                            }
                                         >
-                                            <Checkbox.Indicator />
-                                        </Checkbox.Control>
-                                    </Checkbox.Root>
-                                    <Text
-                                        fontSize="14px"
-                                        textDecoration={"underline"}
-                                        color={"gray.500"}
-                                        cursor="pointer"
-                                        onClick={() => openModal("terms1")}
-                                    >
-                                        서비스 이용약관
-                                    </Text>
-                                    <Text fontSize="13px" color={"gray.500"}>
-                                        (필수)
-                                    </Text>
-                                </HStack>{" "}
-                                <HStack gap={1} align="center">
-                                    <Checkbox.Root>
-                                        <Checkbox.HiddenInput />
-                                        <Checkbox.Control
-                                            _checked={{
-                                                bg: "#2F6FED",
-                                                borderColor: "#2F6FED",
-                                                color: "white",
-                                            }}
+                                            <Checkbox.HiddenInput />
+                                            <Checkbox.Control
+                                                _checked={{
+                                                    bg: "#2F6FED",
+                                                    borderColor: "#2F6FED",
+                                                    color: "white",
+                                                }}
+                                            >
+                                                <Checkbox.Indicator />
+                                            </Checkbox.Control>
+                                        </Checkbox.Root>
+                                        <Text
+                                            fontSize="14px"
+                                            textDecoration={"underline"}
+                                            color={"gray.500"}
+                                            cursor="pointer"
+                                            onClick={() => openModal("terms1")}
                                         >
-                                            <Checkbox.Indicator />
-                                        </Checkbox.Control>
-                                    </Checkbox.Root>
-                                    <Text
-                                        fontSize="14px"
-                                        textDecoration={"underline"}
-                                        color={"gray.500"}
-                                        cursor="pointer"
-                                        onClick={() => openModal("terms2")}
-                                    >
-                                        개인정보 수집 및 이용동의
-                                    </Text>
-                                    <Text fontSize="13px" color={"gray.500"}>
-                                        (필수)
-                                    </Text>
-                                </HStack>
-                                <HStack gap={1} align="center">
-                                    <Checkbox.Root>
-                                        <Checkbox.HiddenInput />
-                                        <Checkbox.Control
-                                            _checked={{
-                                                bg: "#2F6FED",
-                                                borderColor: "#2F6FED",
-                                                color: "white",
-                                            }}
+                                            서비스 이용약관
+                                        </Text>
+                                        <Text fontSize="13px" color={"red.500"}>
+                                            (필수)
+                                        </Text>
+                                    </HStack>
+                                    {submitted && errors.terms1 && (
+                                        <Text
+                                            color="red.400"
+                                            fontSize="12px"
+                                            mt={1}
                                         >
-                                            <Checkbox.Indicator />
-                                        </Checkbox.Control>
-                                    </Checkbox.Root>
-                                    <Text
-                                        fontSize="14px"
-                                        textDecoration={"underline"}
-                                        color={"gray.500"}
-                                        cursor="pointer"
-                                        onClick={() => openModal("terms3")}
-                                    >
-                                        멤버십 이용약관
-                                    </Text>
-                                    <Text fontSize="13px" color={"gray.500"}>
-                                        (선택)
-                                    </Text>
-                                </HStack>
+                                            {errors.terms1}
+                                        </Text>
+                                    )}
+                                </Box>
+                                <Box>
+                                    <HStack gap={1} align="center">
+                                        <Checkbox.Root
+                                            checked={agreements.terms2}
+                                            onCheckedChange={(e) =>
+                                                handleAgreementChange("terms2")(
+                                                    !!e.checked,
+                                                )
+                                            }
+                                        >
+                                            <Checkbox.HiddenInput />
+                                            <Checkbox.Control
+                                                _checked={{
+                                                    bg: "#2F6FED",
+                                                    borderColor: "#2F6FED",
+                                                    color: "white",
+                                                }}
+                                            >
+                                                <Checkbox.Indicator />
+                                            </Checkbox.Control>
+                                        </Checkbox.Root>
+                                        <Text
+                                            fontSize="14px"
+                                            textDecoration={"underline"}
+                                            color={"gray.500"}
+                                            cursor="pointer"
+                                            onClick={() => openModal("terms2")}
+                                        >
+                                            개인정보 수집 및 이용동의
+                                        </Text>
+                                        <Text fontSize="13px" color={"red.500"}>
+                                            (필수)
+                                        </Text>
+                                    </HStack>
+                                    {submitted && errors.terms2 && (
+                                        <Text
+                                            color="red.400"
+                                            fontSize="12px"
+                                            mt={1}
+                                        >
+                                            {errors.terms2}
+                                        </Text>
+                                    )}
+                                </Box>
+                                <Box>
+                                    <HStack gap={1} align="center">
+                                        <Checkbox.Root
+                                            checked={agreements.terms3}
+                                            onCheckedChange={(e) =>
+                                                handleAgreementChange("terms3")(
+                                                    !!e.checked,
+                                                )
+                                            }
+                                        >
+                                            <Checkbox.HiddenInput />
+                                            <Checkbox.Control
+                                                _checked={{
+                                                    bg: "#2F6FED",
+                                                    borderColor: "#2F6FED",
+                                                    color: "white",
+                                                }}
+                                            >
+                                                <Checkbox.Indicator />
+                                            </Checkbox.Control>
+                                        </Checkbox.Root>
+                                        <Text
+                                            fontSize="14px"
+                                            textDecoration={"underline"}
+                                            color={"gray.500"}
+                                            cursor="pointer"
+                                            onClick={() => openModal("terms3")}
+                                        >
+                                            멤버십 이용약관
+                                        </Text>
+                                        <Text
+                                            fontSize="13px"
+                                            color={"gray.500"}
+                                        >
+                                            (선택)
+                                        </Text>
+                                    </HStack>
+                                </Box>
                             </VStack>
 
                             <Button

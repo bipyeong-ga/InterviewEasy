@@ -667,13 +667,9 @@ JSON 구조:
     {
       "id": 1,
       "title": "핵심 기술 역량",
-      "filename": "${originalName}",
       "keywords": "기술 스택, 핵심 역량",
-      "published": "2026. 03. 29",
-      "objective": "요약 1번 항목의 근거 원문",
       "quote": "이력서 원본에 존재하는 실제 문장",
-      "feedback": "이 부분에 구체적인 문제 해결 과정이나 의사결정 근거를 추가하면 더 설득력 있어요.",
-      "section": "이력서 본문"
+      "feedback": "이 부분에 구체적인 문제 해결 과정이나 의사결정 근거를 추가하면 더 설득력 있어요."
     }
   ]
 }
@@ -1224,27 +1220,57 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                                 thoughtStartMatch.index +
                                 thoughtStartMatch[0].length
                             let endContentIdx = fullText.length
+                            let isClosed = false
+
                             if (
                                 thoughtEndMatch &&
                                 thoughtEndMatch.index !== undefined
                             ) {
                                 endContentIdx = thoughtEndMatch.index
+                                isClosed = true
                             } else if (
                                 answerStartMatch &&
                                 answerStartMatch.index !== undefined
                             ) {
                                 endContentIdx = answerStartMatch.index
+                                isClosed = true
                             }
+
+                            // 닫는 태그가 아직 완성되지 않은 상태라면 끝부분의 불완전한 태그("<...")를 보류하여 노출 방지
+                            if (!isClosed) {
+                                const tagPrefixMatch = fullText
+                                    .slice(
+                                        startContentIdx + thoughtSentIndex,
+                                        endContentIdx,
+                                    )
+                                    .match(/<[^>]*$/)
+                                if (
+                                    tagPrefixMatch &&
+                                    tagPrefixMatch.index !== undefined
+                                ) {
+                                    endContentIdx =
+                                        startContentIdx +
+                                        thoughtSentIndex +
+                                        tagPrefixMatch.index
+                                }
+                            }
+
                             if (
                                 endContentIdx > startContentIdx &&
                                 endContentIdx >
                                     thoughtSentIndex + startContentIdx
                             ) {
-                                const newThoughtText = fullText.slice(
+                                let newThoughtText = fullText.slice(
                                     startContentIdx + thoughtSentIndex,
                                     endContentIdx,
                                 )
-                                thoughtSentIndex += newThoughtText.length
+                                thoughtSentIndex =
+                                    endContentIdx - startContentIdx
+                                // 태그 잔여물 제거 필터링
+                                newThoughtText = newThoughtText.replace(
+                                    /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+                                    "",
+                                )
                                 if (newThoughtText) {
                                     sendEvent({
                                         type: "thought",
@@ -1264,21 +1290,45 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                                 answerStartMatch[0].length
                             let endContentIdx = fullText.length
                             const answerEndMatch = fullText.match(/<\/answer>/i)
+                            let isClosed = false
+
                             if (
                                 answerEndMatch &&
                                 answerEndMatch.index !== undefined
                             ) {
                                 endContentIdx = answerEndMatch.index
+                                isClosed = true
                             } else if (
                                 citationsStartMatch &&
                                 citationsStartMatch.index !== undefined
                             ) {
                                 endContentIdx = citationsStartMatch.index
+                                isClosed = true
                             } else if (
                                 jobsStartMatch &&
                                 jobsStartMatch.index !== undefined
                             ) {
                                 endContentIdx = jobsStartMatch.index
+                                isClosed = true
+                            }
+
+                            // 닫는 태그/다음 태그가 아직 완성되지 않은 상태라면 끝부분의 불완전한 태그("<...")를 보류
+                            if (!isClosed) {
+                                const tagPrefixMatch = fullText
+                                    .slice(
+                                        startContentIdx + answerSentIndex,
+                                        endContentIdx,
+                                    )
+                                    .match(/<[^>]*$/)
+                                if (
+                                    tagPrefixMatch &&
+                                    tagPrefixMatch.index !== undefined
+                                ) {
+                                    endContentIdx =
+                                        startContentIdx +
+                                        answerSentIndex +
+                                        tagPrefixMatch.index
+                                }
                             }
 
                             if (
@@ -1286,11 +1336,17 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                                 endContentIdx >
                                     answerSentIndex + startContentIdx
                             ) {
-                                const newAnswerText = fullText.slice(
+                                let newAnswerText = fullText.slice(
                                     startContentIdx + answerSentIndex,
                                     endContentIdx,
                                 )
-                                answerSentIndex += newAnswerText.length
+                                answerSentIndex =
+                                    endContentIdx - startContentIdx
+                                // 태그 잔여물 제거 필터링
+                                newAnswerText = newAnswerText.replace(
+                                    /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+                                    "",
+                                )
                                 if (newAnswerText) {
                                     sendEvent({
                                         type: "answer",
@@ -1303,36 +1359,71 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                             thoughtEndMatch.index !== undefined
                         ) {
                             // thought 태그는 닫혔는데 answer 태그 없이 바로 본문이 나온 경우
-                            const startContentIdx =
+                            // 뒤에 바로 <answer> 태그가 작성 중일 수 있으므로 태그 작성이 끝났거나 태그가 아닌 경우에만 진행
+                            const afterThought = fullText.slice(
                                 thoughtEndMatch.index +
-                                thoughtEndMatch[0].length
-                            let endContentIdx = fullText.length
-                            if (
-                                citationsStartMatch &&
-                                citationsStartMatch.index !== undefined
-                            ) {
-                                endContentIdx = citationsStartMatch.index
-                            } else if (
-                                jobsStartMatch &&
-                                jobsStartMatch.index !== undefined
-                            ) {
-                                endContentIdx = jobsStartMatch.index
-                            }
-                            if (
-                                endContentIdx > startContentIdx &&
-                                endContentIdx >
-                                    answerSentIndex + startContentIdx
-                            ) {
-                                const newAnswerText = fullText.slice(
-                                    startContentIdx + answerSentIndex,
-                                    endContentIdx,
-                                )
-                                answerSentIndex += newAnswerText.length
-                                if (newAnswerText) {
-                                    sendEvent({
-                                        type: "answer",
-                                        text: newAnswerText,
-                                    })
+                                    thoughtEndMatch[0].length,
+                            )
+                            if (!afterThought.trim().startsWith("<")) {
+                                const startContentIdx =
+                                    thoughtEndMatch.index +
+                                    thoughtEndMatch[0].length
+                                let endContentIdx = fullText.length
+                                let isClosed = false
+
+                                if (
+                                    citationsStartMatch &&
+                                    citationsStartMatch.index !== undefined
+                                ) {
+                                    endContentIdx = citationsStartMatch.index
+                                    isClosed = true
+                                } else if (
+                                    jobsStartMatch &&
+                                    jobsStartMatch.index !== undefined
+                                ) {
+                                    endContentIdx = jobsStartMatch.index
+                                    isClosed = true
+                                }
+
+                                if (!isClosed) {
+                                    const tagPrefixMatch = fullText
+                                        .slice(
+                                            startContentIdx + answerSentIndex,
+                                            endContentIdx,
+                                        )
+                                        .match(/<[^>]*$/)
+                                    if (
+                                        tagPrefixMatch &&
+                                        tagPrefixMatch.index !== undefined
+                                    ) {
+                                        endContentIdx =
+                                            startContentIdx +
+                                            answerSentIndex +
+                                            tagPrefixMatch.index
+                                    }
+                                }
+
+                                if (
+                                    endContentIdx > startContentIdx &&
+                                    endContentIdx >
+                                        answerSentIndex + startContentIdx
+                                ) {
+                                    let newAnswerText = fullText.slice(
+                                        startContentIdx + answerSentIndex,
+                                        endContentIdx,
+                                    )
+                                    answerSentIndex =
+                                        endContentIdx - startContentIdx
+                                    newAnswerText = newAnswerText.replace(
+                                        /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+                                        "",
+                                    )
+                                    if (newAnswerText) {
+                                        sendEvent({
+                                            type: "answer",
+                                            text: newAnswerText,
+                                        })
+                                    }
                                 }
                             }
                         } else if (
@@ -1342,23 +1433,45 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         ) {
                             // 모델이 태그 없이 바로 답변을 시작한 경우 실시간 answer 스트리밍
                             let endContentIdx = fullText.length
+                            let isClosed = false
+
                             if (
                                 citationsStartMatch &&
                                 citationsStartMatch.index !== undefined
                             ) {
                                 endContentIdx = citationsStartMatch.index
+                                isClosed = true
                             } else if (
                                 jobsStartMatch &&
                                 jobsStartMatch.index !== undefined
                             ) {
                                 endContentIdx = jobsStartMatch.index
+                                isClosed = true
                             }
+
+                            if (!isClosed) {
+                                const tagPrefixMatch = fullText
+                                    .slice(answerSentIndex, endContentIdx)
+                                    .match(/<[^>]*$/)
+                                if (
+                                    tagPrefixMatch &&
+                                    tagPrefixMatch.index !== undefined
+                                ) {
+                                    endContentIdx =
+                                        answerSentIndex + tagPrefixMatch.index
+                                }
+                            }
+
                             if (endContentIdx > answerSentIndex) {
-                                const newAnswerText = fullText.slice(
+                                let newAnswerText = fullText.slice(
                                     answerSentIndex,
                                     endContentIdx,
                                 )
-                                answerSentIndex += newAnswerText.length
+                                answerSentIndex = endContentIdx
+                                newAnswerText = newAnswerText.replace(
+                                    /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+                                    "",
+                                )
                                 if (newAnswerText) {
                                     sendEvent({
                                         type: "answer",
@@ -1396,9 +1509,16 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         .trim()
 
                     const thoughtMatch = fullText.match(
-                        /<thought>([\s\S]*?)<\/thought>/i,
+                        /<(?:thought|think|thought_process|reasoning)>([\s\S]*?)<\/(?:thought|think|thought_process|reasoning)>/i,
                     )
-                    finalThought = thoughtMatch ? thoughtMatch[1].trim() : ""
+                    finalThought = thoughtMatch
+                        ? thoughtMatch[1]
+                              .replace(
+                                  /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+                                  "",
+                              )
+                              .trim()
+                        : ""
 
                     const answerMatch = fullText.match(
                         /<answer>([\s\S]*?)<\/answer>/i,
@@ -1407,7 +1527,10 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         finalAnswer = answerMatch[1].trim()
                     } else {
                         finalAnswer = fullText
-                            .replace(/<thought>[\s\S]*?<\/thought>/gi, "")
+                            .replace(
+                                /<(?:thought|think|thought_process|reasoning)>[\s\S]*?<\/(?:thought|think|thought_process|reasoning)>/gi,
+                                "",
+                            )
                             .replace(/<citations>[\s\S]*?<\/citations>/gi, "")
                             .replace(
                                 /<recommended_jobs>[\s\S]*?<\/recommended_jobs>/gi,
@@ -1416,6 +1539,12 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                             .replace(/<\/?answer>/gi, "")
                             .trim()
                     }
+                    finalAnswer = finalAnswer
+                        .replace(
+                            /<\/?(?:thought|think|thought_process|reasoning|answer|citations|recommended_jobs)[^>]*>/gi,
+                            "",
+                        )
+                        .trim()
 
                     // 인용구 형식 [키워드: 1] -> [1]로 자동 정규화
                     finalAnswer = finalAnswer.replace(
@@ -1954,8 +2083,12 @@ function validateAndAlignCitations(
                 ...cit,
                 id,
                 quote,
+                title: cit.title || "이력서 핵심 역량",
+                keywords: cit.keywords || "기술 역량, 실무 경험",
                 filename: cit.filename || filename,
                 published: cit.published || "2026. 03. 29",
+                objective: cit.objective || "이력서 주요 분석 근거",
+                section: cit.section || "이력서 본문",
             }
         }
 
@@ -1992,8 +2125,12 @@ function validateAndAlignCitations(
             ...cit,
             id,
             quote,
+            title: cit.title || "이력서 핵심 역량",
+            keywords: cit.keywords || "기술 역량, 실무 경험",
             filename: cit.filename || filename,
             published: cit.published || "2026. 03. 29",
+            objective: cit.objective || "이력서 주요 분석 근거",
+            section: cit.section || "이력서 본문",
         }
     })
 }

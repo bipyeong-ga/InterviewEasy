@@ -242,21 +242,13 @@ const LoginTemplate: React.FC = () => {
                                 </Box>
                             </HStack>
                             {loginError && (
-                                <Box
-                                    p="3"
-                                    bg="red.50"
-                                    border="1px solid"
-                                    borderColor="red.200"
-                                    borderRadius="md"
+                                <Text
+                                    color="red.600"
+                                    fontSize="14px"
+                                    fontWeight="medium"
                                 >
-                                    <Text
-                                        color="red.600"
-                                        fontSize="14px"
-                                        fontWeight="medium"
-                                    >
-                                        {loginError}
-                                    </Text>
-                                </Box>
+                                    {loginError}
+                                </Text>
                             )}
                             <Button
                                 type="submit"
