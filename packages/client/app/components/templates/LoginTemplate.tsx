@@ -42,6 +42,8 @@ const LoginTemplate: React.FC = () => {
     })
     const [errors, setErrors] = useState<FormErrors>({})
     const [submitted, setSubmitted] = useState(false)
+    const [loginError, setLoginError] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
 
     const validate = (nextValues: FormValues): FormErrors => {
         const nextErrors: FormErrors = {}
@@ -60,55 +62,68 @@ const LoginTemplate: React.FC = () => {
 
     const handleChange =
         (field: keyof FormValues) =>
-            (event: React.ChangeEvent<HTMLInputElement>) => {
-                const nextValues = { ...values, [field]: event.target.value }
-                setValues(nextValues)
-                if (submitted) {
-                    setErrors(validate(nextValues))
-                }
+        (event: React.ChangeEvent<HTMLInputElement>) => {
+            const nextValues = { ...values, [field]: event.target.value }
+            setValues(nextValues)
+            if (loginError) {
+                setLoginError(null)
             }
+            if (submitted) {
+                setErrors(validate(nextValues))
+            }
+        }
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
+        setLoginError(null)
         const nextErrors = validate(values)
         setErrors(nextErrors)
         setSubmitted(true)
 
         if (Object.keys(nextErrors).length === 0) {
-            fetch("/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: values.email,
-                    password: values.password,
-                }),
-            })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error("로그인 실패")
-                    }
-                    return response.json()
+            setIsLoading(true)
+            try {
+                const response = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email: values.email,
+                        password: values.password,
+                    }),
                 })
-                .then((data) => {
-                    if (!data?.token) {
-                        throw new Error("토큰이 응답되지 않았습니다")
-                    }
 
-                    login(data.token, {
-                        id: data.id,
-                        email: data.email,
-                        name: data.name,
-                        profile_image_url: data.profile_image_url,
-                    })
-                    console.log("로그인 성공:", data)
-                    const redirectUrl = searchParams.get("redirect") || "/"
-                    navigate(redirectUrl)
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => null)
+                    const errorMessage =
+                        errData?.message ||
+                        (response.status === 401
+                            ? "이메일 또는 비밀번호가 일치하지 않습니다."
+                            : "로그인에 실패했습니다. 다시 시도해주세요.")
+                    throw new Error(errorMessage)
+                }
+
+                const data = await response.json()
+                if (!data?.token) {
+                    throw new Error("토큰이 응답되지 않았습니다")
+                }
+
+                login(data.token, {
+                    id: data.id,
+                    email: data.email,
+                    name: data.name,
+                    profile_image_url: data.profile_image_url,
                 })
-                .catch((error) => {
-                    console.error("로그인 오류:", error)
-                })
+                console.log("로그인 성공:", data)
+                const redirectUrl = searchParams.get("redirect") || "/"
+                navigate(redirectUrl)
+            } catch (error: any) {
+                console.error("로그인 오류:", error)
+                setLoginError(error.message || "로그인 중 오류가 발생했습니다.")
+            } finally {
+                setIsLoading(false)
+            }
         }
     }
 
@@ -226,6 +241,23 @@ const LoginTemplate: React.FC = () => {
                                     </Text>
                                 </Box>
                             </HStack>
+                            {loginError && (
+                                <Box
+                                    p="3"
+                                    bg="red.50"
+                                    border="1px solid"
+                                    borderColor="red.200"
+                                    borderRadius="md"
+                                >
+                                    <Text
+                                        color="red.600"
+                                        fontSize="14px"
+                                        fontWeight="medium"
+                                    >
+                                        {loginError}
+                                    </Text>
+                                </Box>
+                            )}
                             <Button
                                 type="submit"
                                 mt="2"
@@ -235,8 +267,9 @@ const LoginTemplate: React.FC = () => {
                                 _hover={{ bg: "blue.700" }}
                                 borderRadius="14px"
                                 fontSize="16px"
+                                disabled={isLoading}
                             >
-                                로그인
+                                {isLoading ? "로그인 중..." : "로그인"}
                             </Button>
                             <Box position="relative" w="full" py="4">
                                 <Box
@@ -254,7 +287,7 @@ const LoginTemplate: React.FC = () => {
                             <Box>
                                 <Center>
                                     <VStack w="100%" gap="3">
-                                        <Button
+                                        {/* <Button
                                             mt="2"
                                             h="54px"
                                             bg="Black"
@@ -270,7 +303,7 @@ const LoginTemplate: React.FC = () => {
                                             ></Image>
 
                                             <Text> Apple로 로그인</Text>
-                                        </Button>
+                                        </Button> */}
                                         <Button
                                             mt="2"
                                             h="54px"
@@ -280,8 +313,8 @@ const LoginTemplate: React.FC = () => {
                                             fontSize="16px"
                                             w="100%"
                                             onClick={() =>
-                                            (window.location.href =
-                                                "/api/auth/oauth/google")
+                                                (window.location.href =
+                                                    "/api/auth/oauth/google")
                                             }
                                         >
                                             <Box
@@ -291,7 +324,10 @@ const LoginTemplate: React.FC = () => {
                                                 height="40px"
                                             >
                                                 <Center h="100%">
-                                                    <Image src="/images/login/google.svg" alt=""></Image>
+                                                    <Image
+                                                        src="/images/login/google.svg"
+                                                        alt=""
+                                                    ></Image>
                                                 </Center>
                                             </Box>
                                             <Text> Google로 로그인</Text>
@@ -305,8 +341,8 @@ const LoginTemplate: React.FC = () => {
                                             fontSize="16px"
                                             w="100%"
                                             onClick={() =>
-                                            (window.location.href =
-                                                "/api/auth/oauth/github")
+                                                (window.location.href =
+                                                    "/api/auth/oauth/github")
                                             }
                                         >
                                             <Image

@@ -43,7 +43,10 @@ const port = process.env.PORT || 3000
 async function runMigrations() {
     try {
         const migrationsDir = path.join(__dirname, "../migrations")
-        const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith(".sql")).sort()
+        const files = fs
+            .readdirSync(migrationsDir)
+            .filter((f) => f.endsWith(".sql"))
+            .sort()
         for (const file of files) {
             const migrationFile = path.join(migrationsDir, file)
             const sql = fs.readFileSync(migrationFile, "utf-8")
@@ -85,22 +88,34 @@ apiRouter.use("/interview", interviewRouter) // OpenAI 연동 라우트
 import interviewSessionsRouter from "./routes/interviewSessions"
 apiRouter.use("/interview-sessions", interviewSessionsRouter) // 면접 영상/리포트 저장
 
-
 apiRouter.get("/health", (req, res) => {
     res.json({ status: "ok" })
 })
 
 // Global Error Handler Middleware to return JSON errors instead of default HTML
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error("Unhandled error:", err)
-    if (err instanceof multer.MulterError) {
-        if (err.code === "LIMIT_FILE_SIZE") {
-            return res.status(400).json({ error: "파일 크기가 너무 큽니다. 최대 50MB까지 업로드할 수 있습니다." })
+app.use(
+    (
+        err: any,
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+    ) => {
+        console.error("Unhandled error:", err)
+        if (err instanceof multer.MulterError) {
+            if (err.code === "LIMIT_FILE_SIZE") {
+                return res.status(400).json({
+                    error: "파일 크기가 너무 큽니다. 최대 50MB까지 업로드할 수 있습니다.",
+                })
+            }
+            return res
+                .status(400)
+                .json({ error: `파일 업로드 오류: ${err.message}` })
         }
-        return res.status(400).json({ error: `파일 업로드 오류: ${err.message}` })
-    }
-    res.status(err.status || 500).json({ error: err.message || "서버 내부 오류가 발생했습니다." })
-})
+        res.status(err.status || 500).json({
+            error: err.message || "서버 내부 오류가 발생했습니다.",
+        })
+    },
+)
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`)

@@ -6,6 +6,8 @@ import multer from "multer"
 import { PDFParse } from "pdf-parse"
 import OpenAI from "openai"
 
+const apiKey = process.env.OPENAI_API_KEY
+
 const router = Router()
 
 // All resume routes require authentication
@@ -257,7 +259,6 @@ ${currentContent || "(없음)"}
 ${prompt}
 `
 
-        const apiKey = process.env.OPENAI_API_KEY
         let generatedText = ""
 
         if (apiKey && apiKey.trim() !== "") {
@@ -342,7 +343,6 @@ async function callOpenAI(
     previousMessages: any[] = [],
     model: string = "gpt-5.5",
 ) {
-    const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
         throw new Error("OPENAI_API_KEY is not configured in the environment")
     }
@@ -393,6 +393,11 @@ router.post(
     "/:id/upload",
     upload.single("file"),
     async (req: Request, res: ExpressResponse) => {
+        if (!apiKey) {
+            throw new Error(
+                "OPENAI_API_KEY is not configured in the environment",
+            )
+        }
         try {
             const userId = req.user?.id
             const resumeId = parseInt(req.params.id as string, 10)
@@ -437,13 +442,6 @@ router.post(
             if (!extractedText.trim()) {
                 return res.status(400).json({
                     error: "PDF 파일에서 텍스트를 추출하지 못했습니다. 파일에 텍스트가 포함되어 있는지 확인하세요.",
-                })
-            }
-
-            const apiKey = process.env.OPENAI_API_KEY
-            if (!apiKey || apiKey.trim() === "") {
-                return res.status(400).json({
-                    error: "OPENAI_API_KEY가 설정되지 않았습니다. packages/server/.env 파일에 OpenAI API 키를 입력하고 서버를 재시작해 주세요.",
                 })
             }
 
@@ -552,7 +550,6 @@ router.post("/:id/reanalyze", async (req: Request, res: ExpressResponse) => {
             })
         }
 
-        const apiKey = process.env.OPENAI_API_KEY
         let summary = ""
         let improvements = ""
         let recommendedJobs = "[]"
@@ -882,13 +879,43 @@ router.post(
 
                 // 1. 지원자의 핵심 직무 도메인 분석 (AI/ML vs 백엔드 vs 프론트엔드 등)
                 const aiKeywords = [
-                    "머신러닝", "딥러닝", "인공지능", "ai", "ml", "nlp", "llm", "vision",
-                    "비전", "pytorch", "tensorflow", "keras", "huggingface", "데이터 사이언스",
-                    "자연어처리", "생성형", "langchain", "prompt", "컴퓨터 비전", "임베딩",
-                    "vector", "파이토치", "텐서플로우", "cv", "데이터 분석", "data scientist"
+                    "머신러닝",
+                    "딥러닝",
+                    "인공지능",
+                    "ai",
+                    "ml",
+                    "nlp",
+                    "llm",
+                    "vision",
+                    "비전",
+                    "pytorch",
+                    "tensorflow",
+                    "keras",
+                    "huggingface",
+                    "데이터 사이언스",
+                    "자연어처리",
+                    "생성형",
+                    "langchain",
+                    "prompt",
+                    "컴퓨터 비전",
+                    "임베딩",
+                    "vector",
+                    "파이토치",
+                    "텐서플로우",
+                    "cv",
+                    "데이터 분석",
+                    "data scientist",
                 ]
                 const frontendKeywords = [
-                    "프론트엔드", "frontend", "react", "vue", "next.js", "svelte", "html", "css", "웹 퍼블리셔"
+                    "프론트엔드",
+                    "frontend",
+                    "react",
+                    "vue",
+                    "next.js",
+                    "svelte",
+                    "html",
+                    "css",
+                    "웹 퍼블리셔",
                 ]
 
                 let aiMatchCount = 0
@@ -901,14 +928,20 @@ router.post(
                     if (lowerResume.includes(kw)) feMatchCount++
                 }
 
-                isAiDominant = aiMatchCount >= 2 || (aiMatchCount > 0 && aiMatchCount >= feMatchCount)
+                isAiDominant =
+                    aiMatchCount >= 2 ||
+                    (aiMatchCount > 0 && aiMatchCount >= feMatchCount)
 
                 // 2. 500개 공고 초고속 전수 스캔 및 스코어링
                 const scored = []
                 for (let i = 0; i < availablePosts.length; i++) {
                     const post = availablePosts[i]
                     const category = (post.job_category || "").trim()
-                    const title = (post.job_title || post.title || "").toLowerCase()
+                    const title = (
+                        post.job_title ||
+                        post.title ||
+                        ""
+                    ).toLowerCase()
 
                     // AI 지원자일 경우 직무 하드 필터링: 풀스택, 프론트엔드, 앱개발, 게임개발 등 비관련 공고 100% 원천 배제
                     if (isAiDominant) {
@@ -927,14 +960,24 @@ router.post(
 
                     // 도메인 우선 가중치
                     if (isAiDominant) {
-                        if (category === "ML 엔지니어" || category === "데이터 분석") {
+                        if (
+                            category === "ML 엔지니어" ||
+                            category === "데이터 분석"
+                        ) {
                             score += 150
                         }
-                        if (/머신러닝|딥러닝|ai|ml|인공지능|llm|비전|vision|데이터\s*사이언티스트/i.test(title)) {
+                        if (
+                            /머신러닝|딥러닝|ai|ml|인공지능|llm|비전|vision|데이터\s*사이언티스트/i.test(
+                                title,
+                            )
+                        ) {
                             score += 100
                         }
                     } else {
-                        if (post.job_category && lowerResume.includes(category.toLowerCase())) {
+                        if (
+                            post.job_category &&
+                            lowerResume.includes(category.toLowerCase())
+                        ) {
                             score += 50
                         }
                         if (post.job_title && lowerResume.includes(title)) {
@@ -993,11 +1036,10 @@ router.post(
                     )
 
                 console.log(
-                    `[SERVER SSE] ⚡ 500개 공고 전수 정밀 매칭 완료: 소요시간 ${Date.now() - scanStartTime}ms, AI도메인=${isAiDominant}, 상위 매칭 공고=${relevantPostsSummary.map((p) => p.job_title).join(", ")}`
+                    `[SERVER SSE] ⚡ 500개 공고 전수 정밀 매칭 완료: 소요시간 ${Date.now() - scanStartTime}ms, AI도메인=${isAiDominant}, 상위 매칭 공고=${relevantPostsSummary.map((p) => p.job_title).join(", ")}`,
                 )
             }
 
-            const apiKey = process.env.OPENAI_API_KEY
             let finalThought = ""
             let finalAnswer = ""
             let finalCitations: any[] = []
@@ -1066,9 +1108,13 @@ ${
         ? `
 ★ [CRITICAL: 현재 사용자의 질문은 채용 공고 추천 요청입니다!]
 - 사용자 질문: "${message}"
-${isAiDominant ? `- [필수] 지원자의 전문 직무 도메인은 [AI / 머신러닝 / 데이터 사이언스]입니다!
+${
+    isAiDominant
+        ? `- [필수] 지원자의 전문 직무 도메인은 [AI / 머신러닝 / 데이터 사이언스]입니다!
 - 절대로 '풀스택', '프론트엔드', '앱 개발' 등 비관련 직무 공고를 추천하지 마라!
-- 반드시 아래 [선별된 채용 공고 목록]에 제공된 검증된 AI/머신러닝 공고 중에서만 2~4개를 엄선하여 <recommended_jobs>에 넣어라!` : `- 너는 반드시 아래 [선별된 채용 공고 목록] 중 지원자의 역량과 기술 스택에 적합한 공고를 2~4개 골라 <recommended_jobs> 태그 안에 실제 공고 객체 배열로 채워서 출력해야 한다!`}
+- 반드시 아래 [선별된 채용 공고 목록]에 제공된 검증된 AI/머신러닝 공고 중에서만 2~4개를 엄선하여 <recommended_jobs>에 넣어라!`
+        : `- 너는 반드시 아래 [선별된 채용 공고 목록] 중 지원자의 역량과 기술 스택에 적합한 공고를 2~4개 골라 <recommended_jobs> 태그 안에 실제 공고 객체 배열로 채워서 출력해야 한다!`
+}
 - 절대로 <recommended_jobs>[]</recommended_jobs> 처럼 빈 배열로 남기지 마라! 반드시 공고 목록을 채워라!
 `
         : `
@@ -1326,7 +1372,9 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
                         if (
                             isJobRecommendationQuestion &&
                             !matchingStatusSent &&
-                            (citationsStartMatch || jobsStartMatch || fullText.includes("</answer>"))
+                            (citationsStartMatch ||
+                                jobsStartMatch ||
+                                fullText.includes("</answer>"))
                         ) {
                             matchingStatusSent = true
                             sendEvent({
@@ -1471,22 +1519,40 @@ ${relevantPostsSummary.length > 0 ? JSON.stringify(relevantPostsSummary, null, 2
 
                     // AI 도메인 지원자 대상 직무 안전 필터링 (풀스택, 프론트엔드 등 비관련 공고 원천 배제 및 AI 공고 보충)
                     if (isAiDominant && finalRecommendedJobs.length > 0) {
-                        const invalidCategories = ["풀스택", "프론트엔드", "앱 개발", "게임 개발", "보안"]
-                        finalRecommendedJobs = finalRecommendedJobs.filter((job: any) => {
-                            const matched = availablePosts.find((p: any) => p.id === job.id)
-                            const cat = matched?.job_category || ""
-                            const title = (job.job_title || "").toLowerCase()
-                            if (invalidCategories.includes(cat) || /풀스택|frontend|프론트엔드/i.test(title)) {
-                                console.log(
-                                    `[SERVER SSE] 🛡️ Filtered out non-AI job from AI candidate recommendation: ${job.job_title} (${cat})`,
+                        const invalidCategories = [
+                            "풀스택",
+                            "프론트엔드",
+                            "앱 개발",
+                            "게임 개발",
+                            "보안",
+                        ]
+                        finalRecommendedJobs = finalRecommendedJobs.filter(
+                            (job: any) => {
+                                const matched = availablePosts.find(
+                                    (p: any) => p.id === job.id,
                                 )
-                                return false
-                            }
-                            return true
-                        })
+                                const cat = matched?.job_category || ""
+                                const title = (
+                                    job.job_title || ""
+                                ).toLowerCase()
+                                if (
+                                    invalidCategories.includes(cat) ||
+                                    /풀스택|frontend|프론트엔드/i.test(title)
+                                ) {
+                                    console.log(
+                                        `[SERVER SSE] 🛡️ Filtered out non-AI job from AI candidate recommendation: ${job.job_title} (${cat})`,
+                                    )
+                                    return false
+                                }
+                                return true
+                            },
+                        )
 
                         // 비관련 공고 제외로 인해 추천 공고가 부족해진 경우 엄선된 AI 공고(relevantPostsSummary)로 즉시 보충
-                        if (finalRecommendedJobs.length < 3 && relevantPostsSummary.length > 0) {
+                        if (
+                            finalRecommendedJobs.length < 3 &&
+                            relevantPostsSummary.length > 0
+                        ) {
                             const existingIds = new Set(
                                 finalRecommendedJobs.map((j: any) => j.id),
                             )
@@ -1664,7 +1730,6 @@ router.post("/:id/messages", async (req: Request, res: ExpressResponse) => {
             [resumeId, message],
         )
 
-        const apiKey = process.env.OPENAI_API_KEY
         let aiResponseText = ""
         let messageCitations: any[] = []
         let messageRecommendedJobs: any[] = []

@@ -44,7 +44,8 @@ const RECOMMENDED_PREVIEW_JOBS: PreviewJob[] = [
     {
         id: 11,
         companyName: "카카오",
-        companyLogo: "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
+        companyLogo:
+            "https://www.google.com/s2/favicons?domain=kakaocorp.com&sz=128",
         title: "[카카오페이 프론트엔드팀] 프론트엔드 엔지니어",
         techStack: ["Vue.js", "TypeScript"],
         location: "경기 성남시",
@@ -55,7 +56,8 @@ const RECOMMENDED_PREVIEW_JOBS: PreviewJob[] = [
     {
         id: 31,
         companyName: "당근",
-        companyLogo: "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
+        companyLogo:
+            "https://www.google.com/s2/favicons?domain=daangn.com&sz=128",
         title: "[중고거래 서비스팀] 프론트엔드 엔지니어",
         techStack: ["React", "Next.js"],
         location: "서울 구로구",
@@ -65,13 +67,7 @@ const RECOMMENDED_PREVIEW_JOBS: PreviewJob[] = [
     },
 ]
 
-function CompanyLogo({
-    job,
-    boxSize,
-}: {
-    job: PreviewJob
-    boxSize: string
-}) {
+function CompanyLogo({ job, boxSize }: { job: PreviewJob; boxSize: string }) {
     const [failed, setFailed] = useState(false)
 
     if (failed) {
@@ -171,7 +167,13 @@ function SearchScene() {
 function ResumeScene() {
     return (
         <VStack align="stretch" gap={2.5} h="100%" justify="center">
-            <Box bg="white" border="1px solid" borderColor="gray.200" borderRadius="md" p={3}>
+            <Box
+                bg="white"
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="md"
+                p={3}
+            >
                 <Text fontSize="11px" color="gray.700" lineHeight="1.7">
                     저는 사용자 경험을{" "}
                     <Box as="span" bg="yellow.300" px={1} borderRadius="sm">
@@ -227,7 +229,12 @@ function ReportScene({ animateKey }: { animateKey: number }) {
                             {m.value}
                         </Text>
                     </HStack>
-                    <Box h="6px" bg="gray.100" borderRadius="full" overflow="hidden">
+                    <Box
+                        h="6px"
+                        bg="gray.100"
+                        borderRadius="full"
+                        overflow="hidden"
+                    >
                         <MotionBar
                             key={animateKey}
                             h="100%"
@@ -307,14 +314,25 @@ function ProductShowcase() {
                             position="absolute"
                             inset={0}
                             p={3.5}
-                            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                            initial={
+                                reduceMotion ? false : { opacity: 0, y: 10 }
+                            }
                             animate={{ opacity: 1, y: 0 }}
-                            exit={reduceMotion ? undefined : { opacity: 0, y: -10 }}
-                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                            exit={
+                                reduceMotion
+                                    ? undefined
+                                    : { opacity: 0, y: -10 }
+                            }
+                            transition={{
+                                duration: 0.35,
+                                ease: [0.16, 1, 0.3, 1],
+                            }}
                         >
                             {active === 0 && <SearchScene />}
                             {active === 1 && <ResumeScene />}
-                            {active === 2 && <ReportScene animateKey={active} />}
+                            {active === 2 && (
+                                <ReportScene animateKey={active} />
+                            )}
                         </MotionScene>
                     </AnimatePresence>
                 </Box>
@@ -373,7 +391,9 @@ function FilterDemoVisual() {
                         fontSize="sm"
                         fontWeight="semibold"
                         border="1px solid"
-                        borderColor={i === activeFilter ? "blue.600" : "gray.200"}
+                        borderColor={
+                            i === activeFilter ? "blue.600" : "gray.200"
+                        }
                         bg={i === activeFilter ? "blue.600" : "white"}
                         color={i === activeFilter ? "white" : "gray.600"}
                         transition="all 0.3s ease"
@@ -397,7 +417,12 @@ function FilterDemoVisual() {
                     >
                         <HStack gap={3}>
                             <CompanyLogo job={job} boxSize="36px" />
-                            <VStack align="flex-start" gap={0} flex={1} minW={0}>
+                            <VStack
+                                align="flex-start"
+                                gap={0}
+                                flex={1}
+                                minW={0}
+                            >
                                 <Text
                                     fontSize="sm"
                                     fontWeight="bold"
@@ -542,7 +567,12 @@ function InterviewReportVisual() {
                                 {m.value}점
                             </Text>
                         </HStack>
-                        <Box h="8px" bg="gray.100" borderRadius="full" overflow="hidden">
+                        <Box
+                            h="8px"
+                            bg="gray.100"
+                            borderRadius="full"
+                            overflow="hidden"
+                        >
                             <MotionBar
                                 key={`${m.label}-${cycle}`}
                                 h="100%"
@@ -711,8 +741,8 @@ const MainTemplate: React.FC = () => {
                         </Text>
 
                         <Text fontSize={{ base: "md", md: "xl" }} color="white">
-                            공고 탐색부터 자소서 첨삭, 모의면접까지, 면접
-                            준비 전 과정을 무료로 시작해보세요.
+                            공고 탐색부터 자소서 첨삭, 모의면접까지, 면접 준비
+                            전 과정을 무료로 시작해보세요.
                         </Text>
 
                         <BlockLink to="/register">

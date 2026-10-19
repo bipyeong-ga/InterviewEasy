@@ -100,15 +100,15 @@ export function Footer() {
                                             to={path}
                                             style={{
                                                 fontSize: "0.875rem",
-                                                color: "gray.400",
+                                                color: "white",
                                             }}
                                             onMouseEnter={(e) =>
-                                            (e.currentTarget.style.textDecoration =
-                                                "underline")
+                                                (e.currentTarget.style.textDecoration =
+                                                    "underline")
                                             }
                                             onMouseLeave={(e) =>
-                                            (e.currentTarget.style.textDecoration =
-                                                "none")
+                                                (e.currentTarget.style.textDecoration =
+                                                    "none")
                                             }
                                         >
                                             {label}
@@ -133,15 +133,15 @@ export function Footer() {
                                             to={path}
                                             style={{
                                                 fontSize: "0.875rem",
-                                                color: "gray.400",
+                                                color: "white",
                                             }}
                                             onMouseEnter={(e) =>
-                                            (e.currentTarget.style.textDecoration =
-                                                "underline")
+                                                (e.currentTarget.style.textDecoration =
+                                                    "underline")
                                             }
                                             onMouseLeave={(e) =>
-                                            (e.currentTarget.style.textDecoration =
-                                                "none")
+                                                (e.currentTarget.style.textDecoration =
+                                                    "none")
                                             }
                                         >
                                             {label}
@@ -165,15 +165,15 @@ export function Footer() {
                                             to={path}
                                             style={{
                                                 fontSize: "0.875rem",
-                                                color: "gray.400",
+                                                color: "white",
                                             }}
                                             onMouseEnter={(e) =>
-                                            (e.currentTarget.style.textDecoration =
-                                                "underline")
+                                                (e.currentTarget.style.textDecoration =
+                                                    "underline")
                                             }
                                             onMouseLeave={(e) =>
-                                            (e.currentTarget.style.textDecoration =
-                                                "none")
+                                                (e.currentTarget.style.textDecoration =
+                                                    "none")
                                             }
                                         >
                                             {label}

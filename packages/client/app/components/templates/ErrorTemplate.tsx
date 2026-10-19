@@ -50,7 +50,7 @@ const ErrorTemplate: React.FC<{
                         transition={{ duration: 0.4 }}
                     >
                         <Image
-                            src="/logo1.svg"
+                            src="/images/logo.png"
                             alt="Logo"
                             maxH={{ base: "30px", md: "40px" }}
                             w="100%"
